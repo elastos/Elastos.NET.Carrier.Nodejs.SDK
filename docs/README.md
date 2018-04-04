@@ -92,6 +92,8 @@
                     friendInviteResponse callback)                  = ela_invite_friend
         boolean replyFriendInvite(string id, int status,
                     string reason, string msg)                      = ela_reply_friend_invite
+
+        on(stirng name, function callback || null)
     }
 
     string getVersion()                                             = ela_get_version
