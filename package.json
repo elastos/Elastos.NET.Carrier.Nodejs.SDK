@@ -11,7 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/elastos/Elastos.NET.Carrier.Nodejs.SDK.git"
   },
-  "author": "",
+  "author": "Chen Dongxiao <kuit@msn.com>",
   "license": "MIT",
   "gypfile": true,
   "bugs": {
