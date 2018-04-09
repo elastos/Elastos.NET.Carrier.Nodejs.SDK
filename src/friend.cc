@@ -47,7 +47,7 @@ namespace elca {
         }
 
         if (!elca || !elca->elcarrier) return nullptr;
-        if (argc > 1) context = args[2];
+        if (argc > 1) context = args[1];
 
         set_CallbackHandle(env, args[0], context, FRIENDS_ITERATE, elca);
 
