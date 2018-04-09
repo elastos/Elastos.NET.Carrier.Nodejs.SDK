@@ -11,9 +11,10 @@
         "src/utility.cc",
       ],
 
-     "include_dirs": ["${CARRIER_NATIVE_SDK}/include"],
+      "include_dirs": ["<!(echo $CARRIER_NATIVE_SDK)/include"],
      "libraries": [
-            "-L<(module_root_dir)/${CARRIER_NATIVE_SDK}/lib",
+            "-L<!(echo $CARRIER_NATIVE_SDK)/lib",
+            # "-L<(module_root_dir)/<!(echo $CARRIER_NATIVE_SDK)/lib",
             "-l:libelasession.a",
             "-l:libelacarrier.a",
             "-l:libelacommon.a",
