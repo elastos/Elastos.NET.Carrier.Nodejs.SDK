@@ -10,9 +10,29 @@
         "src/nodeinfo.cc",
         "src/utility.cc",
       ],
-
       "include_dirs": ["<!(echo $CARRIER_NATIVE_SDK)/include"],
-     "libraries": [
+      "conditions": [
+        [ 'OS=="mac"', {
+          "libraries": [
+            "-L<!(echo $CARRIER_NATIVE_SDK)/lib",
+            # "-L<(module_root_dir)/<!(echo $CARRIER_NATIVE_SDK)/lib",
+            "libelasession.a",
+            "libelacarrier.a",
+            "libelacommon.a",
+            "libtoxcore.a",
+            "libsodium.a",
+            "libflatcc.a",
+            "libflatccrt.a",
+            "libpjmedia.a",
+            "libpjnath.a",
+            "libpjlib-util.a",
+            "libpj.a",
+            "libconfuse.a",
+            "-lm"
+          ],
+        }],
+        [ 'OS=="linux"', {
+          "libraries": [
             "-L<!(echo $CARRIER_NATIVE_SDK)/lib",
             # "-L<(module_root_dir)/<!(echo $CARRIER_NATIVE_SDK)/lib",
             "-l:libelasession.a",
@@ -27,8 +47,12 @@
             "-l:libpjlib-util.a",
             "-l:libpj.a",
             "-l:libconfuse.a",
-	          "-lncurses", "-lm"
+	          "-lm"
           ],
+        }],
+        [ 'OS=="win"', {
+        }]
+      ],
     }
   ]
 }
