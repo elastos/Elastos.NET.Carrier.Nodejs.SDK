@@ -1,12 +1,8 @@
 {
   "name": "elastos_carrier_addon",
-  "version": "0.0.2",
+  "version": "0.0.10",
   "description": "Elastos.NET.Carrier.Nodejs.SDK is the [Node.js Add-on](https://nodeaddons.com/) for Elastos Carrier. It allows Javascript code to call [Carrier C++](https://github.com/elastos/Elastos.NET.Carrier.Native.SDK) functions.",
-  "main": "./build/Release/elca",
-  "scripts": {
-    "test": "mocha --require babel-core/register js/test/index.js",
-    "install": "node-gyp configure && node-gyp build"
-  },
+  "main": "./index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/elastos/Elastos.NET.Carrier.Nodejs.SDK.git"
@@ -18,19 +14,8 @@
     "url": "https://github.com/elastos/Elastos.NET.Carrier.Nodejs.SDK/issues"
   },
   "homepage": "https://github.com/elastos/Elastos.NET.Carrier.Nodejs.SDK#readme",
-  "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
-    "chai": "^4.1.0",
-    "mocha": "^5.0.0",
-    "should": "*",
-    "sinon": "^1.17.6"
-  },
   "dependencies": {},
-  "directories": {
-    "doc": "docs",
-    "example": "example"
-  },
+  "directories": {},
   "keywords": [
     "elastos",
     "carrier"

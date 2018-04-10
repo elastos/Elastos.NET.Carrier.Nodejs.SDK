@@ -105,8 +105,8 @@ namespace elca {
             bootstraps->public_key = bootstraps_buf->public_key;
         }
 
-        printf("ipv4:%s, ipv6:%s, port:%s, public_key:%s\n",
-                bootstraps->ipv4, bootstraps->ipv6, bootstraps->port, bootstraps->public_key);
+        // printf("ipv4:%s, ipv6:%s, port:%s, public_key:%s\n",
+        //         bootstraps->ipv4, bootstraps->ipv6, bootstraps->port, bootstraps->public_key);
 
         return bootstraps;
     }
@@ -148,7 +148,7 @@ namespace elca {
 
         napi_value element;
         for (uint32_t i = 0; i < length; i++) {
-            printf("index:%d-- ", i);
+            // printf("index:%d-- ", i);
             status = napi_get_element(env, val, i, &element);
             if (status != napi_ok) {
                 return nullptr;

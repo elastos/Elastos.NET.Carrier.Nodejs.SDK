@@ -22,7 +22,7 @@
 
 // process.env.UV_THREADPOOL_SIZE = 8
 
-const carrierSdk = require('../../build/Debug/elca');
+const carrierSdk = require('elca');
 const readline = require('readline');
 
 //Data define
@@ -82,7 +82,8 @@ var commands = [
     { cmd:"label",      fn:label_friend,           help:"label userid name" },
     { cmd:"msg",        fn:send_message,           help:"msg userid message" },
     { cmd:"invite",     fn:invite,                 help:"invite userid data" },
-    { cmd:"ireply",     fn:reply_invite,           help:"ireply userid [confirm message | refuse reason]" }
+    { cmd:"ireply",     fn:reply_invite,           help:"ireply userid [confirm message | refuse reason]" },
+    { cmd:"exit",       fn:exit,                   help:"exit" }
 ]
 
 function do_command(input) {
@@ -117,6 +118,11 @@ function help(args) {
             console.log("    " + commands[i].help);
         }
     }
+}
+
+function exit(args) {
+    carrier.destory();
+    process.exit(0);
 }
 
 function display_user_info(info) {

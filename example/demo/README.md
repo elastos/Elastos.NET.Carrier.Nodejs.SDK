@@ -1,3 +1,10 @@
+
+# Before run
+
+```shell
+    npm install elca
+```
+
 # Demo usage
 
     You can input the 'help' command get the commands usage.
@@ -21,4 +28,5 @@
         msg userid message
         invite userid data
         ireply userid [confirm message | refuse reason]
+        exit exit
 ```
