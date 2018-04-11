@@ -2,7 +2,7 @@
 # Before run
 
 ```shell
-    npm install elca
+    npm install elastos_carrier_addon
 ```
 
 # Demo usage

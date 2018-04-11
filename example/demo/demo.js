@@ -22,14 +22,7 @@
 
 // process.env.UV_THREADPOOL_SIZE = 8
 
-// const carrierSdk = require('elca');
-carrierSdk = null;
-if (process.platform == "linux" && process.arch == "x64") {
-	carrierSdk = require('../../publish/linux/elac');
-}
-else if(process.platform == "darwin" && process.arch == "x64") {
-	carrierSdk = require('../../publish/mac/elca');
-}
+const carrierSdk = require('elastos_carrier_addon');
 const readline = require('readline');
 
 //Data define
