@@ -1,10 +1,14 @@
 
 # Before run
-
+Make sure your node version is 9.10 or above.
+Install npm package
 ```shell
     npm install elastos_carrier_addon
 ```
-
+# Run demo
+```shell
+    node demo.js
+```
 # Demo usage
 
     You can input the 'help' command get the commands usage.
