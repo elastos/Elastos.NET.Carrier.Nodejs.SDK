@@ -1,0 +1,16 @@
+{
+  "restartable": "rs",
+  "delay": "2500",
+  "watch": [
+    "*.js"
+  ],
+  "events": {
+    "restart": "echo display notification \"App restarted due to:\n'$FILENAME'\" with title \"nodemon\""
+  },
+  "ext": "js json",
+  "ignore": [
+    "node_modules/**/*",
+    "node_modules/**/node_modules"
+  ],
+  "exec": "node app.js"
+}
