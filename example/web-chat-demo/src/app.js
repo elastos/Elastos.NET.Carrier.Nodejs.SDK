@@ -1,5 +1,5 @@
-const express = require('express');
-const api = require('./api');
+import express from 'express';
+import router from './router';
 
 const app = express();
 
@@ -15,8 +15,8 @@ const options = {
     }
 }
 
-app.use(express.static('public', options))
-app.use('/api', api);
+app.use(express.static('public', options));
+router(app);
 
 
 app.listen(3000, ()=>{
