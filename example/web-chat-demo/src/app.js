@@ -1,5 +1,6 @@
 import express from 'express';
 import router from './router';
+import cors from 'cors';
 
 const app = express();
 
@@ -14,6 +15,8 @@ const options = {
         res.set('x-timestamp', Date.now())
     }
 }
+
+app.use(cors());
 
 // app.use(express.static('public', options));
 router(app);
