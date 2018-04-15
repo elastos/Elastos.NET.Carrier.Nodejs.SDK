@@ -15,7 +15,7 @@ const options = {
     }
 }
 
-app.use(express.static('public', options));
+// app.use(express.static('public', options));
 router(app);
 
 
