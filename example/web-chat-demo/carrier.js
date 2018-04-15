@@ -172,21 +172,7 @@ function list_friends(argv) {
     carrier.getFriends(friends_list_callback, null);
 }
 
-function show_friend(argv) {
-    if (argv.length != 2) {
-        console.log("Invalid command syntax.");
-        return;
-    }
 
-    info = carrier.getFriendInfo(argv[1]);
-    if (!info) {
-        console.log("Get friend information failed(0x" +  carrier.getError().toString(16) + ").");
-        return;
-    }
-
-    console.log("Friend %s information:", argv[1]);
-    display_friend_info(info);
-}
 
 function label_friend(argv) {
     if (argv.length != 3) {

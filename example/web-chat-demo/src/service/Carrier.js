@@ -1,6 +1,7 @@
 import Base from './Base';
 import SDK from 'elastos_carrier_addon';
 import UserClass from '../model/User';
+import FriendClass from '../model/Friend';
 
 const connection_name = [
     "online",
@@ -135,6 +136,7 @@ export default class extends Base{
         console.log("  friend info: ", ff.getData());
         console.log("     Presence: %s", presence_name[info.presence]);
         console.log("   Connection: %s", connection_name[info.status]);
+
     }
 
     self_info(){
@@ -196,6 +198,53 @@ export default class extends Base{
         }
         else{
             throw ("Request to add a new friend failed(0x" + this.carrier.getError().toString(16) + ").");
+        }
+    }
+
+    show_friend(userid){
+        if(!userid){
+           throw new Error('invalid userid for show_friend');
+        }
+
+        const info = carrier.getFriendInfo(userid);
+        if (!info) {
+            throw ("Get friend information failed(0x" +  carrier.getError().toString(16) + ").");
+        }
+
+        const fi = new FriendClass(info);
+        return fi.getData();
+    }
+
+    list_frined(){
+        //carrier.getFriends(friends_list_callback, null);
+    }
+
+    send_message(userid, msg){
+        const rs = this.carrier.sendFriendMessage(userid, msg);
+        if(rs){
+            return true;
+        }
+        else
+            throw ("Send message failed(0x" +  carrier.getError().toString(16) + ").");
+    }
+
+    accept_friend(userid){
+        const rs = this.carrier.acceptFriend(userid);
+        if(rs){
+            return true;
+        }
+        else{
+            throw ("Accept friend request failed(0x" +  carrier.getError().toString(16) + ").");
+        }
+    }
+
+    remove_friend(userid) {
+        const rs = this.carrier.removeFriend(userid);
+        if(rs){
+            return true;
+        }
+        else{
+            throw ("Remove friend %s failed (0x" +  carrier.getError().toString(16) + ").");
         }
     }
 }
