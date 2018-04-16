@@ -10,16 +10,16 @@
       <li>Gender : {{me.gender}}</li>
       <li>Address : {{address}}</li>
     </ul>
-    <hr/>
+    <hr />
     <div>
-      <select ref="key">
+      <select title="" ref="key">
         <option value="name">Name</option>
         <option value="email">Email</option>
         <option value="phone">Phone</option>
         <option value="gender">Gender</option>
         <option value="region">Region</option>
       </select>
-      <input type="text" ref="value" />
+      <input title="" type="text" ref="value" />
       <button @click="changeValue()">Confirm</button>
     </div>
   </div>

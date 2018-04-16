@@ -23,7 +23,6 @@ const F = {
         ela_id : opts.ela
       }
     }, (err, res, body)=>{
-      console.log(err, res, body)
       if(err){
         opts.error(err);
       }

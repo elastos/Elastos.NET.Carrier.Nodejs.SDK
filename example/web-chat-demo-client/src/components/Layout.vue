@@ -6,6 +6,8 @@
 
     <div class="main">
       <Info />
+      <!--<FriendInfo />-->
+      <AddFriend />
     </div>
     <div class="footer"></div>
   </section>
@@ -14,13 +16,18 @@
 <script>
   import Info from './Info';
   import Header from './Header';
+  import FriendInfo from './FriendInfo';
+  import AddFriend from './AddFriend';
+
   export default {
     data (){
       return {};
     },
     components : {
       Info,
-      Header
+      Header,
+      FriendInfo,
+      AddFriend
     }
   }
 </script>

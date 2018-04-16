@@ -197,7 +197,9 @@ export default class extends Base{
             return true;
         }
         else{
-            throw ("Request to add a new friend failed(0x" + this.carrier.getError().toString(16) + ").");
+            // TODO fix getError is not defined
+            // if added, return ela_add_friend error:0x8100000C error
+            throw new Error(address + ' was added, please wait for response');
         }
     }
 
@@ -215,8 +217,11 @@ export default class extends Base{
         return fi.getData();
     }
 
-    list_frined(){
-        //carrier.getFriends(friends_list_callback, null);
+    list_friend(){
+        // console.log('get list of friends')
+        // this.carrier.getFriends((...args)=>{
+        //     console.log(...args);
+        // }, null);
     }
 
     send_message(userid, msg){

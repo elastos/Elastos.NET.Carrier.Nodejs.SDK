@@ -60,7 +60,7 @@ export default class {
     error(err, code=-1){
         return {
             code,
-            err : err.message || err.reason || err.toString()
+            error : err.message || err.reason || err.toString()
         }
     }
 
@@ -71,6 +71,7 @@ export default class {
 
     buildCarrierService(){
         const id = this.getElaId() || 'default_elastos_id';
+        console.log('get carrier instance by ID => '+id);
         return POOL.getInstance(id);
     }
 
@@ -80,6 +81,6 @@ export default class {
     * */
     getElaId(){
         const ela_id =  this.req.headers['ela_id'];
-        return md5(ela_id);
+        return ela_id ? md5(ela_id) : null;
     }
 }

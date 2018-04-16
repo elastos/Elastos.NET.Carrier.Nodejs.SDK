@@ -2,11 +2,9 @@ import Base from '../Base';
 
 export default class extends Base{
     async action(){
-        const carrier = this.buildCarrierService();
-
         const param = this.getParam();
         if(this[param.action]){
-            return await this[param.action](carrier, param);
+            return await this[param.action](param);
         }
         else{
             throw new Error('wrong action');
@@ -14,25 +12,30 @@ export default class extends Base{
 
     }
 
-    async get(carrier){
+    async get(){
+        const carrier = this.buildCarrierService();
         return this.result(carrier.self_info());
     }
 
-    async set(carrier, param){
+    async set(param){
+        const carrier = this.buildCarrierService();
         const rs = carrier.set_self_info(param.key, param.value);
         return this.result(rs);
     }
 
-    async address(carrier){
+    async address(){
+        const carrier = this.buildCarrierService();
         return this.result(carrier.self_address());
     }
 
-    async nodeid(carrier){
+    async nodeid(){
+        const carrier = this.buildCarrierService();
         return this.result(carrier.self_nodeid());
     }
 
-    async userid(c){
-        return this.result(c.self_userid());
+    async userid(){
+        const carrier = this.buildCarrierService();
+        return this.result(carrier.self_userid());
     }
 
 

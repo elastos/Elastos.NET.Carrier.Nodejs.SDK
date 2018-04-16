@@ -2,22 +2,28 @@ import Base from '../Base';
 
 export default class extends Base{
     async action(){
-        const carrier = this.buildCarrierService();
-
         const param = this.getParam();
         if(this[param.action]){
-            return await this[param.action](carrier, param);
+            return await this[param.action](param);
         }
         else{
             throw new Error('wrong action');
         }
     }
 
-    async add(c, param){
+    async add(param){
+        const carrier = this.buildCarrierService();
         const address = param.address;
         const msg = param.msg;
 
-        const rs = c.add_friend(address, msg);
+        const rs = carrier.add_friend(address, msg);
+
+        return this.result(rs);
+    }
+
+    async list(){
+        const carrier = this.buildCarrierService();
+        const rs = carrier.list_friend();
 
         return this.result(rs);
     }
