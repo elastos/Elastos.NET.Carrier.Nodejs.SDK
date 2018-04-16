@@ -50,7 +50,8 @@ export default class extends Base{
             this._socket.send(this.id, 'elastos_log', data);
         };
 
-        this.carrier = SDK.createObject(opts, this.buildCallback());
+        this.callbacks = this.buildCallback();
+        this.carrier = SDK.createObject(opts, this.callbacks);
         this.carrier.run();
     }
 
@@ -101,26 +102,35 @@ export default class extends Base{
             friendsList: (carrier, friend_info, context)=>{
                 if(friend_info){
                     const d = this.show_friend_info(friend_info);
+                    console.log(d);
                     this.socket_data('friend_list', d);
                 }
                 else {
                     /* The list ended */
-                    // this.socket_message('---------');
+                    this.socket_data('friend_list_end', 1);
                 }
                 return true;
             },
             friendConnection: (carrier, friendid,  status, context)=>{
                 switch (status) {
                     case SDK.ConnectionStatus_Connected:
-                        console.log("Friend[" + friendid +"] connection changed to be online");
+                        this.log("Friend[" + friendid +"] connection changed to be online");
+                        this.socket_data('friend_status', {
+                            userId : friendid,
+                            status : 1
+                        });
                         break;
 
                     case SDK.ConnectionStatus_Disconnected:
-                        console.log("Friend[" + friendid +"] connection changed to be offline.");
+                        this.log("Friend[" + friendid +"] connection changed to be offline.");
+                        this.socket_data('friend_status', {
+                            userId : friendid,
+                            status : 0
+                        });
                         break;
 
                     default:
-                        console.log("Error!!! Got unknown connection status:" + status);
+                        this.log("Error!!! Got unknown connection status:" + status);
                 }
                 return true;
             },
@@ -131,23 +141,23 @@ export default class extends Base{
             friendPresence: (carrier, friendid,  status, context)=>{
                 if (status >= SDK.PresenceStatus_None &&
                     status <= SDK.PresenceStatus_Busy) {
-                    console.log("Friend[" + friendid + "] change presence to " + presence_name[status]);
+                    this.log("Friend[" + friendid + "] change presence to " + presence_name[status]);
                 }
                 else {
-                    console.log("Error!!! Got unknown presence status %d.", status);
+                    this.log("Error!!! Got unknown presence status %d.", status);
                 }
             },
             friendRequest: (carrier, userid, info, hello, context)=>{
-                console.log("Friend request from user[" + info.name ? info.name : userid + "] with HELLO: " + hello + ".");
-                console.log("Reply use following commands:");
-                console.log("  faccept " + userid);
+                this.log("Friend request from user[" + info.name ? info.name : userid + "] with HELLO: " + hello + ".");
+                // this.log("Reply use following commands:");
+                // this.log("  faccept " + userid);
             },
             friendAdded: (carrier, info, context)=>{
-                console.log("New friend added. The friend information:");
+                this.log("New friend added. The friend information:");
                 this.show_friend_info(info);
             },
             friendRemoved: (carrier, friend_id, context)=>{
-                console.log("Friend " + friend_id +  " removed!");
+                this.log("Friend " + friend_id +  " removed!");
             },
             friendMessage: (carrier, from, msg, context)=>{
                 // console.log("Message from friend[" + from + "]: " + msg);
@@ -157,7 +167,7 @@ export default class extends Base{
                 this.log(info);
             },
             friendInvite: (carrier, from, msg, context)=>{
-                console.log("Message from friend[" + from + "]: " + msg);
+                this.log("Message from friend[" + from + "]: " + msg);
             }
         };
     }
@@ -249,10 +259,7 @@ export default class extends Base{
     }
 
     list_friend(){
-        // console.log('get list of friends')
-        // this.carrier.getFriends((...args)=>{
-        //     console.log(...args);
-        // }, null);
+        this.carrier.getFriends(this.callbacks.friendsList, null);
     }
 
     send_message(userid, msg){

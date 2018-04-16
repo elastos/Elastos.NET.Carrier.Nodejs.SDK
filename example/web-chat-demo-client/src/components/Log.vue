@@ -3,9 +3,12 @@
     <h2>LOG</h2>
     <hr />
 
-    <ul v-for="log in list">
-      <li>{{log}}</li>
+    <ul>
+      <li class="m_ul_li" v-for="log in list">
+        {{log}}
+      </li>
     </ul>
+
   </div>
 </template>
 
@@ -35,7 +38,6 @@
       },
       elastos_log(data){
         const store = this.$store;
-        console.log(data);
         if(_.isString(data)){
           store.commit('add_log', data);
         }
@@ -47,3 +49,9 @@
     }
   }
 </script>
+
+<style>
+  .m_ul_li{
+    word-break: break-all;
+  }
+</style>

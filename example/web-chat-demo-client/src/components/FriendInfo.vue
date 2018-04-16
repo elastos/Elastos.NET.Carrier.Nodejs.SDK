@@ -1,6 +1,9 @@
 <template>
   <div class="box">
     <h2>Friend Info</h2>
+    <p v-for="item in list" @click="showInfo(item)">
+      {{item.userId}}
+    </p>
   </div>
 </template>
 
@@ -9,7 +12,10 @@
   import utility from '../utils/utility';
   export default {
     data(){
-      return {};
+      return {
+        flag : true,
+        list : []
+      };
     },
 
     created(){
@@ -26,12 +32,25 @@
         }
       });
     },
-    socket: {
+    sockets: {
       elastos_data(data){
-        console.log(data);
         if(data.elastos_type === 'friend_list'){
-
+          if(this.flag){
+            this.list = [data];
+            this.flag = false;
+          }
+          else{
+            this.list.push(data);
+          }
         }
+        else if(data.elastos_type === 'friend_list_end'){
+          this.flag = true;
+        }
+      }
+    },
+    methods: {
+      showInfo(item){
+        this.$store.commit('add_log', JSON.stringify(item));
       }
     }
   }

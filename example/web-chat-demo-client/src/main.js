@@ -31,5 +31,8 @@ new Vue({
     else{
       throw new Error('invalid ela id, socket connection created failed.');
     }
+  },
+  sockets : {
+
   }
 });

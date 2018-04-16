@@ -8,11 +8,11 @@ const storeOpts = {
   },
   mutations: {
     add_log(state, log){
-      if(_.size(state.server_log) > 10){
-        state.server_log = _.slice(state.server_log, 10);
-      }
-
       state.server_log.unshift(log);
+
+      if(_.size(state.server_log) > 10){
+        state.server_log.pop();
+      }
     },
     clear_log(state){
       state.server_log = [];
