@@ -7,13 +7,21 @@ const F = {
     opts = _.extend({
       method : 'get',
       path : '',
+      ela : '',
       error : ()=>{},
       success : ()=>{}
     }, opts);
 
+    if(!opts.ela){
+      throw new Error('invalid ela id');
+    }
+
     request({
       url : config.SERVER_URL+opts.path,
-      method : opts.method
+      method : opts.method,
+      headers : {
+        ela_id : opts.ela
+      }
     }, (err, res, body)=>{
       console.log(err, res, body)
       if(err){

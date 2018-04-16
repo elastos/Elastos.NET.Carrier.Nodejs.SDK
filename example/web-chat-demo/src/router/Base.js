@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import CarrierPool from '../service/CarrierPool';
+import md5 from 'md5';
 
 let POOL = null;
 export default class {
@@ -68,7 +69,17 @@ export default class {
         return key ? _.get(param, key, null) : param;
     }
 
-    buildCarrierService(id='default_elastos_id'){
+    buildCarrierService(){
+        const id = this.getElaId() || 'default_elastos_id';
         return POOL.getInstance(id);
+    }
+
+    /*
+    * get ela account id from headers
+    *
+    * */
+    getElaId(){
+        const ela_id =  this.req.headers['ela_id'];
+        return md5(ela_id);
     }
 }
