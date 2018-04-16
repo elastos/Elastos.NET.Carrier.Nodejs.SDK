@@ -6,10 +6,12 @@
 
     <div class="main">
       <Info />
-      <!--<FriendInfo />-->
+      <FriendInfo />
       <AddFriend />
     </div>
-    <div class="footer"></div>
+    <div class="footer">
+      <Log />
+    </div>
   </section>
 </template>
 
@@ -18,6 +20,8 @@
   import Header from './Header';
   import FriendInfo from './FriendInfo';
   import AddFriend from './AddFriend';
+  import Log from './Log';
+
 
   export default {
     data (){
@@ -27,7 +31,11 @@
       Info,
       Header,
       FriendInfo,
-      AddFriend
+      AddFriend,
+      Log
+    },
+    created(){
+
     }
   }
 </script>

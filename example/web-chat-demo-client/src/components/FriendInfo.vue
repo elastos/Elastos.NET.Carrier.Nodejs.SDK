@@ -25,6 +25,14 @@
           console.log(rs)
         }
       });
+    },
+    socket: {
+      elastos_data(data){
+        console.log(data);
+        if(data.elastos_type === 'friend_list'){
+
+        }
+      }
     }
   }
 </script>

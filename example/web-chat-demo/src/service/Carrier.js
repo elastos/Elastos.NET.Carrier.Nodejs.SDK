@@ -2,6 +2,7 @@ import Base from './Base';
 import SDK from 'elastos_carrier_addon';
 import UserClass from '../model/User';
 import FriendClass from '../model/Friend';
+import _ from 'lodash';
 
 const connection_name = [
     "online",
@@ -45,8 +46,36 @@ export default class extends Base{
             bootstraps: bootstraps
         };
 
+        this.socket_message = (data)=>{
+            this._socket.send(this.id, 'elastos_log', data);
+        };
+
         this.carrier = SDK.createObject(opts, this.buildCallback());
         this.carrier.run();
+    }
+
+    log(info){
+        let str = '';
+        if(_.isString(info)){
+            str = info;
+            console.log(str);
+            this.socket_message(str);
+        }
+        else{
+            _.each(info, (value, key)=>{
+                str = `[ ${key} ] => ${value}`;
+                console.log(str);
+                this.socket_message(str);
+            });
+        }
+
+    }
+
+    socket_data(type, data){
+        this._socket.send(this.id, 'elastos_data', {
+            ...data,
+            elastos_type: type
+        });
     }
 
     buildCallback(){
@@ -55,30 +84,28 @@ export default class extends Base{
 
             },
             connectionStatus: (carrier, status, context)=>{
-                console.log('[connectionStatus]', status, context);
+                this.log('[connectionStatus]', status, context);
                 switch (status) {
                     case SDK.ConnectionStatus_Connected:
-                        console.log("Connected to carrier network.");
+                        this.log("Connected to carrier network.");
                         break;
 
                     case SDK.ConnectionStatus_Disconnected:
-                        console.log("Disconnect from carrier network.");
+                        this.log("Disconnect from carrier network.");
                         break;
 
                     default:
-                        console.log("Error!!! Got unknown connection status :" + status);
+                        this.log("Error!!! Got unknown connection status :" + status);
                 }
             },
             friendsList: (carrier, friend_info, context)=>{
-                console.log("Friends list from carrier network:");
                 if(friend_info){
-                    this.show_friend_info(friend_info);
+                    const d = this.show_friend_info(friend_info);
+                    this.socket_data('friend_list', d);
                 }
                 else {
                     /* The list ended */
-                    console.log("  ----------------");
-                    console.log(context);
-                    console.log("  ----------------");
+                    // this.socket_message('---------');
                 }
                 return true;
             },
@@ -123,7 +150,11 @@ export default class extends Base{
                 console.log("Friend " + friend_id +  " removed!");
             },
             friendMessage: (carrier, from, msg, context)=>{
-                console.log("Message from friend[" + from + "]: " + msg);
+                // console.log("Message from friend[" + from + "]: " + msg);
+                const info = this.info_friend(from);
+                info.msg = msg;
+
+                this.log(info);
             },
             friendInvite: (carrier, from, msg, context)=>{
                 console.log("Message from friend[" + from + "]: " + msg);
@@ -132,11 +163,11 @@ export default class extends Base{
     }
 
     show_friend_info(info){
-        const ff = new UserClass(info.userInfo);
-        console.log("  friend info: ", ff.getData());
-        console.log("     Presence: %s", presence_name[info.presence]);
-        console.log("   Connection: %s", connection_name[info.status]);
+        const ff = new FriendClass(info);
 
+        this.log(ff.getData());
+
+        return ff.getData();
     }
 
     self_info(){
@@ -203,7 +234,7 @@ export default class extends Base{
         }
     }
 
-    show_friend(userid){
+    info_friend(userid){
         if(!userid){
            throw new Error('invalid userid for show_friend');
         }
