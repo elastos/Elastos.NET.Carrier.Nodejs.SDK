@@ -40,6 +40,10 @@
           ela,
           success : (rs)=>{
             if(rs.code>0){
+              this.address = '';
+              this.msg = '';
+              alert('send request success');
+              this.refreshFriendList();
 
             }
             else{
@@ -57,9 +61,25 @@
           path : `/api/friend/accept?userid=${item.userId}`,
           ela,
           success : (rs)=>{
-            console.log(rs);
+            if(rs.code > 0){
+              this.refreshFriendList();
+            }
+            else{
+              console.error(rs.error);
+            }
           }
         });
+      },
+
+      refreshFriendList(){
+        const ela = utility.getElaId(this.$route);
+        api.go({
+          path: '/api/friend/list',
+          ela: ela,
+          success: (rs)=>{
+            console.log(rs)
+          }
+        })
       }
     },
 

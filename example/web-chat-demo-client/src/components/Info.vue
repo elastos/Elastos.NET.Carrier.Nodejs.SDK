@@ -9,6 +9,7 @@
       <li>Phone : {{me.phone}}</li>
       <li>Gender : {{me.gender}}</li>
       <li>Address : {{address}}</li>
+      <li>Connect network : {{network}}</li>
     </ul>
     <hr />
     <div>
@@ -34,7 +35,8 @@
 
       return {
         me : {},
-        address : null
+        address : null,
+        network : false
       }
     },
     mounted(){
@@ -72,6 +74,15 @@
             }
           }
         })
+      }
+    },
+    sockets: {
+      elastos_data(data){
+        const type = data.elastos_type;
+        if(type === 'network_connect'){
+          this.$store.commit('add_log', (data.connect?'connect':'disconnect') +' to carrier network')
+          this.network = data.connect;
+        }
       }
     }
   }

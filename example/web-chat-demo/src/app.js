@@ -43,5 +43,6 @@ socket.use((st, next) => {
     return next(new Error('authentication error'));
 });
 socket.on('connection', function(st){
+    // console.log('00000000000000000000');
     mysocket.init(st, socket);
 });

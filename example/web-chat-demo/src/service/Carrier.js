@@ -3,6 +3,7 @@ import SDK from 'elastos_carrier_addon';
 import UserClass from '../model/User';
 import FriendClass from '../model/Friend';
 import _ from 'lodash';
+import md5 from 'md5';
 
 const connection_name = [
     "online",
@@ -38,7 +39,7 @@ export default class extends Base{
             throw new Error('invalid carrier id');
         }
 
-        this.id = id;
+        this.id = md5(id);
 
         const opts = {
             udpEnabled: true,
@@ -50,7 +51,7 @@ export default class extends Base{
             this._socket.send(this.id, 'elastos_log', data);
         };
 
-        console.log('create carrier service with id='+this.id);
+        console.log('create carrier service with id = '+id);
 
         this.callbacks = this.buildCallback();
         this.carrier = SDK.createObject(opts, this.callbacks);
@@ -65,11 +66,14 @@ export default class extends Base{
             this.socket_message(str);
         }
         else{
-            _.each(info, (value, key)=>{
-                str = `[ ${key} ] => ${value}`;
-                console.log(str);
-                this.socket_message(str);
-            });
+            // _.each(info, (value, key)=>{
+            //     str = `[ ${key} ] => ${value}`;
+            //     console.log(str);
+            //     this.socket_message(str);
+            // });
+            str = JSON.stringify(info);
+            console.log(str);
+            this.socket_message(str);
         }
 
     }
@@ -87,14 +91,19 @@ export default class extends Base{
 
             },
             connectionStatus: (carrier, status, context)=>{
-                this.log('[connectionStatus]', status, context);
                 switch (status) {
                     case SDK.ConnectionStatus_Connected:
-                        this.log("Connected to carrier network.");
+                        // this.log("Connected to carrier network.");
+                        this.socket_data('network_connect', {
+                            connect : true
+                        });
                         break;
 
                     case SDK.ConnectionStatus_Disconnected:
-                        this.log("Disconnect from carrier network.");
+                        // this.log("Disconnect from carrier network.");
+                        this.socket_data('network_connect', {
+                            connect : false
+                        });
                         break;
 
                     default:
@@ -102,16 +111,21 @@ export default class extends Base{
                 }
             },
             friendsList: (carrier, friend_info, context)=>{
-                if(friend_info){
-                    const d = this.show_friend_info(friend_info);
-                    console.log(d);
-                    this.socket_data('friend_list', d);
+                try{
+                    if(friend_info){
+                        const d = this.show_friend_info(friend_info);
+                        console.log(d);
+                        this.socket_data('friend_list', d);
+                    }
+                    else {
+                        /* The list ended */
+                        this.socket_data('friend_list_end', 1);
+                    }
+                    return true;
+                }catch(e){
+                    console.error(e);
                 }
-                else {
-                    /* The list ended */
-                    this.socket_data('friend_list_end', 1);
-                }
-                return true;
+
             },
             friendConnection: (carrier, friendid,  status, context)=>{
                 switch (status) {
@@ -120,13 +134,11 @@ export default class extends Base{
 
                         //TOOD why call this.info_friend(friendid) here will throw an error.
 
-
-                        //NOTICE does not need to send socket message due to carrier will trigger friendInfo callback
-                        // this.socket_data('friend_status', {
-                        //     userId : friendid,
-                        //     status : 0,
-                        //     online : true
-                        // });
+                        this.socket_data('friend_status', {
+                            userId : friendid,
+                            status : 0,
+                            online : true
+                        });
                         break;
 
                     case SDK.ConnectionStatus_Disconnected:
@@ -147,6 +159,7 @@ export default class extends Base{
                 this.log("Friend information changed: "+friendId);
 
                 const fi = new FriendClass(info);
+                console.log(fi.getData());
                 this.socket_data('friend_status', fi.getData());
             },
             friendPresence: (carrier, friendid,  status, context)=>{
@@ -164,7 +177,7 @@ export default class extends Base{
                 // this.log("  faccept " + userid);
 
                 const u = new UserClass(info);
-
+console.log(u.getData());
                 this.socket_data('friend_request', {
                     msg : hello,
                     ...u.getData()
@@ -307,5 +320,9 @@ export default class extends Base{
         else{
             throw ("Remove friend %s failed (0x" + this.carrier.getError().toString(16) + ").");
         }
+    }
+
+    close(){
+        this.carrier.destory();
     }
 }

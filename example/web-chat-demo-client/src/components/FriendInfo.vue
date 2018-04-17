@@ -1,10 +1,11 @@
 <template>
   <div class="box">
     <h2>Friend Info</h2>
+    <button class="ela_button" @click="refresh()" style="position:absolute;right:25px;top:10px;">Refresh</button>
     <p v-for="item in list" @click="showInfo(item)">
       {{item.userId}} - {{item.online ? 'Online' : 'Offline'}}
        ----
-      <button @click="removeFriend(item)">Remove</button>
+      <button @click="removeFriend(item, $event)">Remove</button>
     </p>
 
     <hr />
@@ -39,13 +40,7 @@
     },
 
     mounted(){
-      api.go({
-        path: '/api/friend/list',
-        ela: this.ela,
-        success: (rs)=>{
-          console.log(rs)
-        }
-      });
+
     },
     sockets: {
       elastos_data(data){
@@ -64,10 +59,11 @@
           this.flag = true;
         }
         else if(type === 'friend_status'){
-          const n = _.findIndex(this.list, (item)=>item.userId===data.userId);
-          if(n !== 1){
 
-            VUE.set(this.list, n, _.extend({}, this.list[n], data));
+          const n = _.findIndex(this.list, (item)=>item.userId===data.userId);
+          if(n !== -1){
+
+            this.$set(this.list, n, _.extend({}, this.list[n], data));
           }
         }
       }
@@ -103,12 +99,13 @@
               // alert('send success');
             }
             else{
-
+              console.error(rs.error);
             }
           }
         });
       },
-      removeFriend(item){
+      removeFriend(item, e){
+        e.stopPropagation();
         api.go({
           path : `/api/friend/remove?userid=${item.userId}`,
           ela : this.ela,
@@ -124,6 +121,15 @@
             else{
               console.error(rs.error);
             }
+          }
+        });
+      },
+      refresh(){
+        api.go({
+          path: '/api/friend/list',
+          ela: this.ela,
+          success: (rs)=>{
+            console.log(rs)
           }
         });
       }

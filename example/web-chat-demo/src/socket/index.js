@@ -1,6 +1,7 @@
 //only for carrier for now
 import _ from 'lodash';
 import md5 from 'md5';
+import CarrierPool from '../service/CarrierPool';
 
 
 const F = {
@@ -11,6 +12,7 @@ const F = {
     queue : {},
 
     init(socketInstance, IO){
+
         F.obj = socketInstance;
         F.ready = true;
         F.IO = IO;
@@ -25,6 +27,26 @@ const F = {
             let rooms = _.keys(F.obj.rooms);
             console.log(rooms); // [ <socket.id>, 'room 237' ]
         });
+
+        F.obj.on('disconnect', function(){
+            // here this means the real socket instance
+            F.closeSocket(this.handshake.query.ela);
+        });
+
+        F.obj.on('error', (...args)=>{
+            console.log('[error]', ...args);
+        })
+    },
+
+    closeSocket(ela){
+        F.IO.to(ela).clients((err, clients)=>{
+            console.log('room '+ela+' disconnect');
+            console.log(err, clients);
+            if(clients.length < 1){
+
+                CarrierPool.destroyInstance(ela);
+            }
+        })
     },
 
 

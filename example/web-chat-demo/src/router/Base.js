@@ -20,7 +20,7 @@ export default class {
         this.res = res;
 
         if(!POOL){
-            POOL = new CarrierPool();
+            POOL = CarrierPool;
         }
 
         this.init();
@@ -80,6 +80,6 @@ export default class {
     * */
     getElaId(){
         const ela_id =  this.req.headers['ela_id'];
-        return ela_id ? md5(ela_id) : null;
+        return ela_id ? ela_id : null;
     }
 }
