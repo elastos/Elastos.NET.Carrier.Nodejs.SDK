@@ -87,3 +87,18 @@ $ npm install
 $ node ./example/demo/demo.js
 ```
 See [readme](./example/demo/README.md) for more detail.
+This is a Medium blog post from community on how to build and run demo.js: https://medium.com/@radektomej/installing-and-running-of-elastos-node-js-demo-app-3f3aeba00e03
+
+# Community Contribution
+## How to run the demo.js - Medium
+Radek Tomsej (from Czech Republic) has this Medium post about how to build and run demo.js. Please go take a look at https://medium.com/@radektomej/installing-and-running-of-elastos-node-js-demo-app-3f3aeba00e03. Thank you Redek!
+## We want more!
+We are looking for more active community members to contribute your idea, your experiences, your code, everything. Please raise an issue and assign to me(kevingzhang). Thanks
+
+At this moment, we need the following material from the community
+- Video and blog post about how to build and run Elastos Carrier
+- A sample Web DApp running on top of Carrier, such as a web chat app for instance chatting for example. Jacky(liyangwood) from DaLian, China is working on one, we welcome more on this.
+- Video and blog post to explain Carrier concept. (Kevingzhang will work on this)
+
+
+https://medium.com/@radektomej/installing-and-running-of-elastos-node-js-demo-app-3f3aeba00e03
