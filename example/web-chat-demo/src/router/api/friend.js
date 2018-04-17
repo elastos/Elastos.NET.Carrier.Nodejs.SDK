@@ -27,4 +27,20 @@ export default class extends Base{
 
         return this.result(rs);
     }
+
+    async remove(param){
+        const carrier = this.buildCarrierService();
+        const userId = param.userid;
+
+        const rs = carrier.remove_friend(userId);
+        return this.result(rs);
+    }
+
+    async accept(param){
+        const carrier = this.buildCarrierService();
+        const userId = param.userid;
+
+        const rs = carrier.accept_friend(userId);
+        return this.result(rs);
+    }
 }

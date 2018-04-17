@@ -50,6 +50,8 @@ export default class extends Base{
             this._socket.send(this.id, 'elastos_log', data);
         };
 
+        console.log('create carrier service with id='+this.id);
+
         this.callbacks = this.buildCallback();
         this.carrier = SDK.createObject(opts, this.callbacks);
         this.carrier.run();
@@ -114,18 +116,25 @@ export default class extends Base{
             friendConnection: (carrier, friendid,  status, context)=>{
                 switch (status) {
                     case SDK.ConnectionStatus_Connected:
-                        this.log("Friend[" + friendid +"] connection changed to be online");
-                        this.socket_data('friend_status', {
-                            userId : friendid,
-                            status : 1
-                        });
+                        this.log("Friend [" + friendid +"] connection changed to be online");
+
+                        //TOOD why call this.info_friend(friendid) here will throw an error.
+
+
+                        //NOTICE does not need to send socket message due to carrier will trigger friendInfo callback
+                        // this.socket_data('friend_status', {
+                        //     userId : friendid,
+                        //     status : 0,
+                        //     online : true
+                        // });
                         break;
 
                     case SDK.ConnectionStatus_Disconnected:
-                        this.log("Friend[" + friendid +"] connection changed to be offline.");
+                        this.log("Friend [" + friendid +"] connection changed to be offline.");
                         this.socket_data('friend_status', {
                             userId : friendid,
-                            status : 0
+                            status : 1,
+                            online : false
                         });
                         break;
 
@@ -135,8 +144,10 @@ export default class extends Base{
                 return true;
             },
             friendInfo: (carrier, friendId, info, context)=>{
-                console.log("Friend information changed: "+friendId);
-                this.show_friend_info(info);
+                this.log("Friend information changed: "+friendId);
+
+                const fi = new FriendClass(info);
+                this.socket_data('friend_status', fi.getData());
             },
             friendPresence: (carrier, friendid,  status, context)=>{
                 if (status >= SDK.PresenceStatus_None &&
@@ -148,23 +159,30 @@ export default class extends Base{
                 }
             },
             friendRequest: (carrier, userid, info, hello, context)=>{
-                this.log("Friend request from user[" + info.name ? info.name : userid + "] with HELLO: " + hello + ".");
+                this.log("Friend request from user[" + info.userId + "] with : " + hello + ".");
                 // this.log("Reply use following commands:");
                 // this.log("  faccept " + userid);
+
+                const u = new UserClass(info);
+
+                this.socket_data('friend_request', {
+                    msg : hello,
+                    ...u.getData()
+                });
             },
             friendAdded: (carrier, info, context)=>{
                 this.log("New friend added. The friend information:");
-                this.show_friend_info(info);
+                const f_info = new FriendClass(info);
+                this.log(f_info.getData());
+                this.socket_data('friend_added', f_info.getData());
             },
             friendRemoved: (carrier, friend_id, context)=>{
                 this.log("Friend " + friend_id +  " removed!");
             },
             friendMessage: (carrier, from, msg, context)=>{
                 // console.log("Message from friend[" + from + "]: " + msg);
-                const info = this.info_friend(from);
-                info.msg = msg;
 
-                this.log(info);
+                this.log('receive message from '+from+' : '+msg);
             },
             friendInvite: (carrier, from, msg, context)=>{
                 this.log("Message from friend[" + from + "]: " + msg);
@@ -268,7 +286,7 @@ export default class extends Base{
             return true;
         }
         else
-            throw ("Send message failed(0x" +  carrier.getError().toString(16) + ").");
+            throw ("Send message failed(0x" +  this.carrier.getError().toString(16) + ").");
     }
 
     accept_friend(userid){
@@ -277,7 +295,7 @@ export default class extends Base{
             return true;
         }
         else{
-            throw ("Accept friend request failed(0x" +  carrier.getError().toString(16) + ").");
+            throw ("Accept friend request failed(0x" +  this.carrier.getError().toString(16) + ").");
         }
     }
 
@@ -287,7 +305,7 @@ export default class extends Base{
             return true;
         }
         else{
-            throw ("Remove friend %s failed (0x" +  carrier.getError().toString(16) + ").");
+            throw ("Remove friend %s failed (0x" + this.carrier.getError().toString(16) + ").");
         }
     }
 }

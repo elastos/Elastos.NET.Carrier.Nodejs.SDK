@@ -1,9 +1,7 @@
 <template>
-  <div class="box">
-    <h2>LOG</h2>
-    <hr />
+  <div class="box c_log">
 
-    <ul>
+    <ul class="m_ul">
       <li class="m_ul_li" v-for="log in list">
         {{log}}
       </li>
@@ -53,5 +51,16 @@
 <style>
   .m_ul_li{
     word-break: break-all;
+  }
+  .m_ul{
+    padding-bottom: 20px;
+  }
+  .c_log{
+    background: #333;
+    color: greenyellow;
+    height: 100%;
+    overflow: auto;
+    box-sizing: border-box;
+    margin: 0;
   }
 </style>

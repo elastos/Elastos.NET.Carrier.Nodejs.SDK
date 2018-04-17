@@ -5,6 +5,13 @@
     <input style="width: 400px;" title="" placeholder="target address" class="ela_text" type="text" v-model="address" />
     <input title="" placeholder="message" class="ela_text" type="text" v-model="msg" />
     <button @click="add()" class="ela_button">Add</button>
+
+    <hr />
+
+    <p v-for="item in apply_list">
+      [{{item.userId}}] apply to be your friend with [{{item.msg}}] =>
+      <button @click="accept(item)">Accept</button>
+    </p>
   </div>
 </template>
 
@@ -16,7 +23,8 @@
     data(){
       return {
         address : '',
-        msg : ''
+        msg : '',
+        apply_list : []
       }
     },
 
@@ -42,6 +50,27 @@
             this.msg = '';
           }
         });
+      },
+      accept(item){
+        const ela = utility.getElaId(this.$route);
+        api.go({
+          path : `/api/friend/accept?userid=${item.userId}`,
+          ela,
+          success : (rs)=>{
+            console.log(rs);
+          }
+        });
+      }
+    },
+
+    sockets: {
+      elastos_data(data){
+        const type = data.elastos_type;
+        data = _.omit(data, ['elastos_type']);
+
+        if(type === 'friend_request'){
+          this.apply_list.push(data);
+        }
       }
     }
   }

@@ -7,7 +7,8 @@ export default class {
 
         this.data = _.extend({}, u.getData(), {
             presence : friendInfo.presence,
-            status : friendInfo.status
+            status : friendInfo.status,
+            online : !friendInfo.status
         });
     }
 

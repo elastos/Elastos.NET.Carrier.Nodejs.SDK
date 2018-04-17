@@ -45,9 +45,16 @@
   .body{
     width: 980px;
     margin: 0 auto;
+    padding-bottom: 300px;
   }
   .header{
 
-
+  }
+  .footer{
+    width: 100%;
+    height: 280px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
   }
 </style>

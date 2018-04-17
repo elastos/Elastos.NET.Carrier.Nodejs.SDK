@@ -25,7 +25,7 @@ new Vue({
     const ela = utility.getElaId(this.$route);
 
     if(ela){
-      const socket = io(config.SERVER_URL+'?ela='+ela);
+      const socket = io(config.SOCKET_URL+'?ela='+ela);
       Vue.use(VueSocketio, socket);
     }
     else{

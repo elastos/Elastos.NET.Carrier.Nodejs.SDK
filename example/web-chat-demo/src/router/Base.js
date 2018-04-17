@@ -71,7 +71,6 @@ export default class {
 
     buildCarrierService(){
         const id = this.getElaId() || 'default_elastos_id';
-        console.log('get carrier instance by ID => '+id);
         return POOL.getInstance(id);
     }
 
