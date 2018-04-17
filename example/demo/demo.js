@@ -87,7 +87,7 @@ var commands = [
 ]
 
 function do_command(input) {
-    var args = input.match(/[^\s"]+|"([^"]*)"/g);
+    var args = input.trim().match(/[^\s"]+|"([^"]*)"/g);
     if (args[0] == "") {
         rl.prompt();
         return;
