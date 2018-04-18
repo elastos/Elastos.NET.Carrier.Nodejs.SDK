@@ -95,11 +95,10 @@
           success : (rs)=>{
             if(rs.code > 0){
               this.msg = '';
-              this.$store.commit('add_log', `send message to ${this.target.userId} : ${msg}`);
-              // alert('send success');
+              this.$root.log(`send message to ${this.target.userId} : ${msg}`);
             }
             else{
-              console.error(rs.error);
+              this.$root.error(rs.error);
             }
           }
         });
@@ -119,7 +118,7 @@
               // this.$store.commit('add_log', `Friend ${item.userId} has been removed`);
             }
             else{
-              console.error(rs.error);
+              this.$root.error(rs.error);
             }
           }
         });
@@ -129,7 +128,7 @@
           path: '/api/friend/list',
           ela: this.ela,
           success: (rs)=>{
-            console.log(rs)
+            // console.log(rs)
           }
         });
       }

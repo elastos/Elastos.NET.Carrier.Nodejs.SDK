@@ -43,8 +43,8 @@ const F = {
             console.log('room '+ela+' disconnect');
             console.log(err, clients);
             if(clients.length < 1){
-
                 CarrierPool.destroyInstance(ela);
+
             }
         })
     },

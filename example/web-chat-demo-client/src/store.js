@@ -8,14 +8,20 @@ const storeOpts = {
   },
   mutations: {
     add_log(state, log){
-      state.server_log.unshift(log);
+      state.server_log.unshift({
+        type : 'log',
+        data : log
+      });
 
-      // if(_.size(state.server_log) > 10){
-      //   state.server_log.pop();
-      // }
     },
     clear_log(state){
       state.server_log = [];
+    },
+    add_error(state, error){
+      state.server_log.unshift({
+        type : 'error',
+        data : error
+      })
     }
   }
 };

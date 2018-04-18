@@ -67,7 +67,6 @@
           path : `/api/me/set?key=${key}&value=${value}`,
           ela : utility.getElaId(this.$route),
           success : (rs)=>{
-            console.log(rs);
             if(rs.code > 0){
               this.me = rs.data;
               this.$refs.value.value = '';
@@ -80,7 +79,7 @@
       elastos_data(data){
         const type = data.elastos_type;
         if(type === 'network_connect'){
-          this.$store.commit('add_log', (data.connect?'connect':'disconnect') +' to carrier network')
+          this.$root.log((data.connect?'connect':'disconnect') +' to carrier network');
           this.network = data.connect;
         }
       }

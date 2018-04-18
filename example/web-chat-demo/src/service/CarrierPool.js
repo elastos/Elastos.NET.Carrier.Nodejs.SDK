@@ -30,7 +30,12 @@ class Pool extends Base{
     destroyInstance(id){
         if(this.pool[id]){
             console.log('Carrier instance of '+(id)+' killed');
-            this.pool[id].close();
+            try{
+                this.pool[id].close();
+            }catch(e){
+                console.error(e);
+            }
+
             delete this.pool[id];
         }
     }

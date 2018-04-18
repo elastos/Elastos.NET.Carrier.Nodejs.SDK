@@ -18,6 +18,7 @@
 <script>
   import api from '../utils/request';
   import utility from '../utils/utility';
+  import _ from 'lodash';
 
   export default{
     data(){
@@ -42,12 +43,12 @@
             if(rs.code>0){
               this.address = '';
               this.msg = '';
-              alert('send request success');
+              this.$root.log('send request success');
               this.refreshFriendList();
 
             }
             else{
-              alert(rs.error);
+              this.$root.error(rs.error);
             }
 
             this.address = '';
@@ -63,9 +64,13 @@
           success : (rs)=>{
             if(rs.code > 0){
               this.refreshFriendList();
+
+              const list = _.clone(this.apply_list);
+              _.remove(list, (d)=>d.userId===item.userId);
+              this.apply_list = list;
             }
             else{
-              console.error(rs.error);
+              this.$root.error(rs.error);
             }
           }
         });
@@ -77,7 +82,7 @@
           path: '/api/friend/list',
           ela: ela,
           success: (rs)=>{
-            console.log(rs)
+            // console.log(rs)
           }
         })
       }

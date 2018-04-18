@@ -3,7 +3,8 @@
 
     <ul class="m_ul">
       <li class="m_ul_li" v-for="log in list">
-        {{log}}
+        <span v-if="log.type==='log'">{{log.data}}</span>
+        <span v-else style="color:#f00;">{{log.data}}</span>
       </li>
     </ul>
 
@@ -22,7 +23,7 @@
     mounted(){
       const store = this.$store;
       store.commit('clear_log');
-      store.commit('add_log', 'start log...');
+      this.$root.log('start log...');
 
       this.list = this.$store.state.server_log;
     },
@@ -31,16 +32,14 @@
     },
     sockets: {
       connect(){
-        const store = this.$store;
-        store.commit('add_log', 'socket connected');
+        this.$root.log('socket connected')
       },
       elastos_log(data){
-        const store = this.$store;
         if(_.isString(data)){
-          store.commit('add_log', data);
+          this.$root.log(data);
         }
         else{
-          store.commit('add_log', JSON.stringify(data));
+          this.$root.log(JSON.stringify(data));
         }
 
       }

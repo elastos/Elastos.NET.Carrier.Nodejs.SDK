@@ -34,5 +34,16 @@ new Vue({
   },
   sockets : {
 
+  },
+  methods : {
+    log(...args){
+      console.log(...args);
+      this.$store.commit('add_log', args[0].toString());
+    },
+    error(...args){
+      console.error(...args);
+      this.$store.commit('add_error', args[0].toString());
+    }
   }
 });
+

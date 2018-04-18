@@ -114,7 +114,6 @@ export default class extends Base{
                 try{
                     if(friend_info){
                         const d = this.show_friend_info(friend_info);
-                        console.log(d);
                         this.socket_data('friend_list', d);
                     }
                     else {
@@ -159,7 +158,6 @@ export default class extends Base{
                 this.log("Friend information changed: "+friendId);
 
                 const fi = new FriendClass(info);
-                console.log(fi.getData());
                 this.socket_data('friend_status', fi.getData());
             },
             friendPresence: (carrier, friendid,  status, context)=>{
@@ -177,7 +175,7 @@ export default class extends Base{
                 // this.log("  faccept " + userid);
 
                 const u = new UserClass(info);
-console.log(u.getData());
+
                 this.socket_data('friend_request', {
                     msg : hello,
                     ...u.getData()
@@ -206,7 +204,7 @@ console.log(u.getData());
     show_friend_info(info){
         const ff = new FriendClass(info);
 
-        this.log(ff.getData());
+        // this.log(ff.getData());
 
         return ff.getData();
     }
