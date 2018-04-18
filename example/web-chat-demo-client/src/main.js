@@ -22,7 +22,7 @@ new Vue({
   template: '<App/>',
 
   created(){
-    const ela = utility.getElaId(this.$route);
+    const ela = utility.getElaId(this.$route) || 'liyang';
 
     if(ela){
       const socket = io(config.SOCKET_URL+'?ela='+ela);
