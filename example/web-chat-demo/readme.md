@@ -1,4 +1,4 @@
-# web wchat demo
+# web chat demo
 
 ## How to run
 
