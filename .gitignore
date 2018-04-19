@@ -2,7 +2,7 @@
 .DS_Store
 
 # dirs
-build
+/build
 cmake-build-debug
 node_modules
 dhtdata
