@@ -4,6 +4,7 @@ import UserClass from '../model/User';
 import FriendClass from '../model/Friend';
 import _ from 'lodash';
 import md5 from 'md5';
+import socket from '../socket/WebSocket';
 
 const connection_name = [
     "online",
@@ -47,8 +48,10 @@ export default class extends Base{
             bootstraps: bootstraps
         };
 
+        this.socket = socket.get(id);
+
         this.socket_message = (data)=>{
-            this._socket.send(this.id, 'elastos_log', data);
+            // this._socket.send(this.id, 'elastos_log', data);
         };
 
         console.log('create carrier service with id = '+id);
@@ -79,10 +82,17 @@ export default class extends Base{
     }
 
     socket_data(type, data){
-        this._socket.send(this.id, 'elastos_data', {
-            ...data,
-            elastos_type: type
-        });
+        // this._socket.send(this.id, 'elastos_data', {
+        //     ...data,
+        //     elastos_type: type
+        // });
+
+    }
+    toClient(type, data){
+        this.socket.send({
+            ...this.socket.result(data),
+            type
+        })
     }
 
     buildCallback(){
@@ -94,15 +104,15 @@ export default class extends Base{
                 switch (status) {
                     case SDK.ConnectionStatus_Connected:
                         // this.log("Connected to carrier network.");
-                        this.socket_data('network_connect', {
-                            connect : true
+                        this.toClient('me/online', {
+                            online : true
                         });
                         break;
 
                     case SDK.ConnectionStatus_Disconnected:
                         // this.log("Disconnect from carrier network.");
-                        this.socket_data('network_connect', {
-                            connect : false
+                        this.toClient('me/online', {
+                            online : false
                         });
                         break;
 
@@ -114,11 +124,17 @@ export default class extends Base{
                 try{
                     if(friend_info){
                         const d = this.show_friend_info(friend_info);
-                        this.socket_data('friend_list', d);
+                        // this.socket_data('friend_list', d);
+                        this.toClient('friend/list/callback', {
+                           end : 0,
+                           info : d
+                        });
                     }
                     else {
                         /* The list ended */
-                        this.socket_data('friend_list_end', 1);
+                        this.toClient('friend/list/callback', {
+                            end : 1
+                        });
                     }
                     return true;
                 }catch(e){
@@ -129,11 +145,11 @@ export default class extends Base{
             friendConnection: (carrier, friendid,  status, context)=>{
                 switch (status) {
                     case SDK.ConnectionStatus_Connected:
-                        this.log("Friend [" + friendid +"] connection changed to be online");
+                        console.log("Friend [" + friendid +"] connection changed to be online");
 
                         //TOOD why call this.info_friend(friendid) here will throw an error.
 
-                        this.socket_data('friend_status', {
+                        this.toClient('friend/status/callback', {
                             userId : friendid,
                             status : 0,
                             online : true
@@ -141,8 +157,8 @@ export default class extends Base{
                         break;
 
                     case SDK.ConnectionStatus_Disconnected:
-                        this.log("Friend [" + friendid +"] connection changed to be offline.");
-                        this.socket_data('friend_status', {
+                        console.log("Friend [" + friendid +"] connection changed to be offline.");
+                        this.toClient('friend/status/callback', {
                             userId : friendid,
                             status : 1,
                             online : false
@@ -155,10 +171,10 @@ export default class extends Base{
                 return true;
             },
             friendInfo: (carrier, friendId, info, context)=>{
-                this.log("Friend information changed: "+friendId);
+                console.log("Friend information changed: "+friendId);
 
                 const fi = new FriendClass(info);
-                this.socket_data('friend_status', fi.getData());
+                this.toClient('friend/info/callback', fi.getData());
             },
             friendPresence: (carrier, friendid,  status, context)=>{
                 if (status >= SDK.PresenceStatus_None &&
@@ -170,30 +186,34 @@ export default class extends Base{
                 }
             },
             friendRequest: (carrier, userid, info, hello, context)=>{
-                this.log("Friend request from user[" + info.userId + "] with : " + hello + ".");
+                console.log("Friend request from user[" + info.userId + "] with : " + hello + ".");
                 // this.log("Reply use following commands:");
                 // this.log("  faccept " + userid);
 
                 const u = new UserClass(info);
 
-                this.socket_data('friend_request', {
+                this.toClient('friend/apply/callback', {
                     msg : hello,
                     ...u.getData()
                 });
             },
             friendAdded: (carrier, info, context)=>{
-                this.log("New friend added. The friend information:");
+                //this.log("New friend added. The friend information:");
                 const f_info = new FriendClass(info);
-                this.log(f_info.getData());
-                this.socket_data('friend_added', f_info.getData());
+                this.toClient('friend/add/callback', f_info.getData());
             },
             friendRemoved: (carrier, friend_id, context)=>{
-                this.log("Friend " + friend_id +  " removed!");
+                console.log("Friend " + friend_id +  " removed!");
+
+                this.toClient('friend/remove/callback', friend_id);
             },
             friendMessage: (carrier, from, msg, context)=>{
                 // console.log("Message from friend[" + from + "]: " + msg);
 
-                this.log('receive message from '+from+' : '+msg);
+                this.toClient('friend/message/callback', {
+                    userId : from,
+                    msg
+                });
             },
             friendInvite: (carrier, from, msg, context)=>{
                 this.log("Message from friend[" + from + "]: " + msg);
@@ -211,7 +231,6 @@ export default class extends Base{
 
     self_info(){
         const me = new UserClass(this.carrier.getSelfInfo());
-
         return me.getData();
     }
     set_self_info(key, value=''){
@@ -278,9 +297,9 @@ export default class extends Base{
            throw new Error('invalid userid for show_friend');
         }
 
-        const info = carrier.getFriendInfo(userid);
+        const info = this.carrier.getFriendInfo(userid);
         if (!info) {
-            throw ("Get friend information failed(0x" +  carrier.getError().toString(16) + ").");
+            throw ("Get friend information failed(0x" +  this.carrier.getError().toString(16) + ").");
         }
 
         const fi = new FriendClass(info);

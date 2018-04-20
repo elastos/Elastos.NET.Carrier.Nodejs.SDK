@@ -21,11 +21,7 @@
       }
     },
     mounted(){
-      const store = this.$store;
-      store.commit('clear_log');
-      this.$root.log('start log...');
-
-      this.list = this.$store.state.server_log;
+      this.list = this.$store.state.log.list;
     },
     created(){
 

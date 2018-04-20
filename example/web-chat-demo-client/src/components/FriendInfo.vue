@@ -14,57 +14,36 @@
     <br />
     <input style="width: 400px;margin-left:20px;" title="" type="text" class="ela_text" v-model="msg" />
     <button @click="sendMessage()" class="ela_button">Send</button>
+    <hr />
+    <ul>
+      <li v-for="item in message_list">
+        {{item.from}} : {{item.msg}}
+      </li>
+    </ul>
   </div>
 </template>
 
 <script>
   import api from '../utils/request';
-  import utility from '../utils/utility';
-  import _ from 'lodash';
-  import VUE from 'vue';
 
   export default {
     data(){
       return {
-        flag : true,
-        list : [],
-
         target : null,
         msg : '',
-        ela : utility.getElaId(this.$route)
       };
     },
 
-    created(){
-
-    },
-
-    mounted(){
-
-    },
-    sockets: {
-      elastos_data(data){
-        const type = data.elastos_type;
-        data = _.omit(data, ['elastos_type']);
-        if(type === 'friend_list'){
-          if(this.flag){
-            this.list = [data];
-            this.flag = false;
-          }
-          else{
-            this.list.push(data);
-          }
+    computed : {
+      list(){
+        return this.$store.state.friend.list;
+      },
+      message_list(){
+        if(this.target){
+          return this.$store.state.friend.message[this.target.userId] || [];
         }
-        else if(type === 'friend_list_end'){
-          this.flag = true;
-        }
-        else if(type === 'friend_status'){
-
-          const n = _.findIndex(this.list, (item)=>item.userId===data.userId);
-          if(n !== -1){
-
-            this.$set(this.list, n, _.extend({}, this.list[n], data));
-          }
+        else{
+          return [];
         }
       }
     },
@@ -89,47 +68,40 @@
           return false;
         }
 
-        api.go({
-          path : `/api/message/send?userid=${this.target.userId}&msg=${encodeURIComponent(msg)}`,
-          ela : this.ela,
-          success : (rs)=>{
-            if(rs.code > 0){
-              this.msg = '';
-              this.$root.log(`send message to ${this.target.userId} : ${msg}`);
-            }
-            else{
-              this.$root.error(rs.error);
-            }
+
+        this.$root.getSocket().send('friend', {
+          method : 'message',
+          param : {
+            userid : this.target.userId,
+            msg : this.msg
+          }
+        }, (rs)=>{
+          if(rs.code > 0){
+            this.msg = '';
+            this.$root.log(`send message to ${this.target.userId} : ${msg}`);
+            this.$store.commit('friend.message.add', {
+              key : this.target.userId,
+              from : 'ME',
+              msg : msg
+            })
+          }
+          else{
+            this.$root.error(rs.error);
           }
         });
       },
       removeFriend(item, e){
         e.stopPropagation();
-        api.go({
-          path : `/api/friend/remove?userid=${item.userId}`,
-          ela : this.ela,
-          success : (rs)=>{
-            console.log(rs);
-            if(rs.code > 0){
-              const list = _.clone(this.list);
-              _.remove(list, (d)=>d.userId===item.userId);
-              this.list = list;
-
-              // this.$store.commit('add_log', `Friend ${item.userId} has been removed`);
-            }
-            else{
-              this.$root.error(rs.error);
-            }
+        this.$root.getSocket().send('friend', {
+          method : 'remove',
+          param : {
+            userid : item.userId
           }
         });
       },
       refresh(){
-        api.go({
-          path: '/api/friend/list',
-          ela: this.ela,
-          success: (rs)=>{
-            // console.log(rs)
-          }
+        this.$root.getSocket().send('friend', {
+          method : 'list'
         });
       }
     }

@@ -2,29 +2,40 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import _ from 'lodash';
 
+import me from './store/me';
+import log from './store/log';
+import friend from './store/friend';
+
 const storeOpts = {
+  modules: {
+    log : log,
+    me : me,
+    friend : friend
+  },
   state: {
-    server_log : []
+
+    message_list : []
   },
   mutations: {
-    add_log(state, log){
-      state.server_log.unshift({
-        type : 'log',
-        data : log
-      });
 
-    },
-    clear_log(state){
-      state.server_log = [];
-    },
-    add_error(state, error){
-      state.server_log.unshift({
-        type : 'error',
-        data : error
-      })
+  },
+  actions: {
+    socket_data(context, param){
+      try{
+        context.commit(param.type, {
+          ...param,
+          context
+        });
+      }catch(e){
+        console.error(e);
+      }
     }
   }
 };
+
+
+
+
 
 let store = null;
 export default {

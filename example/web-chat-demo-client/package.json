@@ -11,10 +11,12 @@
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit test/e2e/specs",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "nw": "nw ."
   },
   "dependencies": {
     "lodash": "^4.17.5",
+    "nw": "^0.30.0",
     "request": "^2.85.0",
     "socket.io": "^2.1.0",
     "vue": "^2.5.2",
@@ -88,5 +90,15 @@
     "> 1%",
     "last 2 versions",
     "not ie <= 8"
-  ]
+  ],
+  "main": "http://127.0.0.1:3001/#/?ela=your_first_id",
+  "window": {
+    "title": "nw-vue-webpack2",
+    "toolbar": true,
+    "frame": true,
+    "width": 1200,
+    "height": 800,
+    "min_width": 800,
+    "min_height": 500
+  }
 }

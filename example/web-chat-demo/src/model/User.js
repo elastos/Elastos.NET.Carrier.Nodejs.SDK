@@ -2,6 +2,7 @@ const _ = require('lodash');
 
 module.exports = function (userInfo){
     const self = this;
+
     self.data = {
         name : userInfo.name,
         userId : userInfo.userId,

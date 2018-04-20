@@ -24,37 +24,37 @@
     data(){
       return {
         address : '',
-        msg : '',
-        apply_list : []
+        msg : ''
+      }
+    },
+
+    computed : {
+      apply_list(){
+        return this.$store.state.friend.apply_list;
       }
     },
 
     methods: {
       add(){
-        const ela = utility.getElaId(this.$route);
         if(!this.address){
           alert('invalid address');
           return false;
         }
-        api.go({
-          path : `/api/friend/add?address=${this.address}&msg=${this.msg}`,
-          ela,
-          success : (rs)=>{
-            if(rs.code>0){
-              this.address = '';
-              this.msg = '';
-              this.$root.log('send request success');
-              this.refreshFriendList();
-
-            }
-            else{
-              this.$root.error(rs.error);
-            }
-
-            this.address = '';
-            this.msg = '';
+        this.$root.getSocket().send('friend', {
+          method : 'add',
+          param : {
+            address : this.address,
+            msg : this.msg
           }
+        }, (rs)=>{
+          if(rs.code>0){
+            this.refreshFriendList();
+          }
+
+          this.address = '';
+          this.msg = '';
         });
+
       },
       accept(item){
         const ela = utility.getElaId(this.$route);
@@ -74,17 +74,24 @@
             }
           }
         });
+
+        this.$root.getSocket().send('friend', {
+          method : 'accept',
+          param : {
+            userid : item.userId
+          }
+        }, (rs)=>{
+          if(rs.code > 0){
+            this.refreshFriendList();
+            this.$store.commit('friend.apply_list.remove', item);
+          }
+        });
       },
 
       refreshFriendList(){
-        const ela = utility.getElaId(this.$route);
-        api.go({
-          path: '/api/friend/list',
-          ela: ela,
-          success: (rs)=>{
-            // console.log(rs)
-          }
-        })
+        this.$root.getSocket().send('friend', {
+          method : 'list'
+        });
       }
     },
 

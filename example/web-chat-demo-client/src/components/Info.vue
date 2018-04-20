@@ -9,7 +9,7 @@
       <li>Phone : {{me.phone}}</li>
       <li>Gender : {{me.gender}}</li>
       <li>Address : {{address}}</li>
-      <li>Connect network : {{network}}</li>
+      <li>Connect network : {{online}}</li>
     </ul>
     <hr />
     <div>
@@ -31,48 +31,34 @@
   import api from '../utils/request';
   import utility from '../utils/utility';
   export default {
-    data () {
-
-      return {
-        me : {},
-        address : null,
-        network : false
+    data(){
+      return {}
+    },
+    computed: {
+      me(){
+        return this.$store.state.me.info;
+      },
+      address(){
+        return this.$store.state.me.address;
+      },
+      online(){
+        return this.$store.state.me.online;
       }
     },
-    mounted(){
-      const ela = utility.getElaId(this.$route);
-      api.go({
-        path: '/api/me/get',
-        ela,
-        success: (rs)=>{
-          this.me = rs.data
-        }
-      });
 
-      api.go({
-        path : '/api/me/address',
-        ela,
-        success : (rs)=>{
-          this.address = rs.data;
-        }
-      })
-    },
     methods: {
       changeValue(){
         const key = this.$refs.key.value;
         const value = this.$refs.value.value || '';
         console.log(key, value);
 
-        api.go({
-          path : `/api/me/set?key=${key}&value=${value}`,
-          ela : utility.getElaId(this.$route),
-          success : (rs)=>{
-            if(rs.code > 0){
-              this.me = rs.data;
-              this.$refs.value.value = '';
-            }
+        this.$root.getSocket().send('me', {
+          method : 'set',
+          param : {
+            key,
+            value
           }
-        })
+        });
       }
     },
     sockets: {
