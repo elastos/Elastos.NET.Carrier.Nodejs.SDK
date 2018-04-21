@@ -263,7 +263,7 @@ export default class extends Base{
                 return true;
             }
             else {
-                throw ("Set user's presence failed (0x" + this.carrier.getError().toString(16) + ").");
+                throw ("Set user's presence failed (0x" + SDK.getError().toString(16) + ").");
             }
         }
         else {
@@ -299,7 +299,7 @@ export default class extends Base{
 
         const info = this.carrier.getFriendInfo(userid);
         if (!info) {
-            throw ("Get friend information failed(0x" +  this.carrier.getError().toString(16) + ").");
+            throw ("Get friend information failed(0x" +  SDK.getError().toString(16) + ").");
         }
 
         const fi = new FriendClass(info);
@@ -316,7 +316,7 @@ export default class extends Base{
             return true;
         }
         else
-            throw ("Send message failed(0x" +  this.carrier.getError().toString(16) + ").");
+            throw ("Send message failed(0x" +  SDK.getError().toString(16) + ").");
     }
 
     accept_friend(userid){
@@ -325,7 +325,7 @@ export default class extends Base{
             return true;
         }
         else{
-            throw ("Accept friend request failed(0x" +  this.carrier.getError().toString(16) + ").");
+            throw ("Accept friend request failed(0x" +  SDK.getError().toString(16) + ").");
         }
     }
 
@@ -335,7 +335,7 @@ export default class extends Base{
             return true;
         }
         else{
-            throw ("Remove friend %s failed (0x" + this.carrier.getError().toString(16) + ").");
+            throw ("Remove friend %s failed (0x" + SDK.getError().toString(16) + ").");
         }
     }
 
