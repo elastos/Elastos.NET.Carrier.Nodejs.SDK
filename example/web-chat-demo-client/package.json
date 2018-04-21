@@ -18,10 +18,8 @@
     "lodash": "^4.17.5",
     "nw": "^0.30.0",
     "request": "^2.85.0",
-    "socket.io": "^2.1.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
-    "vue-socket.io": "^2.1.1-b",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
@@ -91,7 +89,7 @@
     "last 2 versions",
     "not ie <= 8"
   ],
-  "main": "./dist/index.html?liyang",
+  "main": "./dist/index.html?your_first_account",
   "window": {
     "title": "nw-vue-webpack2",
     "toolbar": true,

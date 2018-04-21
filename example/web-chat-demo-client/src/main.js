@@ -4,9 +4,7 @@ import router from './router'
 import config from './config';
 import store from './store';
 import utility from './utils/utility';
-import io from 'socket.io-client';
 
-import VueSocketio from 'vue-socket.io';
 
 import MySocket from './socket';
 
@@ -27,8 +25,6 @@ new Vue({
     const ela = utility.getElaId(this.$route);
 
     if(ela){
-      // const socket = io.connect(config.SOCKET_URL+'?ela='+ela);
-      // Vue.use(VueSocketio, socket);
 
       this.$store.commit('clear_log');
 
@@ -44,9 +40,6 @@ new Vue({
     else{
       throw new Error('invalid ela id, socket connection created failed.');
     }
-  },
-  sockets : {
-
   },
   methods : {
     log(...args){
