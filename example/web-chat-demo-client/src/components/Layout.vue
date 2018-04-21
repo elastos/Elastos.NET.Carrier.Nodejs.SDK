@@ -7,6 +7,7 @@
     <div class="main">
       <Info />
       <FriendInfo />
+      <Message />
       <AddFriend />
     </div>
     <div class="footer">
@@ -21,6 +22,7 @@
   import FriendInfo from './FriendInfo';
   import AddFriend from './AddFriend';
   import Log from './Log';
+  import Message from './Message';
 
 
   export default {
@@ -32,7 +34,8 @@
       Header,
       FriendInfo,
       AddFriend,
-      Log
+      Log,
+      Message
     },
     created(){
 

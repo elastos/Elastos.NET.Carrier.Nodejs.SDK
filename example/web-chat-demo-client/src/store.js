@@ -13,8 +13,6 @@ const storeOpts = {
     friend : friend
   },
   state: {
-
-    message_list : []
   },
   mutations: {
 
@@ -26,6 +24,7 @@ const storeOpts = {
           ...param,
           context
         });
+
       }catch(e){
         console.error(e);
       }

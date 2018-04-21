@@ -14,7 +14,7 @@
     },
     methods: {
       create(){
-        const url = '/#/?ela='+encodeURIComponent(this.name);
+        const url = '?'+encodeURIComponent(this.name);
         window.open(url);
       }
     }

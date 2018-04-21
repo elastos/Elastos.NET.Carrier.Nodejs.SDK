@@ -17,28 +17,10 @@
   export default {
     data(){
       return {
-        list : []
       }
     },
-    mounted(){
-      this.list = this.$store.state.log.list;
-    },
-    created(){
-
-    },
-    sockets: {
-      connect(){
-        this.$root.log('socket connected')
-      },
-      elastos_log(data){
-        if(_.isString(data)){
-          this.$root.log(data);
-        }
-        else{
-          this.$root.log(JSON.stringify(data));
-        }
-
-      }
+    computed : {
+      list : (ctx)=>ctx.$store.state.log.list
     }
   }
 </script>

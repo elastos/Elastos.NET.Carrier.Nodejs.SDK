@@ -91,7 +91,7 @@
     "last 2 versions",
     "not ie <= 8"
   ],
-  "main": "http://127.0.0.1:3001/#/?ela=your_first_id",
+  "main": "./dist/index.html?liyang",
   "window": {
     "title": "nw-vue-webpack2",
     "toolbar": true,

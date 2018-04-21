@@ -14,43 +14,34 @@
     <br />
     <input style="width: 400px;margin-left:20px;" title="" type="text" class="ela_text" v-model="msg" />
     <button @click="sendMessage()" class="ela_button">Send</button>
-    <hr />
-    <ul>
-      <li v-for="item in message_list">
-        {{item.from}} : {{item.msg}}
-      </li>
-    </ul>
+
   </div>
 </template>
 
 <script>
-  import api from '../utils/request';
+  import _ from 'lodash'
 
   export default {
     data(){
       return {
-        target : null,
-        msg : '',
+        msg : ''
       };
     },
 
     computed : {
+      target(){
+        return this.$store.state.friend.currentSelect;
+      },
       list(){
         return this.$store.state.friend.list;
-      },
-      message_list(){
-        if(this.target){
-          return this.$store.state.friend.message[this.target.userId] || [];
-        }
-        else{
-          return [];
-        }
       }
     },
+
     methods: {
       showInfo(item){
         this.$store.commit('add_log', JSON.stringify(item));
-        this.target = item;
+        this.$store.commit('friend.current.set', item);
+        // this.target = item;
       },
       sendMessage(){
         const msg = this.msg;
@@ -83,7 +74,7 @@
               key : this.target.userId,
               from : 'ME',
               msg : msg
-            })
+            });
           }
           else{
             this.$root.error(rs.error);

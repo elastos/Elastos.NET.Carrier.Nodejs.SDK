@@ -6,7 +6,9 @@ export default {
     list : [],
     list_flag : false,
     apply_list : [],
-    message : {}
+    message : {},
+
+    currentSelect : {}
   },
 
   mutations : {
@@ -109,7 +111,22 @@ export default {
         state.message[key] = [];
       }
 
-      state.message[key].push(item);
+      // notice here, need to set value to original state
+      const list = _.clone(state.message);
+      list[key].push(item);
+
+      vue.set(state, 'message', list);
+    },
+
+    'friend.current.set'(state, item){
+      state.currentSelect = item;
+    }
+  },
+
+  getters : {
+    getFriendMessageList : (state)=>()=>{
+      const key = state.currentSelect.userId;
+      return (key && state.message[key])? state.message[key] : [];
     }
   }
 };

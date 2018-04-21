@@ -1,6 +1,6 @@
 <template>
   <div class="box c_info">
-    <h2>Personal Info</h2>
+    <h2>Personal Info -- {{$root.getId()}}</h2>
     <ul>
       <li>Name : {{me.name}}</li>
       <li>User ID : {{me.userId}}</li>
