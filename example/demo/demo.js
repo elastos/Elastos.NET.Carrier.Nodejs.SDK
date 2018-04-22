@@ -195,7 +195,7 @@ function self_info(argv) {
         if (carrier.setSelfInfo(info))
             console.log(str +  " succeess.");
         else
-            console.log(str +  " failed(0x" + carrier.getError().toString(16) + ").");
+            console.log(str +  " failed(0x" + carrierSdk.getError().toString(16) + ").");
     }
     else {
         console.log("Invalid command syntax.");
@@ -217,7 +217,7 @@ function self_nospam(argv) {
             console.log("User's nospam changed to be " + nospam + ".");
         }
         else {
-            console.log("Set user's nospam failed (0x" + carrier.getError().toString(16) + ").");
+            console.log("Set user's nospam failed (0x" + carrierSdk.getError().toString(16) + ").");
         }
     }
     else {
@@ -250,7 +250,7 @@ function self_presence(argv) {
             console.log("User's presence changed to be " + argv[1] + ".");
         }
         else {
-            console.log("Set user's presence failed (0x" + carrier.getError().toString(16) + ").");
+            console.log("Set user's presence failed (0x" + carrierSdk.getError().toString(16) + ").");
         }
     }
     else {
@@ -267,7 +267,7 @@ function friend_add(argv) {
     if (carrier.addFriend(argv[1], argv[2]))
         console.log("Request to add a new friend succeess.");
     else
-        console.log("Request to add a new friend failed(0x" + carrier.getError().toString(16) + ").");
+        console.log("Request to add a new friend failed(0x" + carrierSdk.getError().toString(16) + ").");
 }
 
 function friend_accept(argv) {
@@ -279,7 +279,7 @@ function friend_accept(argv) {
     if (carrier.acceptFriend(argv[1]))
         console.log("Accept friend request success.");
     else
-        console.log("Accept friend request failed(0x" +  carrier.getError().toString(16) + ").");
+        console.log("Accept friend request failed(0x" +  carrierSdk.getError().toString(16) + ").");
 }
 
 function friend_remove(argv) {
@@ -291,7 +291,7 @@ function friend_remove(argv) {
     if (carrier.removeFriend(argv[1]))
         console.log("Remove friend %s success.", argv[1]);
     else
-        console.log("Remove friend %s failed (0x" +  carrier.getError().toString(16) + ").");
+        console.log("Remove friend %s failed (0x" +  carrierSdk.getError().toString(16) + ").");
 }
 
 function list_friends(argv) {
@@ -311,7 +311,7 @@ function show_friend(argv) {
 
     info = carrier.getFriendInfo(argv[1]);
     if (!info) {
-        console.log("Get friend information failed(0x" +  carrier.getError().toString(16) + ").");
+        console.log("Get friend information failed(0x" +  carrierSdk.getError().toString(16) + ").");
         return;
     }
 
@@ -328,7 +328,7 @@ function label_friend(argv) {
     if (carrier.setFriendLabel(argv[1], argv[2]))
         console.log("Update friend label success.");
     else
-        console.log("Update friend label failed(0x" +  carrier.getError().toString(16) + ").");
+        console.log("Update friend label failed(0x" +  carrierSdk.getError().toString(16) + ").");
 }
 
 function send_message(argv) {
@@ -340,7 +340,7 @@ function send_message(argv) {
     if (carrier.sendFriendMessage(argv[1], argv[2]))
         console.log("Send message success.");
     else
-        console.log("Send message failed(0x" +  carrier.getError().toString(16) + ").");
+        console.log("Send message failed(0x" +  carrierSdk.getError().toString(16) + ").");
 }
 
 function invite(argv) {
@@ -352,7 +352,7 @@ function invite(argv) {
     if (carrier.inviteFriend(argv[1], argv[2], invite_response_callback, null))
         console.log("Send invite request success.");
     else
-        console.log("Send invite request failed(0x" +  carrier.getError().toString(16) + ").");
+        console.log("Send invite request failed(0x" +  carrierSdk.getError().toString(16) + ").");
 }
 
 function reply_invite(argv) {
@@ -379,7 +379,7 @@ function reply_invite(argv) {
     if (carrier.replyFriendInvite(argv[1], status, reason, msg))
         console.log("Send invite reply to inviter success.");
     else
-        console.log("Send invite reply to inviter failed(0x" +  carrier.getError().toString(16) + ").");
+        console.log("Send invite reply to inviter failed(0x" +  carrierSdk.getError().toString(16) + ").");
 }
 
 
@@ -554,6 +554,7 @@ console.log(carrierSdk.getVersion());
 // carrierSdk.logInit(4, null); //ElaLogLevel_Info
 
 var carrier = carrierSdk.createObject(opts, callbacks);
+
 carrier.on("idle", idle_callback); //add idle event
 carrier.on("idle", null); //delete idle event
 
