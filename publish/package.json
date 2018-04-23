@@ -1,6 +1,6 @@
 {
   "name": "elastos_carrier_addon",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Elastos.NET.Carrier.Nodejs.SDK is the [Node.js Add-on](https://nodeaddons.com/) for Elastos Carrier. It allows Javascript code to call [Carrier C++](https://github.com/elastos/Elastos.NET.Carrier.Native.SDK) functions.",
   "main": "./index.js",
   "os" : [ "darwin", "linux" ],
