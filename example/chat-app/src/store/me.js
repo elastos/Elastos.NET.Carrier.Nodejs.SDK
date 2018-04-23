@@ -1,6 +1,5 @@
 import _ from 'lodash';
 export default {
-  namespace : true,
   state : {
     info : {
       name : 'NA',
@@ -17,10 +16,7 @@ export default {
   mutations : {
 
 
-    'me/get'(state, {data}){
-      state.info = _.extend({}, state.info, data);
-    },
-    'me/set'(state, {data}){
+    'me/info'(state, {data}){
       state.info = _.extend({}, state.info, data);
     },
     'me/online'(state, {data}){

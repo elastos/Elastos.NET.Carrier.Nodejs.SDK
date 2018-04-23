@@ -1,7 +1,7 @@
 <template>
   <div class="cc-box c_me_mini_info">
-    <p class="d_text">{{info.name}}</p>
-    <p class="d_text d_t2">__symantecPKIClientMessenger__symantecPKIClientMessenger</p>
+    <p class="d_text">{{info.name || 'NA'}}</p>
+    <p class="d_text d_t2">{{address}}</p>
 
     <div class="d_icon">
       <el-tooltip placement="top">
@@ -18,6 +18,9 @@
     computed : {
       info(){
         return this.$store.state.me.info;
+      },
+      address(){
+        return this.$store.state.me.address;
       }
     }
   }

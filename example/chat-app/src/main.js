@@ -8,21 +8,30 @@ Vue.config.productionTip = false;
 
 Vue.use(ElementUI);
 
+let carrier;
+try{
+  carrier = CarrierService;
+}catch(e){
+  carrier = {};
+}
 new Vue({
   el: '#app',
   router,
   store : store.getStore(),
   components: { App },
   template: '<App/>',
+  carrier,
 
   created(){
     window.store = this.$store;
   },
   mounted(){
-    // const Carrier = require('./service/Carrier')
-    // const default_id = 'elastos';
-    // // Carrier.init(default_id);
-    // CarrierService.init(default_id);
+
+  },
+  methods : {
+    getCarrier(){
+      return carrier;
+    }
   }
 });
 

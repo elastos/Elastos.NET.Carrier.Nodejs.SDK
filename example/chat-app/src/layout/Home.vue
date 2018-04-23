@@ -1,5 +1,5 @@
 <template>
-  <div class="c_home">
+  <div class="cc-box c_home">
     <div class="d_left_one">
 
     </div>
@@ -10,14 +10,39 @@
     <div class="d_main">
 
     </div>
+
+    <Loading text="Init Carrier ..." v-if="isLoading" />
   </div>
 </template>
 
 <script>
   import Left_Two from '../components/Home/Left_Two';
+
+  import Loading from '../components/common/Loading';
+  import CarrierModel from '../service/CarrierModel';
+
   export default {
+    data(){
+      return {
+        isLoading : true
+      }
+    },
     components : {
-      Left_Two
+      Left_Two,
+
+      Loading
+    },
+
+    mounted(){
+      const default_id = 'elastos';
+      CarrierService.init(default_id, this.$store, CarrierModel, {});
+
+      const tm = setInterval(()=>{
+        if(CarrierService.ready){
+          clearInterval(tm);
+          this.isLoading = false;
+        }
+      }, 1000);
     }
   };
 </script>

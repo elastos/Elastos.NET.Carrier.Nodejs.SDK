@@ -14,7 +14,17 @@ const storeOpts = {
 
   },
   actions: {
+    carrier_data(context, param){
+      try{
+        context.commit(param.type, {
+          data: param.data,
+          context
+        });
 
+      }catch(e){
+        console.error(e);
+      }
+    }
   }
 };
 
