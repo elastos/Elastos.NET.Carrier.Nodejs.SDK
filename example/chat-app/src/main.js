@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import App from './App';
 import router from './router';
-import Carrier from './service/Carrier';
+// import Carrier from './service/Carrier';
 
 Vue.config.productionTip = false;
 
@@ -14,8 +14,10 @@ new Vue({
   template: '<App/>',
 
   mounted(){
-    // const default_id = 'elastos';
+    // const Carrier = require('./service/Carrier')
+    const default_id = 'elastos';
     // Carrier.init(default_id);
+    CarrierService.init(default_id);
   }
 });
 

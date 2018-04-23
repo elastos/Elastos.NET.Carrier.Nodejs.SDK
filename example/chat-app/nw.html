@@ -9,10 +9,8 @@
 </html>
 
 <script>
-  var carrier = require('elastos_carrier_addon');
+  const CarrierService = require('./src/service/Carrier');
 
-  console.log(carrier);
-  document.getElementById('a').innerText = carrier.getVersion()
+  CarrierService.init('aaaaaa');
 
-  // carrier.run();
 </script>

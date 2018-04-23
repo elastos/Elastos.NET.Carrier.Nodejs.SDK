@@ -5,7 +5,7 @@
   "author": "jacky.li <liyangwood@gmail.com>",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "node build/dev_build.js && npm run nw",
     "start": "npm run dev",
     "unit": "jest --config test/unit/jest.conf.js --coverage",
     "//test": "npm run unit",
@@ -83,7 +83,7 @@
     "last 2 versions",
     "not ie <= 8"
   ],
-  "main": "./index.html",
+  "main": "./dev_dist/index.html",
   "window": {
     "title": "nw-vue-webpack2",
     "toolbar": true,
