@@ -1,0 +1,18 @@
+<html>
+<header>
+
+</header>
+<body>
+<h1>aaaa</h1>
+<div id="a">aaa</div>
+</body>
+</html>
+
+<script>
+  var carrier = require('elastos_carrier_addon');
+
+  console.log(carrier);
+  document.getElementById('a').innerText = carrier.getVersion()
+
+  // carrier.run();
+</script>
