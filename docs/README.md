@@ -66,7 +66,7 @@
 
     object carrier {
         run()                                                       = ela_run
-        destory()                                                   = ela_kill
+        destroy()                                                   = ela_kill
         boolean isReady()                                           = ela_is_ready
 
         string getAddress()                                         = ela_get_address

@@ -121,7 +121,7 @@ function help(args) {
 }
 
 function exit(args) {
-    carrier.destory();
+    carrier.destroy();
     process.exit(0);
 }
 
@@ -558,5 +558,5 @@ carrier.on("idle", idle_callback); //add idle event
 carrier.on("idle", null); //delete idle event
 
 carrier.run();
-// carrier.destory();
+// carrier.destroy();
 
