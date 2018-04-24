@@ -11,8 +11,11 @@
       <el-header style="padding:0;" height="50px">
         <Main_Header />
       </el-header>
-      <el-main>
-        111
+      <el-main class="cc-box" style="padding: 0;">
+        <div class="d_msg_area">1111</div>
+        <div class="d_friend_area">
+          <Main_Friend_List />
+        </div>
       </el-main>
     </el-container>
 
@@ -25,6 +28,7 @@
   import Left_Two from '../components/Home/Left_Two';
   import Left_One from '../components/Home/Left_One';
   import Main_Header from '../components/Home/Main_Header';
+  import Main_Friend_List from '../components/Home/Main_Friend_List';
 
   import Loading from '../components/common/Loading';
   import CarrierModel from '../service/CarrierModel';
@@ -39,6 +43,7 @@
       Left_Two,
       Left_One,
       Main_Header,
+      Main_Friend_List,
 
       Loading
     },
@@ -78,5 +83,17 @@
       background: #0074D9;
     }
 
+    .d_msg_area{
+      padding-right: 240px;
+      background: #ccc;
+      height: 100%;
+    }
+    .d_friend_area{
+      width: 240px;
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+    }
   }
 </style>
