@@ -1,7 +1,7 @@
 <template>
   <div class="cc-box c_home">
     <div class="d_left_one">
-
+      <Left_One />
     </div>
     <div class="d_left_two">
       <Left_Two />
@@ -17,6 +17,7 @@
 
 <script>
   import Left_Two from '../components/Home/Left_Two';
+  import Left_One from '../components/Home/Left_One';
 
   import Loading from '../components/common/Loading';
   import CarrierModel from '../service/CarrierModel';
@@ -29,6 +30,7 @@
     },
     components : {
       Left_Two,
+      Left_One,
 
       Loading
     },

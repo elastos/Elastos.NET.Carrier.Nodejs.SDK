@@ -1,6 +1,9 @@
 <template>
   <div class="cc-box c_me_mini_info">
-    <p class="d_text">{{info.name || 'NA'}}</p>
+    <p class="d_text">
+      {{info.name || 'NA'}}
+      <i v-bind:class="{online : info.online}" class="d_st"></i>
+    </p>
     <p class="d_text d_t2">{{address}}</p>
 
     <div class="d_icon">
@@ -62,6 +65,23 @@
 
       .cc-icon{
 
+      }
+    }
+
+    .d_st{
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 5px;
+      background: #2c3e50;
+      border: 1px solid #878787;
+      position: relative;
+      left: 5px;
+      top: 0;
+
+      &.online{
+        background: #ff0;
+        border-color: #cdcdcd;
       }
     }
   }

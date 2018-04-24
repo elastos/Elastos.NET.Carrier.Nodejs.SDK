@@ -1,3 +1,5 @@
+import UserClass from "../../web-demo-server/src/model/User";
+import FriendClass from "../../web-demo-server/src/model/Friend";
 
 (function(){
   const SDK = require('elastos_carrier_addon');
@@ -64,12 +66,12 @@
           switch (status) {
             case SDK.ConnectionStatus_Connected:
               _log.debug("Connected to carrier network.");
-
+              F.syncData('me/online', true);
               break;
 
             case SDK.ConnectionStatus_Disconnected:
               _log.debug("Disconnect from carrier network.");
-
+              F.syncData('me/online', false);
               break;
             default:
               _log.debug("Error!!! Got unknown connection status :" + status);
@@ -78,10 +80,17 @@
         friendsList: (carrier, friend_info, context)=>{
           try{
             if(friend_info){
-
+              const d = F.model.create('Friend', friend_info);
+              // this.socket_data('friend_list', d);
+              F.syncData('friend/list/callback', {
+                end : 0,
+                info : d.getData()
+              });
             }
             else {
-
+              F.syncData('friend/list/callback', {
+                end : 1
+              });
             }
             return true;
           }catch(e){
@@ -93,13 +102,21 @@
           switch (status) {
             case SDK.ConnectionStatus_Connected:
               _log.debug("Friend [" + friendid +"] connection changed to be online");
-
+              F.syncData('friend/status/callback', {
+                userId : friendid,
+                status : 0,
+                online : true
+              });
 
               break;
 
             case SDK.ConnectionStatus_Disconnected:
               _log.debug("Friend [" + friendid +"] connection changed to be offline.");
-
+              F.syncData('friend/status/callback', {
+                userId : friendid,
+                status : 1,
+                online : false
+              });
               break;
 
             default:
@@ -110,7 +127,8 @@
         friendInfo: (carrier, friendId, info, context)=>{
           _log.debug("Friend information changed: "+friendId);
 
-
+          const fi = F.model.create('Friend', info);
+          F.syncData('friend/info/callback', fi.getData());
         },
         friendPresence: (carrier, friendid,  status, context)=>{
           if (status >= SDK.PresenceStatus_None &&
@@ -125,19 +143,28 @@
           _log.debug("Friend request from user[" + info.userId + "] with : " + hello + ".");
           // this.log("Reply use following commands:");
           // this.log("  faccept " + userid);
+          const u = F.model.create('User', info);
 
+          F.syncData('friend/apply/callback', {
+            msg : hello,
+            ...u.getData()
+          });
         },
         friendAdded: (carrier, info, context)=>{
           _log.debug("New friend added. The friend information:");
-
+          const f_info = F.model.create('Friend', info);
+          F.syncData('friend/add/callback', f_info.getData());
         },
         friendRemoved: (carrier, friend_id, context)=>{
           _log.debug("Friend " + friend_id +  " removed!");
-
+          F.syncData('friend/remove/callback', friend_id);
         },
         friendMessage: (carrier, from, msg, context)=>{
           _log.debug("Message from friend[" + from + "]: " + msg);
-
+          F.syncData('friend/message/callback', {
+            userId : from,
+            msg
+          });
 
         },
         friendInvite: (carrier, from, msg, context)=>{
@@ -175,8 +202,8 @@
       try{
         return fn(...args);
       }catch(e){
-        console.error(e);
-        throw e;
+        console.error(e, F.carrier.getError().toString(16));
+        throw new Error(e, F.carrier.getError().toString(16));
       }
 
     },
@@ -194,6 +221,37 @@
       F.carrier.setSelfInfo(_.extend(info, data));
 
       return info;
+    },
+    addFriend(address, msg){
+      return F.carrier.addFriend(address, msg);
+    },
+    getFriendInfo(userId){
+      let info = F.carrier.getFriendInfo(userId);
+      info = F.model.create('Friend', info);
+      return info.getData();
+    },
+    getAddress(){
+      return F.carrier.getAdaptor();
+    },
+    getFriends(){
+      return F.carrier.getFriends(F.callbacks.friendsList, null);
+    },
+    sendFriendMessage(userId, msg){
+      const rs = F.carrier.sendFriendMessage(userId, msg);
+      return !!rs;
+    },
+
+    acceptFriend(userId){
+      const rs = F.carrier.acceptFriend(userId);
+      return !!rs;
+    },
+
+    removeFriend(userId) {
+      const rs = F.carrier.removeFriend(userId);
+      return !!rs;
+    },
+    close(){
+      F.carrier.destory();
     }
   };
 

@@ -3,10 +3,14 @@ import Vuex from 'vuex';
 import _ from 'lodash';
 
 import me from './me';
+import friend from './friend';
+import log from './log';
 
 const storeOpts = {
   modules: {
     me : me,
+    log,
+    friend
   },
   state: {
   },
