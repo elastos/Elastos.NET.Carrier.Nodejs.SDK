@@ -170,7 +170,7 @@
         friendMessage: (carrier, from, msg, context)=>{
           _log.debug("Message from friend[" + from + "]: " + msg);
           F.syncData('friend/message/callback', {
-            userId : from,
+            user : F.getFriendInfo(from),
             msg
           });
 

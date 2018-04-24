@@ -29,6 +29,9 @@
 <style lang="scss">
   .c_main_header{
     background: rgb(53, 57, 64);
+    border-bottom: 1px solid rgb(41, 43, 57);
+    box-shadow: 0 1px 0 #222;
+    z-index: 1;
 
     .cc-icon{
       position: absolute;

@@ -70,6 +70,14 @@ new Vue({
         type: 'success',
         duration: 3000
       });
+    },
+    errorMessage(err){
+      this.$message({
+        showClose: true,
+        message: err,
+        type: 'error',
+        duration: 5000
+      });
     }
   }
 });

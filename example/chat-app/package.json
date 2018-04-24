@@ -90,7 +90,7 @@
   ],
   "main": "./dev_dist/index.html",
   "window": {
-    "title": "nw-vue-webpack2",
+    "title": "Elastos chat app",
     "toolbar": true,
     "frame": true,
     "width": 1200,

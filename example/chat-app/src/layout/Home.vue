@@ -12,7 +12,9 @@
         <Main_Header />
       </el-header>
       <el-main class="cc-box" style="padding: 0;">
-        <div class="d_msg_area">1111</div>
+        <div class="d_msg_area">
+          <Message_List />
+        </div>
         <div class="d_friend_area">
           <Main_Friend_List />
         </div>
@@ -29,6 +31,7 @@
   import Left_One from '../components/Home/Left_One';
   import Main_Header from '../components/Home/Main_Header';
   import Main_Friend_List from '../components/Home/Main_Friend_List';
+  import Message_List from '../components/Home/Message_List';
 
   import Loading from '../components/common/Loading';
   import CarrierModel from '../service/CarrierModel';
@@ -44,6 +47,7 @@
       Left_One,
       Main_Header,
       Main_Friend_List,
+      Message_List,
 
       Loading
     },

@@ -58,6 +58,10 @@ export default {
       const index = _.findIndex(state.list, (l)=>data.userId===l.userId);
       if(index !== -1){
         vue.set(state.list, index, _.extend({}, state.list[index], data));
+
+        if(state.currentSelect.userId === data.userId){
+          state.currentSelect = state.list[index];
+        }
       }
     },
 
@@ -65,14 +69,20 @@ export default {
       const index = _.findIndex(state.list, (l)=>data.userId===l.userId);
       if(index !== -1){
         vue.set(state.list, index, _.extend({}, state.list[index], data));
+
+        // update current select info
+        if(state.currentSelect.userId === data.userId){
+          state.currentSelect = state.list[index];
+        }
       }
+
     },
 
     'friend/message'(state){},
     'friend/message/callback'(state, {data, context}){
       context.commit('friend.message.add', {
-        key : data.userId,
-        from : data.userId,
+        key : data.user.userId,
+        from : data.user,
         msg : data.msg
       });
 
@@ -97,6 +107,7 @@ export default {
 
       // notice here, need to set value to original state
       const list = _.clone(state.message);
+      item.date = Date.now();
       list[key].push(item);
 
       vue.set(state, 'message', list);
@@ -108,9 +119,9 @@ export default {
   },
 
   getters : {
-    // getFriendMessageList : (state)=>()=>{
-    //   const key = state.currentSelect.userId;
-    //   return (key && state.message[key])? state.message[key] : [];
-    // }
+    getFriendMessageList : (state)=>()=>{
+      const key = state.currentSelect.userId;
+      return (key && state.message[key])? state.message[key] : [];
+    }
   }
 };
