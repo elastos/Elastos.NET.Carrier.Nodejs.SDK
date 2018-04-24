@@ -155,15 +155,45 @@
 
     initData(){
       //get self info
-      const me_data = F.carrier.getSelfInfo();
-      const me = F.model.create('User', me_data);
-      F.syncData('me/info', me.getData());
+
+      const me = F.getSelfInfo();
+      F.syncData('me/info', me);
 
       //get address
       const address = F.carrier.getAddress();
       F.syncData('me/address', address);
 
       F.ready = true;
+    },
+
+    execute(method, ...args){
+      if(!method){
+        throw new Error('invalid method name');
+      }
+
+      const fn = F[method] || F.carrier[method];
+      try{
+        return fn(...args);
+      }catch(e){
+        console.error(e);
+        throw e;
+      }
+
+    },
+
+
+
+    // method list
+    getSelfInfo(){
+      const me_data = F.carrier.getSelfInfo();
+      const me = F.model.create('User', me_data);
+      return me.getData();
+    },
+    setSelfInfo(data){
+      const info = F.getSelfInfo();
+      F.carrier.setSelfInfo(_.extend(info, data));
+
+      return info;
     }
   };
 

@@ -8,19 +8,14 @@ Vue.config.productionTip = false;
 
 Vue.use(ElementUI);
 
-let carrier;
-try{
-  carrier = CarrierService;
-}catch(e){
-  carrier = {};
-}
+let _carrier;
+
 new Vue({
   el: '#app',
   router,
   store : store.getStore(),
   components: { App },
   template: '<App/>',
-  carrier,
 
   created(){
     window.store = this.$store;
@@ -30,7 +25,50 @@ new Vue({
   },
   methods : {
     getCarrier(){
-      return carrier;
+      if(_carrier){
+        return _carrier;
+      }
+
+      const self = this;
+      try{
+        _carrier = CarrierService;
+      }catch(e){
+        _carrier = {
+          init(){
+            _carrier.ready = true;
+          },
+          ready : false,
+
+          execute(){
+            console.log(self);
+            self.$message({
+              showClose: true,
+              message: 'Carrier is invalid in web environment',
+              type: 'error',
+              duration: 5000
+            });
+
+            throw new Error('Carrier is invalid in web environment');
+          }
+        };
+      }
+      return _carrier;
+    },
+
+    syncData(type, data){
+      this.$store.dispatch('carrier_data', {
+        data,
+        type
+      });
+    },
+
+    successMessage(str){
+      this.$message({
+        showClose: true,
+        message: str,
+        type: 'success',
+        duration: 3000
+      });
     }
   }
 });

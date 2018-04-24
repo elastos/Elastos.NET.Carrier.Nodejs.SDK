@@ -12,6 +12,7 @@ export default {
 
 <style lang="scss">
   @import '../node_modules/element-ui/lib/theme-chalk/index.css';
+  @import "./css/index.scss";
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

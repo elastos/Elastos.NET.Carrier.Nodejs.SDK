@@ -56,7 +56,6 @@
   }
 </script>
 <style lang="scss">
-  @import '../css/index.scss';
   .c_login{
     width: 500px;
     margin: 200px auto;

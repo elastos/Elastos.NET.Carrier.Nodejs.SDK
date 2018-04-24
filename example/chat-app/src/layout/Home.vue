@@ -24,7 +24,7 @@
   export default {
     data(){
       return {
-        isLoading : true
+        isLoading : false
       }
     },
     components : {
@@ -33,22 +33,30 @@
       Loading
     },
 
+    created(){
+
+    },
+
     mounted(){
       const default_id = 'elastos';
-      CarrierService.init(default_id, this.$store, CarrierModel, {});
+      const Carrier = this.$root.getCarrier();
+      if(!Carrier.ready){
+        this.isLoading = true;
+        Carrier.init(default_id, this.$store, CarrierModel, {});
+        const tm = setInterval(()=>{
+          if(Carrier.ready){
+            clearInterval(tm);
+            this.isLoading = false;
+          }
+        }, 1000);
+      }
 
-      const tm = setInterval(()=>{
-        if(CarrierService.ready){
-          clearInterval(tm);
-          this.isLoading = false;
-        }
-      }, 1000);
+
     }
   };
 </script>
 
 <style lang="scss">
-  @import "../css/index.scss";
   .c_home{
     width: 100%;
     position: relative;

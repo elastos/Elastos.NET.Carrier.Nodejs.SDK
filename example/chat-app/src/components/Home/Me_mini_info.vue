@@ -6,7 +6,7 @@
     <div class="d_icon">
       <el-tooltip placement="top">
         <div slot="content">setting</div>
-        <i class="cc-icon el-icon-setting"></i>
+        <i @click="goSetting()" class="cc-icon el-icon-setting"></i>
       </el-tooltip>
 
     </div>
@@ -22,13 +22,19 @@
       address(){
         return this.$store.state.me.address;
       }
+    },
+
+    methods : {
+      goSetting(){
+        this.$router.push('setting');
+      }
     }
   }
 </script>
 <style lang="scss">
   .c_me_mini_info{
     background: #2b2c31;
-    height: 60px;
+    height: 60px !important;
     position: absolute;
     left: 0;
     bottom: 0;
