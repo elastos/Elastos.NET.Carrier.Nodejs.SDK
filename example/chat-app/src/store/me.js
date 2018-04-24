@@ -19,7 +19,7 @@ export default {
     'me/info'(state, {data}){
       state.info = _.extend({}, state.info, data);
     },
-    'me/online'(state, {data}){
+    'me/online'(state, {data, context}){
       state.online = data.online;
     },
     'me/address'(state, {data}){

@@ -2,7 +2,7 @@
   <div class="cc-box c_me_mini_info">
     <p class="d_text">
       {{info.name || 'NA'}}
-      <i v-bind:class="{online : info.online}" class="d_st"></i>
+      <i v-bind:class="{online : online}" class="d_st"></i>
     </p>
     <p class="d_text d_t2">{{address}}</p>
 
@@ -24,6 +24,9 @@
       },
       address(){
         return this.$store.state.me.address;
+      },
+      online(){
+        return this.$store.state.me.online;
       }
     },
 

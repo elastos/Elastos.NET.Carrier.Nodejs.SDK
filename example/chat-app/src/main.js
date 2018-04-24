@@ -19,6 +19,8 @@ new Vue({
 
   created(){
     window.store = this.$store;
+
+    this.$store.commit('add_log', 'start application');
   },
   mounted(){
 
@@ -40,7 +42,6 @@ new Vue({
           ready : false,
 
           execute(){
-            console.log(self);
             self.$message({
               showClose: true,
               message: 'Carrier is invalid in web environment',

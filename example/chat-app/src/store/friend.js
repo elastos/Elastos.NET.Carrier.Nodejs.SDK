@@ -33,7 +33,7 @@ export default {
       context.commit('add_log', '[friend/list] : ');
     },
     'friend/add'(state, {data, context}){
-      context.commit('add_log', '[friend/add] : ');
+      context.commit('add_log', '[friend/add] : '+data.address);
     },
     'friend/apply/callback'(state, {data, context}){
       context.commit('add_log', `${data.userId} apply to be your friend with message "${data.msg}"`);

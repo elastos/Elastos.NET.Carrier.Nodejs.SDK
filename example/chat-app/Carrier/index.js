@@ -1,12 +1,16 @@
-import UserClass from "../../web-demo-server/src/model/User";
-import FriendClass from "../../web-demo-server/src/model/Friend";
 
 (function(){
   const SDK = require('elastos_carrier_addon');
   const _ = require('lodash');
   const _log = {
-    debug : console.log,
-    error : console.error
+    debug(str){
+      console.log(str);
+      F.store.commit('add_log', str);
+    },
+    error(err){
+      console.error(err);
+      F.store.commit('add_error', err.toString());
+    }
   };
   const hash = (str)=>{
     return str;
@@ -66,12 +70,16 @@ import FriendClass from "../../web-demo-server/src/model/Friend";
           switch (status) {
             case SDK.ConnectionStatus_Connected:
               _log.debug("Connected to carrier network.");
-              F.syncData('me/online', true);
+              F.syncData('me/online', {
+                online : true
+              });
               break;
 
             case SDK.ConnectionStatus_Disconnected:
               _log.debug("Disconnect from carrier network.");
-              F.syncData('me/online', false);
+              F.syncData('me/online', {
+                online : false
+              });
               break;
             default:
               _log.debug("Error!!! Got unknown connection status :" + status);
@@ -81,7 +89,6 @@ import FriendClass from "../../web-demo-server/src/model/Friend";
           try{
             if(friend_info){
               const d = F.model.create('Friend', friend_info);
-              // this.socket_data('friend_list', d);
               F.syncData('friend/list/callback', {
                 end : 0,
                 info : d.getData()
@@ -151,8 +158,9 @@ import FriendClass from "../../web-demo-server/src/model/Friend";
           });
         },
         friendAdded: (carrier, info, context)=>{
-          _log.debug("New friend added. The friend information:");
           const f_info = F.model.create('Friend', info);
+          _log.debug("New friend added.");
+
           F.syncData('friend/add/callback', f_info.getData());
         },
         friendRemoved: (carrier, friend_id, context)=>{

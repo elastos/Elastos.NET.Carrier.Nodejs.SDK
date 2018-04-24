@@ -1,23 +1,30 @@
 <template>
-  <div class="cc-box c_home">
-    <div class="d_left_one">
+  <el-container class="cc-box c_home">
+    <el-aside class="d_left_one" width="70px">
       <Left_One />
-    </div>
-    <div class="d_left_two">
+    </el-aside>
+    <el-aside class="d_left_two" width="240px">
       <Left_Two />
-    </div>
+    </el-aside>
 
-    <div class="d_main">
-
-    </div>
+    <el-container>
+      <el-header style="padding:0;" height="50px">
+        <Main_Header />
+      </el-header>
+      <el-main>
+        111
+      </el-main>
+    </el-container>
 
     <Loading text="Init Carrier ..." v-if="isLoading" />
-  </div>
+  </el-container>
+
 </template>
 
 <script>
   import Left_Two from '../components/Home/Left_Two';
   import Left_One from '../components/Home/Left_One';
+  import Main_Header from '../components/Home/Main_Header';
 
   import Loading from '../components/common/Loading';
   import CarrierModel from '../service/CarrierModel';
@@ -31,6 +38,7 @@
     components : {
       Left_Two,
       Left_One,
+      Main_Header,
 
       Loading
     },
@@ -65,19 +73,10 @@
 
     .d_left_one{
       background: #42b983;
-      position: fixed;
-      left: 0;
-      top: 0;
-      width: 80px;
-      bottom: 0;
     }
     .d_left_two{
       background: #0074D9;
-      position: fixed;
-      top: 0;
-      left: 80px;
-      bottom: 0;
-      width: 300px;
     }
+
   }
 </style>

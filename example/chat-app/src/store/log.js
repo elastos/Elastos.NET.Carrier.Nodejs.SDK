@@ -1,5 +1,6 @@
 
 import _ from 'lodash';
+
 export default {
   state : {
     list : []
@@ -8,7 +9,8 @@ export default {
     add_log(state, log){
       state.list.unshift({
         type : 'log',
-        data : log
+        data : log,
+        date : Date.now()
       });
 
     },
@@ -18,7 +20,8 @@ export default {
     add_error(state, error){
       state.list.unshift({
         type : 'error',
-        data : error
+        data : error,
+        date : Date.now()
       })
     }
   }
