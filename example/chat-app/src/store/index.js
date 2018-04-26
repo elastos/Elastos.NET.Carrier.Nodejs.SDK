@@ -5,12 +5,14 @@ import _ from 'lodash';
 import me from './me';
 import friend from './friend';
 import log from './log';
+import account from './account';
 
 const storeOpts = {
   modules: {
     me : me,
     log,
-    friend
+    friend,
+    account
   },
   state: {
   },

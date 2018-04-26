@@ -57,7 +57,7 @@
     },
 
     mounted(){
-      const default_id = 'elastos';
+      const default_id = this.$store.state.account.username || 'elastos';
       const Carrier = this.$root.getCarrier();
       if(!Carrier.ready){
         this.isLoading = true;

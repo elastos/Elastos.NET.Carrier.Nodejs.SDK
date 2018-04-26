@@ -11,8 +11,8 @@
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
-        <el-button @click="resetForm('ruleForm')">重置</el-button>
+        <el-button type="primary" @click="submitForm('ruleForm')">Login</el-button>
+        <el-button @click="resetForm('ruleForm')">Reset</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -28,7 +28,7 @@
         },
         rules: {
           pass: [
-            { validator: ()=>{}, trigger: 'blur' }
+            { required : true, trigger: 'blur' }
           ],
           checkPass: [
             { validator: ()=>{}, trigger: 'blur' }
@@ -41,6 +41,9 @@
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if(valid) {
+            const name = this.ruleForm.username;
+            this.$store.commit('account/username', name);
+
             this.$router.replace('/home');
           }
           else{
