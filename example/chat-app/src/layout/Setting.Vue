@@ -1,7 +1,7 @@
 <template>
   <el-container class="cc-box c_setting">
 
-    <el-tabs tab-position="left" class="d_tabs" value="profile">
+    <el-tabs @tab-click="tabClick($event)" tab-position="left" class="d_tabs" :value="select">
       <el-tab-pane disabled label="User Setting"></el-tab-pane>
       <el-tab-pane name="profile" label="Profile">
         <Profile />
@@ -10,10 +10,11 @@
       <el-tab-pane class="d_gap" disabled label="Application Setting"></el-tab-pane>
 
       <el-tab-pane disabled label="Account Setting"></el-tab-pane>
-      <el-tab-pane name="password" label="Password"></el-tab-pane>
+      <!--<el-tab-pane name="password" label="Password"></el-tab-pane>-->
+      <el-tab-pane name="logout" label="Logout"></el-tab-pane>
     </el-tabs>
 
-    <el-button type="primary" style="position:absolute;right: 40px;top: 20px;" @click="$router.back()">Fanhui</el-button>
+    <i class="cc-icon el-icon-circle-close-outline d_close" @click="$router.back()"></i>
   </el-container>
 
 </template>
@@ -22,11 +23,19 @@
   export default {
     data(){
       return {
-
+        select : 'profile'
       };
     },
     components : {
       Profile
+    },
+    methods : {
+      tabClick(tab){
+        if(tab.name === 'logout'){
+          this.select = 'profile'
+        }
+
+      }
     }
   }
 </script>
@@ -59,6 +68,10 @@
           margin-top: 0 !important;
         }
 
+        &:last-child{
+          color: #f00 !important;
+        }
+
         &.is-active{
           color: #ff0;
         }
@@ -84,6 +97,14 @@
       .el-tabs__active-bar{
         background: none;
       }
+    }
+
+    .d_close{
+      position:absolute;
+      right: 40px;top: 25px;
+      font-size: 3rem;
+      color: #d9d9d9;
+      cursor: pointer;
     }
   }
 
