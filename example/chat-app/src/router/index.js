@@ -29,7 +29,7 @@ export default new Router({
     //default
     {
       path : '/',
-      redirect : 'login'
+      redirect : 'home'
     }
   ]
 })

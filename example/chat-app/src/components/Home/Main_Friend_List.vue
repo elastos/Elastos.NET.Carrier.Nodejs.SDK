@@ -31,6 +31,7 @@
 <style lang="scss">
   .c_main_friend_list{
     background: rgb(47, 49, 54);
+    padding-bottom: 60px;
 
     .d_st{
       display: inline-block;

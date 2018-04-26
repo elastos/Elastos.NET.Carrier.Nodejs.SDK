@@ -15,9 +15,9 @@
         <div class="d_msg_area">
           <Message_List />
         </div>
-        <div class="d_friend_area">
-          <Main_Friend_List />
-        </div>
+        <!--<div class="d_friend_area">-->
+          <!--<Main_Friend_List />-->
+        <!--</div>-->
       </el-main>
     </el-container>
 
@@ -84,11 +84,11 @@
       background: #42b983;
     }
     .d_left_two{
-      background: #0074D9;
+      position: relative;
     }
 
     .d_msg_area{
-      padding-right: 240px;
+      /*padding-right: 240px;*/
       background: #ccc;
       height: 100%;
     }

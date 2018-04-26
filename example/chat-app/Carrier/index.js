@@ -159,7 +159,7 @@
         },
         friendAdded: (carrier, info, context)=>{
           const f_info = F.model.create('Friend', info);
-          _log.debug("New friend added.");
+          // _log.debug("New friend added.");
 
           F.syncData('friend/add/callback', f_info.getData());
         },

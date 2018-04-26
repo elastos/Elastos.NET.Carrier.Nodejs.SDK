@@ -53,6 +53,7 @@ export default {
     },
     'friend/add/callback'(state, {data, context}){
       context.commit('add_log', 'New friend added. userId is '+data.userId);
+
     },
     'friend/info/callback'(state, {data}){
       const index = _.findIndex(state.list, (l)=>data.userId===l.userId);
@@ -86,7 +87,7 @@ export default {
         msg : data.msg
       });
 
-      context.commit('add_log', `receive message from ${data.userId} : ${data.msg}`);
+      context.commit('add_log', `receive message from ${data.user.userId} : ${data.msg}`);
     },
 
     'friend.apply_list.remove'(state, item){
