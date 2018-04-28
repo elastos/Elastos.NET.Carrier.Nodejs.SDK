@@ -9,7 +9,8 @@ const User = class {
       gender : userInfo.gender,
       phone : userInfo.phone,
       email : userInfo.email,
-      region : userInfo.region
+      region : userInfo.region,
+
     };
   }
 

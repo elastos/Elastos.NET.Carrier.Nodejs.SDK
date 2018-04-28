@@ -57,7 +57,6 @@
       F.carrier = SDK.createObject(opts, F.callbacks);
       F.carrier.run();
 
-
       F.initData();
     },
 
@@ -84,6 +83,8 @@
             default:
               _log.debug("Error!!! Got unknown connection status :" + status);
           }
+          _log.debug('carrier node is ready : '+F.carrier.isReady());
+          F.ready = F.carrier.isReady();
         },
         friendsList: (carrier, friend_info, context)=>{
           try{
@@ -176,7 +177,20 @@
 
         },
         friendInvite: (carrier, from, msg, context)=>{
-          _log.debug("Message from friend[" + from + "]: " + msg);
+          _log.debug("Friend invited from friend[" + from + "] with : " + msg);
+        },
+        friendsIterate: (...args)=>{
+          console.log('[friendsIterate]', ...args);
+        },
+
+        friendInviteResponse : (carrier, friendid, status, reason, data, context)=>{
+          _log.debug("Got invite response from " + friendid + ".");
+          if (status === 0) {
+            _log.debug("message within response: " + data);
+          }
+          else {
+            _log.debug("refused: " + reason);
+          }
         }
       };
     },
@@ -254,10 +268,21 @@
       return !!rs;
     },
 
-    removeFriend(userId) {
+    removeFriend(userId){
       const rs = F.carrier.removeFriend(userId);
       return !!rs;
     },
+    setFriendLabel(userId, label){
+      const rs = F.carrier.setFriendLabel(userId, label);
+      return !!rs;
+    },
+
+    inviteFriend(userId, msg){
+
+      const rs = F.carrier.inviteFriend(userId, msg, F.callbacks.friendInviteResponse, null);
+      return !!rs;
+    },
+
     close(){
       F.carrier.destory();
     }
