@@ -284,7 +284,9 @@
     },
 
     close(){
-      F.carrier.destory();
+      console.log('kill carrier node');
+      F.carrier.destroy();
+      F.ready = false;
     }
   };
 

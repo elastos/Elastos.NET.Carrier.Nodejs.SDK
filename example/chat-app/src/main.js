@@ -78,6 +78,11 @@ new Vue({
         type: 'error',
         duration: 5000
       });
+    },
+    logout(){
+      this.getCarrier().close();
+      this.$store.dispatch('reset');
+      this.$router.replace('login');
     }
   }
 });

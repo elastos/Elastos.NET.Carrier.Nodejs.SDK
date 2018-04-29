@@ -30,6 +30,11 @@ const storeOpts = {
       }catch(e){
         console.error(e);
       }
+    },
+
+    reset(ctx){
+      ctx.commit('account/reset');
+      ctx.commit('reset');
     }
   }
 };

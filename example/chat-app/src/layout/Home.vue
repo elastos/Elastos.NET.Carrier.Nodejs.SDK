@@ -57,11 +57,11 @@
     },
 
     mounted(){
-      const default_id = this.$store.state.account.username || 'elastos';
+      const username = this.$store.state.account.username;
       const Carrier = this.$root.getCarrier();
       if(!Carrier.ready){
         this.isLoading = true;
-        Carrier.init(default_id, this.$store, CarrierModel, {});
+        Carrier.init(username, this.$store, CarrierModel, {});
         const tm = setInterval(()=>{
           if(Carrier.ready){
             clearInterval(tm);

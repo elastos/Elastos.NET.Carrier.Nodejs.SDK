@@ -25,11 +25,14 @@
     },
     methods : {
       logout(){
-        this.$confirm('Are you sure to Logout?')
-          .then(_ => {
-
-          })
-          .catch(_ => {});
+        this.$confirm('Are you sure to Logout?', 'Message', {
+          cancelButtonText : 'Cancel',
+          confirmButtonText : 'Confirm'
+        }).then(()=>{
+          this.$root.logout();
+        }).catch((e)=>{
+          console.error(e);
+        });
       }
     }
   }

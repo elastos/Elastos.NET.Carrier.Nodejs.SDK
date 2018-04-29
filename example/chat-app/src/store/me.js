@@ -1,21 +1,22 @@
 import _ from 'lodash';
-export default {
-  state : {
-    info : {
-      name : 'NA',
-      userId : '',
-      email : '',
-      region : '',
-      phone : '',
-      gender : '',
-    },
-    address : '',
-    online : false
+
+const default_state = ()=>({
+  info : {
+    name : 'NA',
+    userId : '',
+    email : '',
+    region : '',
+    phone : '',
+    gender : '',
   },
+  address : '',
+  online : false
+});
+
+export default {
+  state : default_state(),
 
   mutations : {
-
-
     'me/info'(state, {data}){
       state.info = _.extend({}, state.info, data);
     },
@@ -24,6 +25,11 @@ export default {
     },
     'me/address'(state, {data}){
       state.address = data;
+    },
+
+
+    reset(state){
+      _.assign(state, default_state());
     }
   },
 

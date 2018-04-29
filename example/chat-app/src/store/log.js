@@ -1,10 +1,11 @@
-
 import _ from 'lodash';
 
+const default_state = ()=>({
+  list : []
+});
+
 export default {
-  state : {
-    list : []
-  },
+  state : default_state(),
   mutations: {
     add_log(state, log){
       state.list.unshift({
@@ -23,6 +24,10 @@ export default {
         data : error,
         date : Date.now()
       })
+    },
+
+    reset(state){
+      _.assign(state, default_state());
     }
   }
 };

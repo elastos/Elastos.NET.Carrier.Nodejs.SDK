@@ -1,15 +1,17 @@
 import _ from 'lodash';
 import vue from 'vue';
 
-export default {
-  state : {
-    list : [],
-    list_flag : false,
-    apply_list : [],
-    message : {},
+const default_state = ()=>({
+  list : [],
+  list_flag : false,
+  apply_list : [],
+  message : {},
 
-    currentSelect : {}
-  },
+  currentSelect : {}
+});
+
+export default {
+  state : default_state(),
 
   mutations : {
     'friend/list/callback'(state, {data}){
@@ -116,6 +118,13 @@ export default {
 
     'friend.current.set'(state, item){
       state.currentSelect = item;
+    },
+
+
+
+
+    reset(state){
+      _.assign(state, default_state());
     }
   },
 
