@@ -142,6 +142,10 @@
           if (status >= SDK.PresenceStatus_None &&
             status <= SDK.PresenceStatus_Busy) {
             _log.debug("Friend[" + friendid + "] change presence to " + presence_name[status]);
+            F.syncData('friend/status/callback', {
+              userId : friendid,
+              presence : status
+            });
           }
           else {
             _log.debug("Error!!! Got unknown presence status %d.", status);
@@ -212,6 +216,10 @@
       const address = F.carrier.getAddress();
       F.syncData('me/address', address);
 
+      //get self presence
+      const presence = F.getSelfPresence();
+      F.syncData('me/presence', presence);
+
       F.ready = true;
     },
 
@@ -281,6 +289,11 @@
 
       const rs = F.carrier.inviteFriend(userId, msg, F.callbacks.friendInviteResponse, null);
       return !!rs;
+    },
+
+    getSelfPresence(){
+      const rs = F.carrier.getSelfPresence();
+      return rs;
     },
 
     close(){

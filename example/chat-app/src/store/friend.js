@@ -57,28 +57,12 @@ export default {
       context.commit('add_log', 'New friend added. userId is '+data.userId);
 
     },
-    'friend/info/callback'(state, {data}){
-      const index = _.findIndex(state.list, (l)=>data.userId===l.userId);
-      if(index !== -1){
-        vue.set(state.list, index, _.extend({}, state.list[index], data));
-
-        if(state.currentSelect.userId === data.userId){
-          state.currentSelect = state.list[index];
-        }
-      }
+    'friend/info/callback'(state, {data, context}){
+      context.commit('friend.info.update', data);
     },
 
-    'friend/status/callback'(state, {data}){
-      const index = _.findIndex(state.list, (l)=>data.userId===l.userId);
-      if(index !== -1){
-        vue.set(state.list, index, _.extend({}, state.list[index], data));
-
-        // update current select info
-        if(state.currentSelect.userId === data.userId){
-          state.currentSelect = state.list[index];
-        }
-      }
-
+    'friend/status/callback'(state, {data, context}){
+      context.commit('friend.info.update', data);
     },
 
     'friend/message'(state){},
@@ -118,6 +102,17 @@ export default {
 
     'friend.current.set'(state, item){
       state.currentSelect = item;
+    },
+
+    'friend.info.update'(state, data){
+      const index = _.findIndex(state.list, (l)=>data.userId===l.userId);
+      if(index !== -1){
+        vue.set(state.list, index, _.extend({}, state.list[index], data));
+
+        if(state.currentSelect.userId === data.userId){
+          state.currentSelect = state.list[index];
+        }
+      }
     },
 
 

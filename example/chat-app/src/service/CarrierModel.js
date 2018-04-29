@@ -9,8 +9,7 @@ const User = class {
       gender : userInfo.gender,
       phone : userInfo.phone,
       email : userInfo.email,
-      region : userInfo.region,
-
+      region : userInfo.region
     };
   }
 
@@ -26,7 +25,8 @@ const Friend = class {
     this.data = _.extend({}, u.getData(), {
       presence : friendInfo.presence,
       status : friendInfo.status,
-      online : !friendInfo.status
+      online : !friendInfo.status,
+      label : friendInfo.label
     });
   }
 
