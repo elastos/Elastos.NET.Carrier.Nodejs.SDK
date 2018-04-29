@@ -1,8 +1,17 @@
 <template>
   <div class="cc-box c_me_mini_info">
     <p class="d_text">
-      {{info.name || 'NA'}}
-      <i v-bind:class="{online : online}" class="d_st"></i>
+      <el-dropdown @command="handleCommand" trigger="click">
+        <span class="el-dropdown-link">
+          <span class="d_text">{{info.name || 'NA'}}</span>
+          <i v-bind:class="presence_class()" class="d_st"></i>
+        </span>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item command="0">Free</el-dropdown-item>
+          <el-dropdown-item command="1" divided>Away</el-dropdown-item>
+          <el-dropdown-item command="2">Busy</el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
     </p>
     <p class="d_text d_t2">{{address}}</p>
 
@@ -16,6 +25,8 @@
   </div>
 </template>
 <script>
+  import {presence_class} from '../../utility';
+  import _ from 'lodash';
   export default {
 
     computed : {
@@ -33,6 +44,19 @@
     methods : {
       goSetting(){
         this.$router.push('setting');
+      },
+      handleCommand(cmd){
+        try{
+          cmd = _.toNumber(cmd);
+          this.$root.getCarrier().execute('setSelfPresence', cmd);
+          this.$root.syncData('me/presence', cmd);
+        }catch(e){
+          console.error(e)
+        }
+
+      },
+      presence_class(){
+        return presence_class(this.online, this.$store.state.me.presence, 'd_')
       }
     }
   }
@@ -82,9 +106,17 @@
       left: 5px;
       top: 0;
 
-      &.online{
+      &.d_none{
+        background: lime;
+        border: none;
+      }
+      &.d_away{
         background: #ff0;
-        border-color: #cdcdcd;
+        border: none;
+      }
+      &.d_busy{
+        background: #f00;
+        border: none;
       }
     }
   }

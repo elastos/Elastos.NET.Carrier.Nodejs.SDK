@@ -1,10 +1,6 @@
 import _ from 'lodash';
 
-const PRESENCE_NAME = [
-  "none",    // None;
-  "away",    // Away;
-  "busy",    // Busy;
-];
+
 const default_state = ()=>({
   info : {
     name : 'NA',
@@ -16,8 +12,7 @@ const default_state = ()=>({
   },
   address : '',
   online : false,
-  presence : -1,
-  presence_string : ''
+  presence : 0
 });
 
 export default {
@@ -36,7 +31,6 @@ export default {
 
     'me/presence'(state, {data}){
       state.presence = data;
-      state.presence_string = PRESENCE_NAME[data];
     },
 
 

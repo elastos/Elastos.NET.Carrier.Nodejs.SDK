@@ -139,15 +139,14 @@
           F.syncData('friend/info/callback', fi.getData());
         },
         friendPresence: (carrier, friendid,  status, context)=>{
-          if (status >= SDK.PresenceStatus_None &&
-            status <= SDK.PresenceStatus_Busy) {
-            _log.debug("Friend[" + friendid + "] change presence to " + presence_name[status]);
+          if(status >= SDK.PresenceStatus_None && status <= SDK.PresenceStatus_Busy){
+            _log.debug("Friend[" + friendid + "] change presence to " + F.presence_name[status]);
             F.syncData('friend/status/callback', {
               userId : friendid,
               presence : status
             });
           }
-          else {
+          else{
             _log.debug("Error!!! Got unknown presence status %d.", status);
           }
         },
@@ -232,8 +231,8 @@
       try{
         return fn(...args);
       }catch(e){
-        console.error(e, F.carrier.getError().toString(16));
-        throw new Error(e, F.carrier.getError().toString(16));
+        console.error(e, SDK.getError().toString(16));
+        throw new Error(e, SDK.getError().toString(16));
       }
 
     },
@@ -294,6 +293,24 @@
     getSelfPresence(){
       const rs = F.carrier.getSelfPresence();
       return rs;
+    },
+
+    setSelfPresence(status){
+      let presence = null;
+      if(status === 0){
+        presence = SDK.PresenceStatus_None;
+      }
+      else if(status === 1) {
+        presence = SDK.PresenceStatus_Away;
+      }
+      else if(status === 2) {
+        presence = SDK.PresenceStatus_Busy;
+      }
+      else{
+        throw new Error('invalid status : '+status);
+      }
+
+      return !!F.carrier.setSelfPresence(presence);
     },
 
     close(){

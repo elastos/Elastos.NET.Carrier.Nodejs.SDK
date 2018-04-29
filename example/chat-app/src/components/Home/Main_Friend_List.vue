@@ -4,7 +4,7 @@
       <li @click="selectFriend(item)" class="d_li" v-bind:class="{select: item.userId===select.userId}" v-for="item in list">
         <span class="d_t1">
           {{item.name || 'NA'}} {{item.label ? `(${item.label})` : ''}}
-          <i v-bind:class="{online : item.online}" class="d_st"></i>
+          <i v-bind:class="presence_class(item)" class="d_st"></i>
         </span>
         <span class="d_t2">{{item.userId}}</span>
         <i @click="showInfo(item, $event)" class="cc-icon el-icon-more"></i>
@@ -18,6 +18,8 @@
 </template>
 <script>
   import Friend_Info_Card from './Friend_Info_Card';
+  import {presence_class} from '../../utility';
+
   export default {
     components : {
       Friend_Info_Card
@@ -44,6 +46,9 @@
         e.stopPropagation();
         this.dialogInfo = item;
         this.dialogVisible = true;
+      },
+      presence_class(item) {
+        return presence_class(item.online, item.presence, 'd_')
       }
     }
   }
@@ -64,9 +69,17 @@
       left: 5px;
       top: 0;
 
-      &.online{
+      &.d_none{
         background: lime;
-        border-color: #cdcdcd;
+        border: none;
+      }
+      &.d_away{
+        background: #ff0;
+        border: none;
+      }
+      &.d_busy{
+        background: #f00;
+        border: none;
       }
     }
 
