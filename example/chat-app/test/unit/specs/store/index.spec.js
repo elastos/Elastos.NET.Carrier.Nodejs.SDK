@@ -13,6 +13,10 @@ test('[store account]', ()=>{
   expect(store.state.account.username).toBe('xyz');
   store.commit('account/reset');
   expect(store.state.account.username).toBe('elastos');
+
+  store.dispatch('carrier_data', 'str');
+  store.dispatch('reset');
+
 });
 
 test('[store me]', ()=>{
@@ -79,10 +83,18 @@ test('[store friend]', ()=>{
   store.dispatch('carrier_data', {
     type : 'friend/list/callback',
     data : {
+      info : {
+        userId : 'aa'
+      }
+    }
+  });
+  store.dispatch('carrier_data', {
+    type : 'friend/list/callback',
+    data : {
       end : 1
     }
   });
-  expect(friend.list.length).toBe(1);
+  expect(friend.list.length).toBe(2);
 
   store.dispatch('carrier_data', {
     type : 'friend/list',
@@ -92,14 +104,6 @@ test('[store friend]', ()=>{
     type : 'friend/add',
     data : {
       address : 'address'
-    }
-  });
-
-  store.dispatch('carrier_data', {
-    type : 'friend/apply/callback',
-    data : {
-      userId : 'aaa',
-      msg : 'aaa'
     }
   });
 
@@ -118,6 +122,13 @@ test('[store friend]', ()=>{
     data : 'aaa'
   });
 
+  store.dispatch('carrier_data', {
+    type : 'friend/add/callback',
+    data : {
+      userId : 'a1'
+    }
+  });
+
   store.commit('friend.current.set', {
     userId : 'a'
   });
@@ -125,6 +136,67 @@ test('[store friend]', ()=>{
     key : 'a',
     msg : 'hello'
   });
+  store.dispatch('carrier_data', {
+    type : 'friend/message/callback',
+    data : {
+      user : {
+        userId : 'a'
+      },
+      msg : 'a1'
+    }
+  });
 
-  expect(store.getters.getFriendMessageList().length).toBe(1);
+  expect(store.getters.getFriendMessageList().length).toBe(2);
+
+  store.dispatch('carrier_data', {
+    type : 'friend/status/callback',
+    data : {
+      userId : 'aa',
+      name : 'abc'
+    }
+  });
+
+  store.dispatch('carrier_data', {
+    type : 'friend/info/callback',
+    data : {
+      userId : 'a',
+      name : 'bbb'
+    }
+  });
+  store.dispatch('carrier_data', {
+    type : 'friend/info/callback',
+    data : {
+      userId : 'no_exist',
+      name : 'bbb'
+    }
+  });
+
+  expect(friend.list[0].name).toBe('bbb');
+
+  store.dispatch('carrier_data', {
+    type : 'friend/apply/callback',
+    data : {
+      userId : 'b',
+      msg : 'bbb'
+    }
+  });
+  expect(friend.apply_list.length).toBe(1);
+  store.commit('friend.apply_list.remove', {
+    userId : 'b'
+  });
+  expect(friend.apply_list.length).toBe(0);
+
+  store.commit('friend.current.set', {
+    userId : 'z'
+  });
+  expect(store.getters.getFriendMessageList().length).toBe(0);
+
+  store.commit('reset');
+  store.dispatch('carrier_data', {
+    type : 'friend/list/callback',
+    data : {
+      end : 1
+    }
+  });
+  expect(friend.list.length).toBe(0);
 });
