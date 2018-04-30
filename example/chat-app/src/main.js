@@ -3,6 +3,7 @@ import App from './App';
 import router from './router';
 import ElementUI from 'element-ui';
 import store from './store';
+import boot from './boot';
 
 Vue.config.productionTip = false;
 
@@ -21,6 +22,8 @@ new Vue({
     window.store = this.$store;
 
     this.$store.commit('add_log', 'start application');
+
+    boot();
   },
   mounted(){
 
