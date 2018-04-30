@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "elastos_carrier_addon": "0.0.3"
+    "elastos_carrier_addon": "0.0.4"
   }
 }

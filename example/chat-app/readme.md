@@ -1,8 +1,17 @@
-## chat-demo
+# chat-app
 
-This is a chat app based on Elastos Carrier network and nwjs.
+This is desktop chat app which based on nwjs
+
+## How to run
+```
+cd chat-app
+npm i
+npm start
+```
+
+## Run unit test
+```
+npm test
+```
 
 
-
-
-### coming soon.
