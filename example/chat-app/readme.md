@@ -9,4 +9,9 @@ npm i
 npm start
 ```
 
+## Run unit test
+```
+npm test
+```
+
 
