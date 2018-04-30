@@ -136,7 +136,7 @@ namespace elca {
         // Set the properties
         napi_property_descriptor descriptors[] = {
             { "run", NULL, 0, 0, 0, fn[0], napi_default, 0 },
-            { "destory", NULL, 0, 0, 0, fn[1], napi_default, 0 },
+            { "destroy", NULL, 0, 0, 0, fn[1], napi_default, 0 },
             { "isReady", NULL, 0, 0, 0, fn[2], napi_default, 0 },
         };
 
