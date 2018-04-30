@@ -1,6 +1,6 @@
 import Log from '@/utility/Log';
 
-it('[class Log]', ()=>{
+it('[object Log]', ()=>{
   const log = new Log('xyz');
 
   expect(log.key).toBe('xyz');
