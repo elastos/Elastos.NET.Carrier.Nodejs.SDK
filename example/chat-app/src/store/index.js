@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import _ from 'lodash';
 
 import me from './me';
 import friend from './friend';

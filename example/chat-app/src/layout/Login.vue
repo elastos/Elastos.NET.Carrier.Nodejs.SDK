@@ -32,8 +32,7 @@
           ],
           checkPass: [
             { validator: ()=>{}, trigger: 'blur' }
-          ],
-
+          ]
         }
       };
     },

@@ -8,7 +8,7 @@ const default_state = ()=>({
     email : '',
     region : '',
     phone : '',
-    gender : '',
+    gender : ''
   },
   address : '',
   online : false,

@@ -2,7 +2,7 @@
   <div class="cc-box c_me_mini_info">
     <p class="d_text">
       <el-dropdown @command="handleCommand" trigger="click">
-        <span class="el-dropdown-link">
+        <span class="el-dropdown-link" style="cursor:pointer;">
           <span class="d_text">{{info.name || 'NA'}}</span>
           <i v-bind:class="presence_class()" class="d_st"></i>
         </span>

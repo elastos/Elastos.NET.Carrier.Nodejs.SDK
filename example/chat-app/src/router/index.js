@@ -26,7 +26,7 @@ export default new Router({
 
 
 
-    //default
+    // default
     {
       path : '/',
       redirect : 'login'

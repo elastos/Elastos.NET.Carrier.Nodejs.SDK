@@ -9,9 +9,9 @@
     "web": "webpack-dev-server --inline --progress --config build/webpack.web.conf.js",
     "start": "npm run dev",
     "unit": "jest --config test/unit/jest.conf.js --coverage",
-    "//test": "npm run unit",
+    "test": "npm run unit",
     "lint": "eslint --ext .js,.vue src test/unit",
-    "build": "node build/build.js",
+    "build": "npm run lint && node build/build.js",
     "nw": "nw ."
   },
   "dependencies": {
