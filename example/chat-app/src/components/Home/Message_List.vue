@@ -117,6 +117,11 @@
         text-overflow: ellipsis;
         padding: 0 8px;
       }
+
+      .el-input__inner, .el-input-group__prepend{
+        background: #474b53;
+        color: #eeeeee;
+      }
     }
   }
 </style>
