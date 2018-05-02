@@ -1,8 +1,19 @@
 import Log from './Log';
 import _ from 'lodash';
+import Message from './Message';
 
-export {
-  Log
+// nw
+const isNW = ()=>{
+  return !_.isUndefined(nw);
+};
+export const nwBuild = (callback)=>{
+  return {
+    exec : ()=>{
+      if(isNW()){
+        callback(nw);
+      }
+    }
+  };
 };
 
 export const hash = (str)=>{
@@ -40,4 +51,9 @@ export const cache = (key, value)=>{
   }
 };
 
+
+export {
+  Log,
+  Message
+};
 

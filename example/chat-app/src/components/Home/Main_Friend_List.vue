@@ -8,6 +8,8 @@
         </span>
         <span class="d_t2">{{item.userId}}</span>
         <i @click="showInfo(item, $event)" class="cc-icon el-icon-more"></i>
+
+        <i v-if="unread[item.userId]" class="d_unread"></i>
       </li>
     </ul>
 
@@ -36,6 +38,9 @@
       },
       select(){
         return this.$store.state.friend.currentSelect;
+      },
+      unread(){
+        return this.$store.state.friend.unread_message;
       }
     },
     methods : {
@@ -120,6 +125,16 @@
           top: 15px;
           font-size: 1.8rem;
           cursor: pointer;
+        }
+        .d_unread{
+          background: #f56c6c;
+          display: block;
+          position: absolute;
+          right: 2px;
+          top: 2px;
+          width: 10px;
+          height: 10px;
+          border-radius: 5px;
         }
       }
     }

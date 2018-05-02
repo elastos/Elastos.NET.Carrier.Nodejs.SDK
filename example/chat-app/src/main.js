@@ -3,6 +3,7 @@ import App from './App';
 import router from './router';
 import ElementUI from 'element-ui';
 import store from './store';
+import {Message, nwBuild} from './utility';
 
 Vue.config.productionTip = false;
 
@@ -21,6 +22,17 @@ new Vue({
     window.store = this.$store;
 
     this.$store.commit('add_log', 'start application');
+
+    // bind nw event
+    nwBuild(()=>{
+      const win = nw.Window.get();
+      Message.register('nw_app_badge', (label=0)=>{
+        if(label > 100) label = 100;
+        if(label === 0) label = '';
+        win.setBadgeLabel(label.toString());
+      })
+    }).exec();
+
   },
   mounted(){
 
