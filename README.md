@@ -88,6 +88,19 @@ $ node ./example/demo/demo.js
 ```
 See [readme](./example/demo/README.md) for more detail.
 This is a Medium blog post from community on how to build and run demo.js: https://medium.com/@radektomej/installing-and-running-of-elastos-node-js-demo-app-3f3aeba00e03
+# Sample app
+## Chat-App
+[code](./example/chat-app).
+This is a Nodejs desktop app (using nw.js). It can launch a js desktop UI. User can register and add friends, chat with friends.
+TODO: Add screen shot or demo video link here
+
+## Web Demo
+[client](./example/web-demo-client)
+[server](./example/web-demo-server)
+This is a web UI demo based on original [demo app](./example/demo). It use web UI instead of command line. It demos the same feature as the original demo. 
+
+## More to come
+Please create your own sample app and let us know. We will add your project links here and we will give you ELA reward. 
 
 # Community Contribution
 ## How to run the demo.js - Medium

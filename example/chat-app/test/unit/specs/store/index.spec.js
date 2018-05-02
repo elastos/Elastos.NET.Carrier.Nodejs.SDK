@@ -145,8 +145,34 @@ test('[store friend]', ()=>{
       msg : 'a1'
     }
   });
+  store.dispatch('carrier_data', {
+    type : 'friend/message/callback',
+    data : {
+      user : {
+        userId : 'aa'
+      },
+      msg : 'a1'
+    }
+  });
+  store.dispatch('carrier_data', {
+    type : 'friend/message/callback',
+    data : {
+      user : {
+        userId : 'aa'
+      },
+      msg : 'a2'
+    }
+  });
+  expect(friend.unread_message.total).toBe(2);
+  expect(friend.unread_message['a']).not.toBe(1);
+  expect(friend.unread_message['aa']).toBe(2);
 
   expect(store.getters.getFriendMessageList().length).toBe(2);
+
+  store.commit('friend.current.set', {
+    userId : 'aa'
+  });
+  expect(friend.unread_message.total).toBe(0);
 
   store.dispatch('carrier_data', {
     type : 'friend/status/callback',

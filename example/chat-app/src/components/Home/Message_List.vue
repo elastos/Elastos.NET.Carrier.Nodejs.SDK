@@ -37,6 +37,11 @@
         this.scrollToBottom();
       }
     },
+    mounted(){
+      try{
+        this.scrollToBottom();
+      }catch(e){}
+    },
     methods : {
       min_name(){
         if(!this.current.userId){
@@ -116,6 +121,11 @@
         overflow: hidden;
         text-overflow: ellipsis;
         padding: 0 8px;
+      }
+
+      .el-input__inner, .el-input-group__prepend{
+        background: #474b53;
+        color: #eeeeee;
       }
     }
   }

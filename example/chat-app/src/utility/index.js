@@ -1,7 +1,23 @@
 import Log from './Log';
+import _ from 'lodash';
+import Message from './Message';
 
-export {
-  Log
+// nw
+const getNW = ()=>{
+  return require('nw') || null;
+};
+export const nwBuild = (callback)=>{
+  return {
+    exec : ()=>{
+      const nw = getNW();
+      if(nw){
+        callback(nw);
+      }
+      else{
+        console.error('nw only available in nwjs desktop env')
+      }
+    }
+  };
 };
 
 export const hash = (str)=>{
@@ -28,4 +44,20 @@ export const presence_class = (online, presence, prefix='')=>{
   return prefix+rs;
 };
 
+const _cache = {};
+export const cache = (key, value)=>{
+  if(!_.isUndefined(value)){
+    _cache[key] = value;
+    return value;
+  }
+  else{
+    return _.isUndefined(_cache[key]) ? null : _cache[key];
+  }
+};
+
+
+export {
+  Log,
+  Message
+};
 

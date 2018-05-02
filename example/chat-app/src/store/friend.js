@@ -1,11 +1,15 @@
 import _ from 'lodash';
 import vue from 'vue';
+import {Message} from '../utility';
 
 const default_state = ()=>({
   list : [],
   list_flag : false,
   apply_list : [],
   message : {},
+  unread_message : {
+    total : 0
+  },
 
   currentSelect : {}
 });
@@ -74,6 +78,18 @@ export default {
       });
 
       context.commit('add_log', `receive message from ${data.user.userId} : ${data.msg}`);
+
+      if(state.currentSelect.userId !== data.user.userId){
+        if(!state.unread_message[data.user.userId]){
+          state.unread_message[data.user.userId] = 0;
+        }
+        state.unread_message[data.user.userId] += 1;
+        state.unread_message.total += 1;
+
+        const tmp = _.clone(state.unread_message);
+        vue.set(state, 'unread_message', tmp);
+        Message.send('nw_app_badge', state.unread_message.total);
+      }
     },
 
     'friend.apply_list.remove'(state, item){
@@ -102,6 +118,17 @@ export default {
 
     'friend.current.set'(state, item){
       state.currentSelect = item;
+
+      // surplus unread number
+      if(state.unread_message[item.userId]){
+        const n = state.unread_message[item.userId];
+        state.unread_message.total -= n;
+        state.unread_message[item.userId] = 0;
+
+        const tmp = _.clone(state.unread_message);
+        vue.set(state, 'unread_message', tmp);
+        Message.send('nw_app_badge', state.unread_message.total);
+      }
     },
 
     'friend.info.update'(state, data){

@@ -1,4 +1,4 @@
-import {presence_class, hash} from '@/utility';
+import {presence_class, hash, cache, nwBuild} from '@/utility';
 
 test('[function hash]', ()=>{
   const str = hash('aaa');
@@ -21,3 +21,37 @@ test('[function presence_class]', ()=>{
     presence_class(true, 3);
   }).toThrow();
 });
+
+test('[function cache]', ()=>{
+  cache('key', 'value');
+  expect(cache('key')).toBe('value');
+  expect(cache('no_exist')).toBe(null);
+});
+
+test('[function nwBuild]', ()=>{
+  let rs = 1;
+  jest.doMock('nw', ()=>{
+    return undefined;
+  });
+  nwBuild(()=>{
+    rs = 10;
+  }).exec();
+  expect(rs).not.toBe(10);
+});
+
+test('[function nwBuild]', ()=>{
+  let rs = 1;
+  // mock nw
+  jest.doMock('nw', ()=>{
+    return {
+      env : 'test'
+    };
+  });
+
+  nwBuild((nw)=>{
+    rs = nw.env;
+  }).exec();
+
+  expect(rs).toBe('test');
+});
+
