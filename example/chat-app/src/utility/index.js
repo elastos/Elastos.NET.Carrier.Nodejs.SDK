@@ -3,14 +3,18 @@ import _ from 'lodash';
 import Message from './Message';
 
 // nw
-const isNW = ()=>{
-  return !_.isUndefined(nw);
+const getNW = ()=>{
+  return require('nw') || null;
 };
 export const nwBuild = (callback)=>{
   return {
     exec : ()=>{
-      if(isNW()){
+      const nw = getNW();
+      if(nw){
         callback(nw);
+      }
+      else{
+        console.error('nw only available in nwjs desktop env')
       }
     }
   };

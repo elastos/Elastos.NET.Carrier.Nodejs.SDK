@@ -23,7 +23,7 @@ const F = {
   },
 
   remove(type){
-
+    pool[type] = [];
   }
 };
 
