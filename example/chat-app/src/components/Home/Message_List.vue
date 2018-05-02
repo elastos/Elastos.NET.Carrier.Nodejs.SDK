@@ -37,6 +37,11 @@
         this.scrollToBottom();
       }
     },
+    mounted(){
+      try{
+        this.scrollToBottom();
+      }catch(e){}
+    },
     methods : {
       min_name(){
         if(!this.current.userId){

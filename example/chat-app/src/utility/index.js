@@ -1,4 +1,5 @@
 import Log from './Log';
+import _ from 'lodash';
 
 export {
   Log
@@ -26,6 +27,17 @@ export const presence_class = (online, presence, prefix='')=>{
   }
 
   return prefix+rs;
+};
+
+const _cache = {};
+export const cache = (key, value)=>{
+  if(!_.isUndefined(value)){
+    _cache[key] = value;
+    return value;
+  }
+  else{
+    return _.isUndefined(_cache[key]) ? null : _cache[key];
+  }
 };
 
 

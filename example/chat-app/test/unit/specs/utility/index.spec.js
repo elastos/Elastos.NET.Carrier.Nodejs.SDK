@@ -1,4 +1,4 @@
-import {presence_class, hash} from '@/utility';
+import {presence_class, hash, cache} from '@/utility';
 
 test('[function hash]', ()=>{
   const str = hash('aaa');
@@ -20,4 +20,10 @@ test('[function presence_class]', ()=>{
   expect(()=>{
     presence_class(true, 3);
   }).toThrow();
+});
+
+test('[function cache]', ()=>{
+  cache('key', 'value');
+  expect(cache('key')).toBe('value');
+  expect(cache('no_exist')).toBe(null);
 });
