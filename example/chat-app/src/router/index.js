@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/layout/Home';
 import Login from '@/layout/Login';
-import Setting from '@/layout/Setting';
+import Setting from '@/layout/SettingPage';
 
 Vue.use(Router);
 
