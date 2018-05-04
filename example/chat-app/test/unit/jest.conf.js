@@ -20,6 +20,7 @@ module.exports = {
   collectCoverageFrom: [
     'src/**/*.{js}',
     '!src/storage/**',
+    '!src/utility/Notification.js',
     '!src/main.js',
     '!src/boot.js',
     '!src/router/index.js',
