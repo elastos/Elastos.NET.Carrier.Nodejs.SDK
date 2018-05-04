@@ -2,6 +2,7 @@ import SDK from 'elastos_carrier_addon';
 import _ from 'lodash';
 import md5 from 'md5';
 import Robot from './Robot';
+import CarrierData from '../model/CarrierData';
 
 const connection_name = [
     "online",
@@ -35,15 +36,19 @@ class Carrier {
         this._data = {
             online : false,
             info : {
-                name : 'Carrier Robot',
+                name : process.env.ROBOT_NAME || 'Carrier Robot',
                 email : 'rebot@carrier.net',
                 region : 'China',
                 phone : '123',
                 gender : 'female',
                 description : 'aaa'
             },
+            list : [],
+            list_flag : false,
+            address : ''
         };
 
+        this.args = [id];
         this.id = md5(id);
 
         const opts = {
@@ -52,12 +57,17 @@ class Carrier {
             bootstraps: bootstraps
         };
 
+        this.ready = false;
+
         console.log('create carrier service with id = '+id);
 
         this.callbacks = this.buildCallback();
         this.carrier = SDK.createObject(opts, this.callbacks);
         this.carrier.run();
-console.log(this.self_address());
+
+
+        this._data.address = this.self_address();
+        console.log('Address is '+this._data.address);
         this.carrier.setSelfInfo(_.extend({
             userId : this.self_nodeid()
         }, this._data.info));
@@ -70,9 +80,7 @@ console.log(this.self_address());
         console.log(info);
     }
 
-    toClient(type, data){
-
-    }
+    toClient(type, data){}
 
     buildCallback(){
         return {
@@ -84,17 +92,17 @@ console.log(this.self_address());
                     case SDK.ConnectionStatus_Connected:
                         this.log("Connected to carrier network.");
                         this._data.online = true;
+                        this.ready = true;
 
                         _.delay(()=>{
                             console.log(this.self_info());
                         }, 1000);
 
-
-
                         break;
 
                     case SDK.ConnectionStatus_Disconnected:
                         this.log("Disconnect from carrier network.");
+                        this.restart();
 
                         break;
 
@@ -104,12 +112,22 @@ console.log(this.self_address());
             },
             friendsList: (carrier, friend_info, context)=>{
                 try{
-                    if(friend_info){
+                    if(!this._data.list_flag){
+                        if(friend_info){
+                            this._data.list_flag = true;
+                            this._data.list = [CarrierData.create('Friend', friend_info).getData()];
+                        }
 
                     }
-                    else {
-
+                    else{
+                        if(!friend_info){
+                            this._data.list_flag = false;
+                        }
+                        else{
+                            this._data.list.push(CarrierData.create('Friend', friend_info).getData());
+                        }
                     }
+
                     return true;
                 }catch(e){
                     console.error(e);
@@ -121,26 +139,15 @@ console.log(this.self_address());
                     case SDK.ConnectionStatus_Connected:
                         console.log("Friend [" + friendid +"] connection changed to be online");
 
-                        //TOOD why call this.info_friend(friendid) here will throw an error.
-
-                        this.toClient('friend/status/callback', {
-                            userId : friendid,
-                            status : 0,
-                            online : true
-                        });
                         break;
 
                     case SDK.ConnectionStatus_Disconnected:
                         console.log("Friend [" + friendid +"] connection changed to be offline.");
-                        this.toClient('friend/status/callback', {
-                            userId : friendid,
-                            status : 1,
-                            online : false
-                        });
+
                         break;
 
                     default:
-                        this.log("Error!!! Got unknown connection status:" + status);
+                        console.log("Error!!! Got unknown connection status:" + status);
                 }
                 return true;
             },
@@ -164,10 +171,6 @@ console.log(this.self_address());
                     try{
                         _.delay(()=>{
                             this.carrier.acceptFriend(info.userId);
-
-                            _.delay(()=>{
-                                this.send_message(info.userId, 'Hello');
-                            }, 2000)
                         }, 2000);
                     }catch(e){
                         console.error(e);
@@ -182,7 +185,6 @@ console.log(this.self_address());
             friendRemoved: (carrier, friend_id, context)=>{
                 console.log("Friend " + friend_id +  " removed!");
 
-                this.toClient('friend/remove/callback', friend_id);
             },
             friendMessage: (carrier, from, msg, context)=>{
                 console.log("Message from friend[" + from + "]: " + msg);
@@ -207,15 +209,8 @@ console.log(this.self_address());
 
 
     self_info(){
-        const me = this.carrier.getSelfInfo();
-        return {
-            userId : me.userId,
-            name : me.name,
-            gender : me.gender,
-            region : me.region,
-            email : me.email,
-            phone : me.phone
-        };
+        const info = this.carrier.getSelfInfo();
+        return CarrierData.create('User', info).getData();
     }
     self_presence(status=''){
         let presence;
@@ -280,7 +275,7 @@ console.log(this.self_address());
             throw ("Get friend information failed(0x" +  SDK.getError().toString(16) + ").");
         }
 
-        const fi = new FriendClass(info);
+        const fi = CarrierData.create('Friend', info);
         return fi.getData();
     }
 
@@ -318,7 +313,11 @@ console.log(this.self_address());
     }
 
     close(){
-        this.carrier.destory();
+        this.carrier.destroy();
+    }
+
+    restart(){
+
     }
 }
 Carrier.instance = null;
