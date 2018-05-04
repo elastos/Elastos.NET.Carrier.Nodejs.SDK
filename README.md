@@ -98,6 +98,7 @@ TODO: Add screen shot or demo video link here
 [code](./example/robot-node).
 This is a service node demo with a robot chat connected.
 We deploy a public node instance with address **bMccKHhBAj2kbdLZGVVEtoaiMzSngnmxhXgXDx56bUVBGV5neYYV**, welcome to use Chat-App to chat with the robot.
+Notice that the robot node only accept add request with message **"elastos"**, others can not add.
 
 ## Web Demo
 [client](./example/web-demo-client)
