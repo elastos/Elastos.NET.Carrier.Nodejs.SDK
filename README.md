@@ -94,6 +94,11 @@ This is a Medium blog post from community on how to build and run demo.js: https
 This is a Nodejs desktop app (using nw.js). It can launch a js desktop UI. User can register and add friends, chat with friends.
 TODO: Add screen shot or demo video link here
 
+## Robot-node
+[code](./example/robot-node).
+This is a service node demo with a robot chat connected.
+We deploy a public node instance with address **bMccKHhBAj2kbdLZGVVEtoaiMzSngnmxhXgXDx56bUVBGV5neYYV**, welcome to use Chat-App to chat with the robot.
+
 ## Web Demo
 [client](./example/web-demo-client)
 [server](./example/web-demo-server)
