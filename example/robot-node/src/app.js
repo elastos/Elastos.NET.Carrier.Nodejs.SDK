@@ -13,7 +13,8 @@ app.use(cors());
 // router(app);
 boot(app, config);
 
-app.listen(3000, ()=>{
-    console.log('server start => http://localhost:3000')
+const port = process.env.PORT;
+app.listen(port, ()=>{
+    console.log('server start at port : '+port);
 });
 
