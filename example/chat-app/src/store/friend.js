@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import vue from 'vue';
-import {Message} from '../utility';
+import {Message, Notification, cache} from '../utility';
 
 const default_state = ()=>({
   list : [],
@@ -89,6 +89,14 @@ export default {
         const tmp = _.clone(state.unread_message);
         vue.set(state, 'unread_message', tmp);
         Message.send('nw_app_badge', state.unread_message.total);
+      }
+
+      if(!cache('nw_focus') || state.currentSelect.userId !== data.user.userId){
+        Notification.show(`${data.user.name || data.user.userId} : ${data.msg}`, {
+          onclick : ()=>{
+            context.commit('friend.current.set', data.user);
+          }
+        });
       }
     },
 

@@ -34,6 +34,8 @@
       border-top: 1px solid #0074D9;
       padding: 10px 0;
       list-style: none;
+      overflow: auto;
+      max-height: 500px;
 
       .d_li{
         color: #0074D9;

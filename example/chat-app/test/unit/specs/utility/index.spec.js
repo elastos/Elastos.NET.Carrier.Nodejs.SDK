@@ -30,9 +30,7 @@ test('[function cache]', ()=>{
 
 test('[function nwBuild]', ()=>{
   let rs = 1;
-  jest.doMock('nw', ()=>{
-    return undefined;
-  });
+
   nwBuild(()=>{
     rs = 10;
   }).exec();
@@ -44,9 +42,12 @@ test('[function nwBuild]', ()=>{
   // mock nw
   jest.doMock('nw', ()=>{
     return {
-      env : 'test'
+
     };
   });
+  window.nw = {
+    env : 'test'
+  };
 
   nwBuild((nw)=>{
     rs = nw.env;

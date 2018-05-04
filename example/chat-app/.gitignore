@@ -16,3 +16,4 @@ yarn-error.log*
 *.sln
 
 /.ela_data
+/.fs_storage
