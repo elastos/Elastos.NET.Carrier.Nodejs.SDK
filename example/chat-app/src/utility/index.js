@@ -1,10 +1,11 @@
 import Log from './Log';
 import _ from 'lodash';
 import Message from './Message';
+import Notification from './Notification';
 
 // nw
 const getNW = ()=>{
-  return require('nw') || null;
+  return window.nw || null;
 };
 export const nwBuild = (callback)=>{
   return {
@@ -58,6 +59,7 @@ export const cache = (key, value)=>{
 
 export {
   Log,
-  Message
+  Message,
+  Notification
 };
 

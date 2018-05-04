@@ -41,6 +41,7 @@
         throw new Error('invalid carrier id');
       }
 
+      F.init_args = [id, store, CarrierModel, config];
       F.id = hash(id);
       F.store = store;
       F.model = CarrierModel;
@@ -79,6 +80,9 @@
               F.syncData('me/online', {
                 online : false
               });
+
+              // reconnect
+
               break;
             default:
               _log.debug("Error!!! Got unknown connection status :" + status);
@@ -315,8 +319,20 @@
 
     close(){
       console.log('kill carrier node');
-      F.carrier.destroy();
+      try{
+        F.carrier.destroy();
+      }catch(e){
+        console.error(e);
+      }
       F.ready = false;
+    },
+    restart(){
+      F.close();
+
+      _log.debug('restart carrier node');
+      setTimeout(()=>{
+        F.init.apply(F, F.init_args);
+      }, 2000);
     }
   };
 

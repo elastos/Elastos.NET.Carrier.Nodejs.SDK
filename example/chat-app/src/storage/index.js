@@ -5,7 +5,7 @@ import _ from 'lodash';
 export default {
   create(dbName, key, opts={}){
     if(_.isUndefined(nw)){
-      console.error('storage layer only available for NW env');
+      console.error('storage layer only available for nwjs env');
 
       return {};
     }
