@@ -77,7 +77,7 @@ export default {
         msg : data.msg
       });
 
-      context.commit('add_log', `receive message from ${data.user.userId} : ${data.msg}`);
+      // context.commit('add_log', `receive message from ${data.user.userId} : ${data.msg}`);
 
       if(state.currentSelect.userId !== data.user.userId){
         if(!state.unread_message[data.user.userId]){

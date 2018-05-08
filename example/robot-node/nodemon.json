@@ -1,0 +1,17 @@
+{
+  "restartable": "rs",
+  "delay": "2500",
+  "watch": [
+    "src/*.js",
+    "src/**/*.js"
+  ],
+  "events": {
+    "restart": "echo display notification \"App restarted due to:\n'$FILENAME'\" with title \"nodemon\""
+  },
+  "ext": "js json",
+  "ignore": [
+    "node_modules/**/*",
+    "node_modules/**/node_modules"
+  ],
+  "exec": "babel-node --presets es2015 src/app.js"
+}
