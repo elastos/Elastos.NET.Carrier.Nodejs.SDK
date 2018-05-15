@@ -58,7 +58,7 @@ $ node --version
 v9.10.0
 ```
 
-Install node-gype
+Install node-gyp
 ```shell
 sudo npm install -g node-gyp
 ```
