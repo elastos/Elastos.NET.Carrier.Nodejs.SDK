@@ -24,11 +24,39 @@
 
 namespace elca {
 
-    typedef size_t get_arguments(napi_env env, void *args, napi_value* result);
+    const char* carrier_cb_name[] = {
+        "idle",
+        "connectionStatus",
+        "friendsList",
+        "friendConnection",
+        "friendInfo",
+        "friendPresence",
+        "friendRequest",
+        "friendAdded",
+        "friendRemoved",
+        "friendMessage",
+        "friendInvite",
+        "friendsIterate",
+        "friendInviteResponse",
+        "sessionRequest"
+    };
 
-    typedef struct _ConnectionArgs {
-        int32_t status;
-    } ConnectionArgs;
+    const char* session_cb_name[] = {
+        "sessionRequestComplete"
+    };
+
+    const char* stream_cb_name[] = {
+        "state_changed",
+        "stream_data",
+        "channel_open",
+        "channel_opened",
+        "channel_data",
+        "channel_pending",
+        "channel_resume",
+        "channel_close"
+    };
+
+    typedef size_t get_arguments(napi_env env, void *args, napi_value* result);
 
     typedef struct _FriendInfoArgs {
         char id[ELA_MAX_ID_LEN + 1];
@@ -60,15 +88,37 @@ namespace elca {
         uint32_t len;
     } FriendInviteResponseArgs;
 
+    typedef struct _SessionRequestArgs {
+        char from[ELA_MAX_ID_LEN + 1];
+        char sdp[ELA_MAX_APP_MESSAGE_LEN + 1];
+    } SessionRequestArgs;
+
     typedef struct _WorkerInfo {
         uv_work_t work;
         napi_env env;
         napi_ref handle;
-        napi_ref carrier;
+        napi_ref object;
         napi_value context;
+        const char* fn_name;
         void* args;
         get_arguments* get_args;
     } WorkerInfo;
+
+    static const char** getCallbackNamesAndCount(Elca *elca, int *count) {
+        switch(elca->type) {
+            case CARRIER:
+                if (count) *count = CARRIER_CALLBACK_COUNT;
+                return carrier_cb_name;
+            case SESSION:
+                if (count) *count = SESSION_CALLBACK_COUNT;
+                return session_cb_name;
+            case STREAM:
+                if (count) *count = STREAM_CALLBACK_COUNT;
+                return stream_cb_name;
+        }
+        if (count) *count = 0;
+        return nullptr;
+    }
 
     void work_Execute(uv_work_t * work) {
         // printf("uvAsync thread id: %ul\n", pthread_self());
@@ -86,12 +136,12 @@ namespace elca {
         status = napi_open_handle_scope(env, &scope);
         CHECK_STATUS;
 
-        napi_value carrier;
-        status = napi_get_reference_value(env, info->carrier, &carrier);
+        napi_value object;
+        status = napi_get_reference_value(env, info->object, &object);
         CHECK_STATUS;
 
-        if (carrier) {
-            argv[0] = carrier;
+        if (object) {
+            argv[0] = object;
             if (info->get_args) {
                 argc = info->get_args(env, info->args, argv + 1);
             }
@@ -112,7 +162,10 @@ namespace elca {
             if (fn) {
                 napi_value result;
                 status = napi_call_function(env, global, fn, argc, argv, &result);
-                CHECK_STATUS;
+                if (status != napi_ok) {
+                    log_err(env, "Callback function '%s' run wrong!", info->fn_name);
+                    // napi_throw_error(env, "", "callback function error!");
+                }
             }
         }
 
@@ -124,8 +177,12 @@ namespace elca {
 
     static inline void send_async_work(int index,  get_arguments* get_args, void* args, void *context) {
         Elca *elca = (Elca*)context;
+        const char** cb_name;
+        int count;
 
         if (!elca->handle[index]) return;
+        cb_name = getCallbackNamesAndCount(elca, &count);
+        if (!cb_name || index >= count) return;
 
         WorkerInfo* info = nullptr;
         HEAP_ALLOC_VOID(info, WorkerInfo, 1);
@@ -136,9 +193,25 @@ namespace elca {
         info->args = args;
         info->handle = elca->handle[index];
         info->context = elca->context[index];
-        info->carrier = elca->carrier;
+        info->object = elca->object;
+        info->fn_name = cb_name[index];
 
         uv_queue_work(uv_default_loop(), &info->work, work_Execute, work_Completed);
+    }
+
+
+    static size_t getIntValueArgs(napi_env env, void *args, napi_value* argv) {
+        int32_t value = *(int32_t*)args;
+        napi_create_int32(env, value, argv);
+        return 1;
+    }
+
+    static void setIntValueCallback(int cb_no, int value, void* context) {
+        int* args = nullptr;
+        HEAP_ALLOC_VOID(args, int, 1);
+        *args = value;
+
+        send_async_work(cb_no, getIntValueArgs, args, context);
     }
 
     //idle_callback
@@ -147,31 +220,21 @@ namespace elca {
     }
 
     //connection_callback
-    static size_t get_ConnectionArgs(napi_env env, void *args, napi_value* argv) {
-        int32_t status = *(int32_t*)args;
-        napi_create_int32(env, status, argv);
-        return 1;
-    }
-
     static void connection_callback(ElaCarrier *w, ElaConnectionStatus status,
                                     void *context) {
-        int* args = nullptr;
-        HEAP_ALLOC_VOID(args, int, 1);
-        *args = status;
-
-        send_async_work(CONNECTION_STATUS, get_ConnectionArgs, args, context);
+        setIntValueCallback(CONNECTION_STATUS, status, context);
     }
 
     //friends_list_callback
     //friends_iterate_callback
     //friend_added_callback
-    static size_t get_ElaFriendInfoArgs(napi_env env, void *args, napi_value* argv) {
+    static size_t getElaFriendInfoArgs(napi_env env, void *args, napi_value* argv) {
         ElaFriendInfo* friend_info = (ElaFriendInfo*)args;
-        argv[0] = create_FriendInfoJsObj(env, friend_info);
+        argv[0] = createFriendInfoJsObj(env, friend_info);
         return 1;
     }
 
-    static bool set_FriendInfoCallback(int cb_no, const ElaFriendInfo *info,
+    static bool setFriendInfoCallback(int cb_no, const ElaFriendInfo *info,
                                     void *context) {
         ElaFriendInfo* friend_info = nullptr;
         if (info) {
@@ -179,26 +242,26 @@ namespace elca {
             memcpy(friend_info, info, sizeof(ElaFriendInfo));
         }
 
-        send_async_work(cb_no, get_ElaFriendInfoArgs, friend_info, context);
+        send_async_work(cb_no, getElaFriendInfoArgs, friend_info, context);
         return true;
     }
 
     static bool friends_list_callback(ElaCarrier *w, const ElaFriendInfo *info,
                                     void *context) {
-        return set_FriendInfoCallback(FRIENDS_LIST, info, context);
+        return setFriendInfoCallback(FRIENDS_LIST, info, context);
     }
 
     bool friends_iterate_callback(const ElaFriendInfo *info, void *context) {
-        return set_FriendInfoCallback(FRIENDS_ITERATE, info, context);
+        return setFriendInfoCallback(FRIENDS_ITERATE, info, context);
     }
 
     static void friend_added_callback(ElaCarrier *w, const ElaFriendInfo *info,
                                     void *context) {
-        set_FriendInfoCallback(FRIEND_ADDED, info, context);
+        setFriendInfoCallback(FRIEND_ADDED, info, context);
     }
 
     //friend_removed_callback
-    static size_t get_FriendRemovedArgs(napi_env env, void *args, napi_value* argv) {
+    static size_t getFriendRemovedArgs(napi_env env, void *args, napi_value* argv) {
         napi_create_string_utf8(env, (char*)args, NAPI_AUTO_LENGTH, argv);
         return 1;
     }
@@ -210,14 +273,14 @@ namespace elca {
             strncpy(id, friendid, ELA_MAX_ID_LEN);
         }
 
-        send_async_work(FRIEND_REMOVED, get_FriendRemovedArgs, id, context);
+        send_async_work(FRIEND_REMOVED, getFriendRemovedArgs, id, context);
     }
 
     //friend_info_callback
-    static size_t get_FriendInfoArgs(napi_env env, void *args, napi_value* argv) {
+    static size_t getFriendInfoArgs(napi_env env, void *args, napi_value* argv) {
         FriendInfoArgs* fi = (FriendInfoArgs*)args;
         napi_create_string_utf8(env, fi->id, NAPI_AUTO_LENGTH, &argv[0]);
-        argv[1] = create_FriendInfoJsObj(env, &fi->info);
+        argv[1] = createFriendInfoJsObj(env, &fi->info);
 
         return 2;
     }
@@ -229,12 +292,12 @@ namespace elca {
         if (friend_id) strncpy(fi->id, friend_id, ELA_MAX_ID_LEN);
         if (info) memcpy(&fi->info, info, sizeof(ElaFriendInfo));
 
-        send_async_work(FRIEND_INFO, get_FriendInfoArgs, fi, context);
+        send_async_work(FRIEND_INFO, getFriendInfoArgs, fi, context);
     }
 
     //friend_connection_callback
     //friend_presence_callback
-    static size_t get_FriendStatusArgs(napi_env env, void *args, napi_value* argv) {
+    static size_t getFriendStatusArgs(napi_env env, void *args, napi_value* argv) {
         FriendStatusArgs *fs = (FriendStatusArgs*)args;
         napi_create_string_utf8(env, fs->id, NAPI_AUTO_LENGTH, &argv[0]);
         napi_create_int32(env,fs->status, &argv[1]);
@@ -242,31 +305,31 @@ namespace elca {
         return 2;
     }
 
-    static void set_FriendStatusCallback(int cb_no, const char *id, int32_t status,
+    static void setFriendStatusCallback(int cb_no, const char *id, int32_t status,
                                         void *context) {
         FriendStatusArgs* fs = nullptr;
         HEAP_ALLOC_VOID(fs, FriendStatusArgs, 1);
         if (id) strncpy(fs->id, id, ELA_MAX_ID_LEN);
         fs->status = status;
 
-        send_async_work(cb_no, get_FriendStatusArgs, fs, context);
+        send_async_work(cb_no, getFriendStatusArgs, fs, context);
     }
 
     static void friend_connection_callback(ElaCarrier *w, const char *friend_id,
                                         ElaConnectionStatus status, void *context) {
-        set_FriendStatusCallback(FRIEND_CONNECTION, friend_id, status, context);
+        setFriendStatusCallback(FRIEND_CONNECTION, friend_id, status, context);
     }
 
     static void friend_presence_callback(ElaCarrier *w, const char *friend_id,
                                         ElaPresenceStatus status, void *context) {
-        set_FriendStatusCallback(FRIEND_PRESENCE, friend_id, status, context);
+        setFriendStatusCallback(FRIEND_PRESENCE, friend_id, status, context);
     }
 
     //friend_request_callback
-    static size_t get_FriendFequestArgs(napi_env env, void *args, napi_value* argv) {
+    static size_t getFriendFequestArgs(napi_env env, void *args, napi_value* argv) {
         FriendRequestArgs *fr = (FriendRequestArgs*)args;
         napi_create_string_utf8(env, fr->id, NAPI_AUTO_LENGTH, &argv[0]);
-        argv[1] = create_UserInfoJsObj(env, &fr->info);
+        argv[1] = createUserInfoJsObj(env, &fr->info);
         napi_create_string_utf8(env, fr->hello, NAPI_AUTO_LENGTH, &argv[2]);
 
         return 3;
@@ -281,12 +344,12 @@ namespace elca {
         if (info) memcpy(&fr->info, info, sizeof(ElaUserInfo));
         if (hello) strncpy(fr->hello, hello, ELA_MAX_APP_MESSAGE_LEN);
 
-        send_async_work(FRIEND_REQUEST, get_FriendFequestArgs, fr, context);
+        send_async_work(FRIEND_REQUEST, getFriendFequestArgs, fr, context);
     }
 
     //message_callback
     //invite_request_callback
-    static size_t get_MessageArgs(napi_env env, void *args, napi_value* argv) {
+    static size_t getMessageArgs(napi_env env, void *args, napi_value* argv) {
         MessageArgs* message = (MessageArgs*)args;
 
         napi_create_string_utf8(env, message->from, NAPI_AUTO_LENGTH, &argv[0]);
@@ -296,7 +359,7 @@ namespace elca {
         return 3;
     }
 
-    static void set_MessageCallback(int cb_no, const char *from,
+    static void setMessageCallback(int cb_no, const char *from,
                                 const char *data, size_t len, void *context) {
         MessageArgs* message = nullptr;
         HEAP_ALLOC_VOID(message, MessageArgs, 1);
@@ -304,22 +367,22 @@ namespace elca {
         if (data) strncpy(message->data, data, ELA_MAX_APP_MESSAGE_LEN);
         message->len = len;
 
-        send_async_work(cb_no, get_MessageArgs, message, context);
+        send_async_work(cb_no, getMessageArgs, message, context);
     }
 
     static void friend_message_callback(ElaCarrier *w, const char *from,
                                 const char *msg, size_t len, void *context) {
 
-        set_MessageCallback(FRIEND_MESSAGE, from, msg, len, context);
+        setMessageCallback(FRIEND_MESSAGE, from, msg, len, context);
     }
 
     static void invite_request_callback(ElaCarrier *w, const char *from,
                                         const char *data, size_t len, void *context) {
-        set_MessageCallback(FRIEND_INVITE, from, data, len, context);
+        setMessageCallback(FRIEND_INVITE, from, data, len, context);
     }
 
     //friend_invite_response_callback
-    static size_t get_FriendInviteResponseArgs(napi_env env, void *args, napi_value* argv) {
+    static size_t getFriendInviteResponseArgs(napi_env env, void *args, napi_value* argv) {
         FriendInviteResponseArgs* response = (FriendInviteResponseArgs*)args;
 
         napi_create_string_utf8(env, response->from, NAPI_AUTO_LENGTH, &argv[0]);
@@ -342,28 +405,194 @@ namespace elca {
         response->status = status;
         response->len = len;
 
-        send_async_work(FRIEND_INVITE_RESPONSE, get_FriendInviteResponseArgs, response, context);
+        send_async_work(FRIEND_INVITE_RESPONSE, getFriendInviteResponseArgs, response, context);
+    }
+
+    //session_request_callback
+    static size_t getSessionRequestArgs(napi_env env, void *args, napi_value* argv) {
+        SessionRequestArgs *session = (SessionRequestArgs*)args;
+        napi_create_string_utf8(env, session->from, NAPI_AUTO_LENGTH, &argv[0]);
+        napi_create_string_utf8(env, session->sdp, NAPI_AUTO_LENGTH, &argv[1]);
+
+        return 2;
+    }
+
+    void session_request_callback(ElaCarrier *w, const char *from,
+                const char *sdp, size_t len, void *context) {
+
+        SessionRequestArgs* session = nullptr;
+        HEAP_ALLOC_VOID(session, SessionRequestArgs, 1);
+        if (from) strncpy(session->from, from, ELA_MAX_ID_LEN);
+        if (sdp) strncpy(session->sdp, sdp, ELA_MAX_APP_MESSAGE_LEN);
+
+        send_async_work(SESSION_REQUEST, getSessionRequestArgs, session, context);
+    }
+
+//----- session callbaks ---------------------------------------------------------
+    typedef struct _SessionRequestCompleteArgs {
+        int32_t status;
+        char reason[ELA_MAX_APP_MESSAGE_LEN + 1];
+        char sdp[ELA_MAX_APP_MESSAGE_LEN + 1];
+    } SessionRequestCompleteArgs;
+
+    typedef struct _StreamDataArgs {
+        void* data;
+        size_t len;
+    } StreamDataArgs;
+
+    typedef struct _ChannelDataArgs {
+        int32_t id;
+        void* data;
+        size_t len;
+    } ChannelDataArgs;
+
+    typedef struct _ChannelOpenArgs {
+        int32_t id;
+        char cookie[ELA_MAX_APP_MESSAGE_LEN + 1];
+    } ChannelOpenArgs;
+
+    typedef struct _ChannelCloseArgs {
+        int32_t id;
+        uint32_t reason;
+    } ChannelCloseArgs;
+
+    //session_request_complete_callback
+    static size_t getSessionRequestCompleteArgs(napi_env env, void *args, napi_value* argv) {
+        SessionRequestCompleteArgs *session = (SessionRequestCompleteArgs*)args;
+        napi_create_uint32(env, session->status, &argv[0]);
+        napi_create_string_utf8(env, session->reason, NAPI_AUTO_LENGTH, &argv[1]);
+        napi_create_string_utf8(env, session->sdp, NAPI_AUTO_LENGTH, &argv[2]);
+
+        return 3;
+    }
+
+    void session_request_complete_callback(ElaSession *ws, int status,
+                    const char *reason, const char *sdp, size_t len, void *context) {
+
+        SessionRequestCompleteArgs* session = nullptr;
+        HEAP_ALLOC_VOID(session, SessionRequestCompleteArgs, 1);
+        if (reason) strncpy(session->reason, reason, ELA_MAX_APP_MESSAGE_LEN);
+        if (sdp) strncpy(session->sdp, sdp, ELA_MAX_APP_MESSAGE_LEN);
+        session->status = status;
+
+        send_async_work(SESSION_REQUEST_COMPLETE, getSessionRequestCompleteArgs, session, context);
+    }
+
+    //state_changed
+    static size_t getSataChangedArgs(napi_env env, void *args, napi_value* argv) {
+        int32_t state = *(int32_t*)args;
+        napi_create_int32(env, state, argv);
+        return 1;
+    }
+
+    static void state_changed(ElaSession *ws, int stream, ElaStreamState state, void *context) {
+        int* args = nullptr;
+        HEAP_ALLOC_VOID(args, int, 1);
+        *args = (int)state;
+
+        send_async_work(STATE_CHANGED, getSataChangedArgs, args, context);
+    }
+
+    //stream_data
+    static size_t getStreamDataArgs(napi_env env, void *args, napi_value* argv) {
+        StreamDataArgs* dataArgs = (StreamDataArgs*)args;
+        void *data;
+        napi_create_buffer_copy(env, dataArgs->len, dataArgs->data, &data, &argv[0]);
+        free(dataArgs->data);
+        return 1;
+    }
+
+    static void stream_data(ElaSession *ws, int stream, const void *data,
+                            size_t len, void *context) {
+        if (!data || len < 1) return;
+
+        StreamDataArgs* dataArgs = nullptr;
+        HEAP_ALLOC_VOID(dataArgs, StreamDataArgs, 1);
+        HEAP_ALLOC_VOID(dataArgs->data, char, len);
+        memcpy(dataArgs->data, data, len);
+        dataArgs->len = len;
+
+        send_async_work(STREAM_DATA, getStreamDataArgs, dataArgs, context);
+    }
+
+    //channel_data
+    static size_t getChannelDataArgs(napi_env env, void *args, napi_value* argv) {
+        ChannelDataArgs* dataArgs = (ChannelDataArgs*)args;
+        void *data;
+        napi_create_int32(env, dataArgs->id, &argv[0]);
+        napi_create_buffer_copy(env, dataArgs->len, dataArgs->data, &data, &argv[1]);
+        free(dataArgs->data);
+        return 2;
+    }
+
+    bool channel_data(ElaSession *ws, int stream, int channel,
+                        const void *data, size_t len, void *context) {
+        if (!data || len < 1) return true;
+
+        ChannelDataArgs* dataArgs = nullptr;
+        HEAP_ALLOC(dataArgs, ChannelDataArgs, 1, true);
+        HEAP_ALLOC(dataArgs->data, char, len, true);
+        memcpy(dataArgs->data, data, len);
+        dataArgs->len = len;
+        dataArgs->id = channel;
+
+        send_async_work(CHANNEL_DATA, getChannelDataArgs, dataArgs, context);
+        return true;
+    }
+
+    //channel_open
+    static size_t getChannelOpenArgs(napi_env env, void *args, napi_value* argv) {
+        ChannelOpenArgs* channelArgs = (ChannelOpenArgs*)args;
+        napi_create_string_utf8(env, channelArgs->cookie, NAPI_AUTO_LENGTH, &argv[0]);
+        return 1;
+    }
+
+    bool channel_open(ElaSession *ws, int stream, int channel,
+                        const char *cookie, void *context) {
+        ChannelOpenArgs* channelArgs = nullptr;
+        HEAP_ALLOC(channelArgs, ChannelOpenArgs, 1, true);
+        if (cookie) strncpy(channelArgs->cookie, cookie, ELA_MAX_APP_MESSAGE_LEN);
+
+        send_async_work(CHANNEL_OPEN, getChannelOpenArgs, channelArgs, context);
+        return true;
+    }
+
+    //channel_close
+    static size_t getChannelCloseArgs(napi_env env, void *args, napi_value* argv) {
+        ChannelCloseArgs* channelArgs = (ChannelCloseArgs*)args;
+        napi_create_int32(env, channelArgs->id, &argv[0]);
+        napi_create_int32(env, channelArgs->reason, &argv[1]);
+        return 2;
+    }
+
+    void channel_close(ElaSession *ws, int stream, int channel,
+                        CloseReason reason, void *context) {
+        ChannelCloseArgs* channelArgs = nullptr;
+        HEAP_ALLOC_VOID(channelArgs, ChannelCloseArgs, 1);
+        channelArgs->id = channel;
+        channelArgs->reason = reason;
+
+        send_async_work(CHANNEL_DATA, getChannelCloseArgs, channelArgs, context);
+    }
+
+    //channel_opened
+    void channel_opened(ElaSession *ws, int stream, int channel, void *context) {
+        setIntValueCallback(CHANNEL_OPENED, channel, context);
+    }
+
+    //channel_pending
+    void channel_pending(ElaSession *ws, int stream, int channel, void *context) {
+        setIntValueCallback(CHANNEL_PENDING, channel, context);
+    }
+
+    //channel_resume
+    void channel_resume(ElaSession *ws, int stream, int channel, void *context) {
+        setIntValueCallback(CHANNEL_RESUME, channel, context);
     }
 
 //--------------------------------------------------------------------------------
 
-    const char* cb_name[] = {
-        "idle",
-        "connectionStatus",
-        "friendsList",
-        "friendConnection",
-        "friendInfo",
-        "friendPresence",
-        "friendRequest",
-        "friendAdded",
-        "friendRemoved",
-        "friendMessage",
-        "friendInvite",
-        "friendsIterate",
-        "friendInviteResponse"
-    };
-
-    void set_NativeCallbacks(ElaCallbacks* callbacks) {
+    void setCarrierNativeCallbacks(ElaCallbacks* callbacks) {
         memset(callbacks, 0, sizeof(ElaCallbacks));
         callbacks->idle = idle_callback;
         callbacks->connection_status = connection_callback;
@@ -378,7 +607,19 @@ namespace elca {
         callbacks->friend_invite = invite_request_callback;
     }
 
-    void delete_CallbackHandle(napi_env env, int cb_no, Elca *elca) {
+    void setStreamNativeCallbacks(ElaStreamCallbacks* callbacks) {
+        memset(callbacks, 0, sizeof(ElaStreamCallbacks));
+        callbacks->state_changed = state_changed;
+        callbacks->stream_data = stream_data;
+        callbacks->channel_open = channel_open;
+        callbacks->channel_opened = channel_opened;
+        callbacks->channel_data = channel_data;
+        callbacks->channel_pending = channel_pending;
+        callbacks->channel_resume = channel_resume;
+        callbacks->channel_close = channel_close;
+    }
+
+    void deleteCallbackHandle(napi_env env, int cb_no, Elca *elca) {
         if (elca->handle[cb_no]) {
             napi_delete_reference(env, elca->handle[cb_no]);
             elca->handle[cb_no] = nullptr;
@@ -387,7 +628,7 @@ namespace elca {
         elca->context[cb_no] = nullptr;
     }
 
-    void set_CallbackHandle(napi_env env, napi_value callback, napi_value context,
+    void setCallbackHandle(napi_env env, napi_value callback, napi_value context,
                                     int cb_no, Elca *elca) {
         napi_status status;
         napi_valuetype valuetype;
@@ -397,7 +638,7 @@ namespace elca {
         status = napi_typeof(env, callback, &valuetype);
         CHECK_STATUS;
 
-        delete_CallbackHandle(env, cb_no, elca);
+        deleteCallbackHandle(env, cb_no, elca);
 
         if (valuetype != napi_function) {
             return;
@@ -409,40 +650,47 @@ namespace elca {
         elca->context[cb_no] = context;
     }
 
-    static void set_CallbackHandleByProperty(napi_env env, napi_value callbacks,
-                                        napi_value context, int cb_no, Elca *elca) {
+    static void setCallbackHandleByProperty(napi_env env, napi_value callbacks,
+                                        napi_value context, const char* name, int cb_no, Elca *elca) {
         napi_status status;
         napi_value callback = nullptr;
 
-        status = napi_get_named_property(env, callbacks, cb_name[cb_no], &callback);
+        status = napi_get_named_property(env, callbacks, name, &callback);
         if(status != napi_ok || !callback) {
             return;
         }
 
-        return set_CallbackHandle(env, callback, context, cb_no, elca);
+        return setCallbackHandle(env, callback, context, cb_no, elca);
     }
 
-    void set_CallbackFuntions(napi_env env, napi_value callbacks, napi_value context, Elca *elca) {
+    void setCallbackFuntions(napi_env env, napi_value callbacks, napi_value context, Elca *elca) {
         napi_status status;
         napi_valuetype valuetype;
+        int count;
 
         status = napi_typeof(env, callbacks, &valuetype);
         CHECK_STATUS;
 
         if (valuetype != napi_object) return;
 
-        for (int i = 0; i < CALLBACK_COUNT; i++) {
-            set_CallbackHandleByProperty(env, callbacks, context, i, elca);
+        const char** cb_name = getCallbackNamesAndCount(elca, &count);
+
+        for (int i = 0; i < count; i++) {
+            setCallbackHandleByProperty(env, callbacks, context, cb_name[i], i, elca);
         }
     }
 
 //-----------------------------------------------------------------------
 
-    static void set_CallbackHandleByName(napi_env env, const char* name,
+
+    static void setCallbackHandleByName(napi_env env, const char* name,
                                         napi_value callback, napi_value context, Elca *elca) {
-        for (int i = 0; i < CALLBACK_COUNT; i++) {
+        int count;
+        const char** cb_name = getCallbackNamesAndCount(elca, &count);
+
+        for (int i = 0; i < count; i++) {
             if (!strcmp(name, cb_name[i])) {
-                return set_CallbackHandle(env, callback, context, i, elca);
+                return setCallbackHandle(env, callback, context, i, elca);
             }
         }
     }
@@ -458,12 +706,9 @@ namespace elca {
         napi_value args[3];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 2) {
-            log_err(env, "elca_event_on: Wrong number of arguments");
-            return nullptr;
-        }
+        CHECK_STATUS_AND_ARGC("on", 2, nullptr);
+        CHECK_ELACARRIER_PTR(value_false);
 
-        if (!elca || !elca->elcarrier) return value_false;
         if (argc > 2) context = args[2];
 
         status = napi_typeof(env, args[0], &valuetype);
@@ -472,23 +717,22 @@ namespace elca {
         status = napi_get_value_string_utf8(env, args[0], name, MAX_EVENT_NAME_LEN, &len);
         if (status != napi_ok) return nullptr;
 
-        set_CallbackHandleByName(env, name, args[1], context, elca);
+        setCallbackHandleByName(env, name, args[1], context, elca);
         return nullptr;
     }
 
-    void create_CallBackFunctions(napi_env env, napi_value carrier, Elca *elca) {
+    void createOnFunctions(napi_env env, napi_value object, Elca *elca) {
         napi_status status;
-        napi_value fn[1];
-        memset(fn, 0, sizeof(napi_value) * 1);
+        napi_value fn;
 
-        napi_create_function(env, nullptr, 0, elca_event_on, (void*)elca, &fn[0]);
+        napi_create_function(env, nullptr, 0, elca_event_on, (void*)elca, &fn);
 
         // Set the properties
         napi_property_descriptor descriptors[] = {
-            { "on", NULL, 0, 0, 0, fn[0], napi_default, 0 },
+            { "on", NULL, 0, 0, 0, fn, napi_default, 0 },
         };
 
-        status = napi_define_properties(env, carrier,
+        status = napi_define_properties(env, object,
                                         sizeof(descriptors) / sizeof(descriptors[0]),
                                         descriptors);
         CHECK_STATUS;

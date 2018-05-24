@@ -27,13 +27,22 @@
 
 namespace elca {
 
+    void createConstants(napi_env env, napi_value exports);
+    void createUtilityFunctions(napi_env env, napi_value carrier);
+
+    void createOnFunctions(napi_env env, napi_value object, Elca *elca);
+    void createNodeInfoFunctions(napi_env env, napi_value carrier, Elca *elca);
+    void createFriendFunctions(napi_env env, napi_value carrier, Elca *elca);
+    void createSessionFunctions(napi_env env, napi_value carrier, Elca *elca);
+
+
     #define ANSI_RESET "\033[0m"
     #define ANSI_RED   "\033[31m"
 
     void log_info(const char *format, ...) {
         va_list args;
 
-        printf("Info:");
+        printf("Info: ");
         va_start(args, format);
         vprintf(format, args);
         va_end(args);
@@ -54,7 +63,7 @@ namespace elca {
         }
 
         printf("%s", red_color);
-        printf("Error:");
+        printf("Error: ");
         va_start(args, format);
         vsnprintf(buf, 1024, format, args);
         va_end(args);
@@ -86,10 +95,10 @@ namespace elca {
         Elca* elca = nullptr;
 
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, (void**)&elca);
-        if (elca && elca->elcarrier) {
+        if (elca && elca->elacarrier) {
             uv_work_t* work = nullptr;
             HEAP_ALLOC(work, uv_work_t, 1, nullptr);
-            work->data = elca->elcarrier;
+            work->data = elca->elacarrier;
             uv_queue_work(uv_default_loop(), work, run_Execute, run_Completed);
         }
         return nullptr;
@@ -98,12 +107,12 @@ namespace elca {
     static napi_value elca_kill(napi_env env, napi_callback_info info) {
         Elca* elca = nullptr;
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, (void**)&elca);
-        if (elca && elca->elcarrier) {
-            ela_kill(elca->elcarrier);
+        if (elca && elca->elacarrier) {
+            ela_kill(elca->elacarrier);
             for (int i = 0; i < CALLBACK_COUNT; i++) {
-                 delete_CallbackHandle(env, i, elca);
+                 deleteCallbackHandle(env, i, elca);
             }
-            napi_delete_reference(env, elca->carrier);
+            napi_delete_reference(env, elca->object);
             free(elca);
         }
         return nullptr;
@@ -115,8 +124,8 @@ namespace elca {
         bool ret = false;
 
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, (void**)&elca);
-        if (elca && elca->elcarrier) {
-            ret = ela_is_ready(elca->elcarrier);
+        if (elca && elca->elacarrier) {
+            ret = ela_is_ready(elca->elacarrier);
         }
 
         napi_get_boolean(env, ret, &result);
@@ -124,7 +133,7 @@ namespace elca {
     }
 
 //------------------------------------------------------------------------------
-    static void create_InstanceFunctions(napi_env env, napi_value carrier, Elca *elca) {
+    static void createInstanceFunctions(napi_env env, napi_value carrier, Elca *elca) {
         napi_status status;
         napi_value fn[3];
         memset(fn, 0, sizeof(napi_value) * 3);
@@ -156,53 +165,50 @@ namespace elca {
         ElaCarrier *carrier;
 
         napi_status status;
-        napi_value obj = nullptr;
+        napi_value obj = value_null;
         napi_value context = nullptr;
 
         size_t argc = 3;
         napi_value args[3];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-        if(status != napi_ok || argc < 2) {
-            log_err(env, "elca_new: Wrong number of arguments");
-            return nullptr;
-        }
+        CHECK_STATUS_AND_ARGC("createObject", 2, value_null);
 
         if (argc > 2) context = args[2];
 
         memset(&opts, 0, sizeof(ElaOptions));
         opts.persistent_location = buf;
-        if (get_OptionsValue(env, args[0], &opts, &bootstraps_buf) == nullptr) {
+        if (getOptionsValue(env, args[0], &opts, &bootstraps_buf) == nullptr) {
             goto EIXT;
         }
 
-        HEAP_ALLOC(elca, Elca, 1, nullptr);
+        HEAP_ALLOC(elca, Elca, 1, value_null);
+        elca->type = CARRIER;
 
-        set_CallbackFuntions(env, args[1], context, elca);
-        set_NativeCallbacks(&callbacks);
+        setCallbackFuntions(env, args[1], context, elca);
+        setCarrierNativeCallbacks(&callbacks);
 
         carrier = ela_new(&opts, &callbacks, elca);
         if (!carrier) {
             log_err(env, "Run ela_new error:0x%X", ela_get_error());
-            obj = nullptr;
             goto EIXT;
         }
 
         status = napi_create_object(env, &obj);
         if (status != napi_ok || !obj) {
-            obj = nullptr;
             goto EIXT;
         }
 
-        elca->elcarrier = carrier;
+        elca->elacarrier = carrier;
         elca->env = env;
-        status = napi_create_reference(env, obj, 1, &elca->carrier);
+        status = napi_create_reference(env, obj, 1, &elca->object);
         CHECK_STATUS;
 
-        create_InstanceFunctions(env, obj, elca);
-        create_CallBackFunctions(env, obj, elca);
-        create_NodeInfoFunctions(env, obj, elca);
-        create_FriendFunctions(env, obj, elca);
+        createInstanceFunctions(env, obj, elca);
+        createOnFunctions(env, obj, elca);
+        createNodeInfoFunctions(env, obj, elca);
+        createFriendFunctions(env, obj, elca);
+        createSessionFunctions(env, obj, elca);
 
 EIXT:
         if (!obj && elca) free(elca);
@@ -222,8 +228,8 @@ EIXT:
         status = napi_set_named_property(env, exports, "createObject", fn);
         if (status != napi_ok) return nullptr;
 
-        create_Constants(env, exports);
-        create_UtilityFunctions(env, exports);
+        createConstants(env, exports);
+        createUtilityFunctions(env, exports);
 
         return exports;
     }

@@ -41,17 +41,14 @@ namespace elca {
         napi_value args[2];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 1) {
-            log_err(env, "elca_get_friends: Wrong number of arguments");
-            return nullptr;
-        }
+        CHECK_STATUS_AND_ARGC("getFriends", 1, value_false);
 
-        if (!elca || !elca->elcarrier) return nullptr;
+        if (!elca || !elca->elacarrier) return value_false;
         if (argc > 1) context = args[1];
 
-        set_CallbackHandle(env, args[0], context, FRIENDS_ITERATE, elca);
+        setCallbackHandle(env, args[0], context, FRIENDS_ITERATE, elca);
 
-        ret = ela_get_friends(elca->elcarrier, friends_iterate_callback, elca);
+        ret = ela_get_friends(elca->elacarrier, friends_iterate_callback, elca);
         if (ret == -1) {
             log_err(env, "Run ela_get_friends error:0x%X", ela_get_error());
             return value_false;
@@ -71,26 +68,23 @@ namespace elca {
         napi_value args[1];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 1) {
-            log_err(env, "elca_get_friends: Wrong number of arguments");
-            return nullptr;
-        }
+        CHECK_STATUS_AND_ARGC("getFriendInfo", 1, value_null);
 
-        if (!elca || !elca->elcarrier) return value_false;
+        if (!elca || !elca->elacarrier) return value_null;
 
         status = napi_typeof(env, args[0], &valuetype);
-        if (status != napi_ok || valuetype != napi_string) return nullptr;
+        if (status != napi_ok || valuetype != napi_string) return value_null;
 
         status = napi_get_value_string_utf8(env, args[0], friend_id, ELA_MAX_ID_LEN + 1, &len);
-        if (status != napi_ok) return nullptr;
+        if (status != napi_ok) return value_null;
 
-        ret = ela_get_friend_info(elca->elcarrier, friend_id, &friend_info);
+        ret = ela_get_friend_info(elca->elacarrier, friend_id, &friend_info);
         if (ret == -1) {
             log_err(env, "Run ela_get_friend_info error:0x%X", ela_get_error());
-            return nullptr;
+            return value_null;
         }
         else {
-            return create_FriendInfoJsObj(env, &friend_info);
+            return createFriendInfoJsObj(env, &friend_info);
         }
     }
 
@@ -106,12 +100,9 @@ namespace elca {
         napi_value args[2];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 2) {
-            log_err(env, "elca_get_friends: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("setFriendLabel", 2, value_false);
 
-        if (!elca || !elca->elcarrier) return value_false;
+        if (!elca || !elca->elacarrier) return value_false;
 
         status = napi_typeof(env, args[0], &valuetype);
         if (status != napi_ok || valuetype != napi_string) return value_false;
@@ -123,7 +114,7 @@ namespace elca {
         status = napi_get_value_string_utf8(env, args[1], label, ELA_MAX_USER_NAME_LEN + 1, &len);
         if (status != napi_ok) return value_false;
 
-        ret = ela_set_friend_label(elca->elcarrier, friend_id, label);
+        ret = ela_set_friend_label(elca->elacarrier, friend_id, label);
         if (ret == -1) {
             log_err(env, "Run ela_set_friend_label error:0x%X", ela_get_error());
             return value_false;
@@ -144,19 +135,16 @@ namespace elca {
         napi_value args[1];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 1) {
-            log_err(env, "elca_is_friend: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("isFriend", 1, value_false);
 
-        if (!elca || !elca->elcarrier) return value_false;
+        if (!elca || !elca->elacarrier) return value_false;
 
         status = napi_typeof(env, args[0], &valuetype);
         if (status != napi_ok || valuetype != napi_string) return value_false;
         status = napi_get_value_string_utf8(env, args[0], user_id, ELA_MAX_ID_LEN + 1, &len);
         if (status != napi_ok) return value_false;
 
-        ret = ela_is_friend(elca->elcarrier, user_id);
+        ret = ela_is_friend(elca->elacarrier, user_id);
         if (ret) {
             return value_true;
         }
@@ -177,12 +165,9 @@ namespace elca {
         napi_value args[2];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 2) {
-            log_err(env, "elca_add_friend: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("addFriend", 2, value_false);
 
-        if (!elca || !elca->elcarrier) return value_false;
+        if (!elca || !elca->elacarrier) return value_false;
 
         status = napi_typeof(env, args[0], &valuetype);
         if (status != napi_ok || valuetype != napi_string) return value_false;
@@ -194,7 +179,7 @@ namespace elca {
         status = napi_get_value_string_utf8(env, args[1], hello, ELA_MAX_APP_MESSAGE_LEN + 1, &len);
         if (status != napi_ok) return value_false;
 
-        ret = ela_add_friend(elca->elcarrier, address, hello);
+        ret = ela_add_friend(elca->elacarrier, address, hello);
         if (ret == -1) {
             log_err(env, "Run ela_add_friend error:0x%X", ela_get_error());
             return value_false;
@@ -215,19 +200,16 @@ namespace elca {
         napi_value args[1];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 1) {
-            log_err(env, "elca_accept_friend: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("acceptFriend", 1, value_false);
 
-        if (!elca || !elca->elcarrier) return value_false;
+        if (!elca || !elca->elacarrier) return value_false;
 
         status = napi_typeof(env, args[0], &valuetype);
         if (status != napi_ok || valuetype != napi_string) return value_false;
         status = napi_get_value_string_utf8(env, args[0], user_id, ELA_MAX_ID_LEN + 1, &len);
         if (status != napi_ok) return value_false;
 
-        ret = ela_accept_friend(elca->elcarrier, user_id);
+        ret = ela_accept_friend(elca->elacarrier, user_id);
         if (ret == -1) {
             log_err(env, "Run ela_accept_friend error:0x%X", ela_get_error());
             return value_false;
@@ -248,19 +230,16 @@ namespace elca {
         napi_value args[1];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 1) {
-            log_err(env, "elca_remove_friend: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("removeFriend", 1, value_false);
 
-        if (!elca || !elca->elcarrier) return value_false;
+        if (!elca || !elca->elacarrier) return value_false;
 
         status = napi_typeof(env, args[0], &valuetype);
         if (status != napi_ok || valuetype != napi_string) return value_false;
         status = napi_get_value_string_utf8(env, args[0], user_id, ELA_MAX_ID_LEN + 1, &len);
         if (status != napi_ok) return value_false;
 
-        ret = ela_remove_friend(elca->elcarrier, user_id);
+        ret = ela_remove_friend(elca->elacarrier, user_id);
         if (ret == -1) {
             log_err(env, "Run ela_remove_friend error:0x%X", ela_get_error());
             return value_false;
@@ -282,12 +261,9 @@ namespace elca {
         napi_value args[2];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 2) {
-            log_err(env, "elca_send_friend_message: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("sendFriendMessage", 2, value_false);
 
-        if (!elca || !elca->elcarrier) return value_false;
+        if (!elca || !elca->elacarrier) return value_false;
 
         //get user_id
         status = napi_typeof(env, args[0], &valuetype);
@@ -301,7 +277,7 @@ namespace elca {
         status = napi_get_value_string_utf8(env, args[1], msg, ELA_MAX_APP_MESSAGE_LEN + 1, &len);
         if (status != napi_ok) return value_false;
 
-        ret = ela_send_friend_message(elca->elcarrier, user_id, msg, len);
+        ret = ela_send_friend_message(elca->elacarrier, user_id, msg, len);
         if (ret == -1) {
             log_err(env, "Run ela_send_friend_message error:0x%X", ela_get_error());
             return value_false;
@@ -326,12 +302,9 @@ namespace elca {
         napi_value args[4];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 3) {
-            log_err(env, "elca_invite_friend: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("initeFriend", 3, value_false);
 
-        if (!elca || !elca->elcarrier) return value_false;
+        if (!elca || !elca->elacarrier) return value_false;
         if (argc > 3) context = args[3];
 
         //get to
@@ -347,9 +320,9 @@ namespace elca {
         if (status != napi_ok) return value_false;
 
         //get callback
-        set_CallbackHandle(env, args[2], context, FRIEND_INVITE_RESPONSE, elca);
+        setCallbackHandle(env, args[2], context, FRIEND_INVITE_RESPONSE, elca);
 
-        ret = ela_invite_friend(elca->elcarrier, user_id, data, len, friend_invite_response_callback, elca);
+        ret = ela_invite_friend(elca->elacarrier, user_id, data, len, friend_invite_response_callback, elca);
         if (ret == -1) {
             log_err(env, "Run ela_invite_friend error:0x%X", ela_get_error());
             return value_false;
@@ -371,12 +344,9 @@ namespace elca {
         napi_value args[4];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 4) {
-            log_err(env, "elca_reply_friend_invite: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("replyFriendInvite", 4, value_false);
 
-        if (!elca || !elca->elcarrier) return value_false;
+        if (!elca || !elca->elacarrier) return value_false;
 
         //get user_id
         status = napi_typeof(env, args[0], &valuetype);
@@ -409,7 +379,7 @@ namespace elca {
             msg[0] ='\0';
         }
 
-        ret = ela_reply_friend_invite(elca->elcarrier, user_id, reply_status, reason, msg, len);
+        ret = ela_reply_friend_invite(elca->elacarrier, user_id, reply_status, reason, msg, len);
         if (ret == -1) {
             log_err(env, "Run ela_reply_friend_invite error:0x%X", ela_get_error());
             return value_false;
@@ -417,7 +387,7 @@ namespace elca {
         else return value_true;
     }
 
-    void create_FriendFunctions(napi_env env, napi_value carrier, Elca *elca) {
+    void createFriendFunctions(napi_env env, napi_value carrier, Elca *elca) {
         napi_status status;
         napi_value fn[10];
         memset(fn, 0, sizeof(napi_value) * 10);

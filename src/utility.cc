@@ -28,7 +28,7 @@ namespace elca {
     static napi_value elca_get_version(napi_env env, napi_callback_info info) {
         napi_value result;
         const char* ret = ela_get_version();
-        if (!ret) return nullptr;
+        if (!ret) return value_null;
         napi_create_string_utf8(env, ret, NAPI_AUTO_LENGTH, &result);
         return result;
     }
@@ -43,10 +43,7 @@ namespace elca {
         napi_value args[2];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-        if(status != napi_ok || argc < 1) {
-            log_err(env, "elca_address_is_valid: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("addressIsValid", 1, value_false);
 
         status = napi_typeof(env, args[1], &valuetype);
         if (status != napi_ok || valuetype != napi_string) return value_false;
@@ -73,10 +70,7 @@ namespace elca {
         napi_value args[2];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-        if(status != napi_ok || argc < 1) {
-            log_err(env, "elca_log_init: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("logInit", 1, value_false);
 
         status = napi_typeof(env, args[0], &valuetype);
         if (status != napi_ok || valuetype != napi_number) return value_false;
@@ -106,10 +100,7 @@ namespace elca {
         napi_value args[1];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-        if(status != napi_ok || argc < 1) {
-            log_err(env, "elca_id_is_valid: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("idIsValid", 1, value_false);
 
         status = napi_typeof(env, args[0], &valuetype);
         if (status != napi_ok || valuetype != napi_string) return value_false;
@@ -129,7 +120,7 @@ namespace elca {
         napi_value result;
 
         int ret = ela_get_error();
-        if (ret == -1) return nullptr;
+        if (ret == -1) return value_null;
         napi_create_uint32(env, ret, &result);
         return result;
     }
@@ -139,7 +130,7 @@ namespace elca {
         return nullptr;
     }
 
-    void create_UtilityFunctions(napi_env env, napi_value exports) {
+    void createUtilityFunctions(napi_env env, napi_value exports) {
         napi_status status;
         napi_value fn[6];
         memset(fn, 0, sizeof(napi_value) * 6);

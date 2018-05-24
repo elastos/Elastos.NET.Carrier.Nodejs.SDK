@@ -27,8 +27,9 @@ namespace elca {
     napi_value value_null = nullptr;
     napi_value value_false = nullptr;
     napi_value value_true = nullptr;
+    napi_value value_n1 = nullptr;
 
-    static char* get_StringProperty(napi_env env, napi_value obj, const char* name, char* buf, size_t len) {
+    static char* getStringProperty(napi_env env, napi_value obj, const char* name, char* buf, size_t len) {
         napi_value val;
         napi_valuetype valuetype;
         size_t size;
@@ -46,7 +47,7 @@ namespace elca {
         return nullptr;
     }
 
-    static bool get_BoolProperty(napi_env env, napi_value obj, const char* name) {
+    static bool getBoolProperty(napi_env env, napi_value obj, const char* name) {
         napi_value val;
         napi_valuetype valuetype;
         bool ret = false;
@@ -61,7 +62,7 @@ namespace elca {
         return ret;
     }
 
-    static uint32_t get_Uint32Property(napi_env env, napi_value obj, const char* name) {
+    static uint32_t getUint32Property(napi_env env, napi_value obj, const char* name) {
         napi_value val;
         napi_valuetype valuetype;
         uint32_t ret = 0;
@@ -86,22 +87,22 @@ namespace elca {
         if (valuetype != napi_object) return nullptr;
 
         //ipv4
-        if (get_StringProperty(env, obj, "ipv4", bootstraps_buf->ipv4, MAX_IPV4_ADDRESS_LEN)) {
+        if (getStringProperty(env, obj, "ipv4", bootstraps_buf->ipv4, MAX_IPV4_ADDRESS_LEN)) {
             bootstraps->ipv4 = bootstraps_buf->ipv4;
         }
 
         //ipv6
-        if (get_StringProperty(env, obj, "ipv6", bootstraps_buf->ipv6, MAX_IPV6_ADDRESS_LEN)) {
+        if (getStringProperty(env, obj, "ipv6", bootstraps_buf->ipv6, MAX_IPV6_ADDRESS_LEN)) {
             bootstraps->ipv6 = bootstraps_buf->ipv6;
         }
 
         //port
-        if (get_StringProperty(env, obj, "port", bootstraps_buf->port, MAX_PORT_LEN)) {
+        if (getStringProperty(env, obj, "port", bootstraps_buf->port, MAX_PORT_LEN)) {
             bootstraps->port = bootstraps_buf->port;
         }
 
         //public_key
-        if (get_StringProperty(env, obj, "publicKey", bootstraps_buf->public_key, MAX_PUBLIC_KEY_LEN)) {
+        if (getStringProperty(env, obj, "publicKey", bootstraps_buf->public_key, MAX_PUBLIC_KEY_LEN)) {
             bootstraps->public_key = bootstraps_buf->public_key;
         }
 
@@ -111,7 +112,7 @@ namespace elca {
         return bootstraps;
     }
 
-    ElaOptions *get_OptionsValue(napi_env env, napi_value obj, ElaOptions *opts, BootstrapBuf** bootstraps_buf) {
+    ElaOptions *getOptionsValue(napi_env env, napi_value obj, ElaOptions *opts, BootstrapBuf** bootstraps_buf) {
         napi_status status;
         napi_value val;
         napi_valuetype valuetype;
@@ -121,10 +122,10 @@ namespace elca {
         if (valuetype != napi_object) return nullptr;
 
         //udp_enabled
-        opts->udp_enabled = get_BoolProperty(env, obj, "udpEnabled");
+        opts->udp_enabled = getBoolProperty(env, obj, "udpEnabled");
 
         //persistent_location
-        get_StringProperty(env, obj, "persistentLocation", (char *)opts->persistent_location, 1024);
+        getStringProperty(env, obj, "persistentLocation", (char *)opts->persistent_location, 1024);
 
         //bootstraps
         status = napi_get_named_property(env, obj, "bootstraps", &val);
@@ -162,26 +163,26 @@ namespace elca {
         return opts;
     }
 
-    ElaUserInfo* get_UserInfoFromJsObj(napi_env env, napi_value obj, ElaUserInfo *info) {
+    ElaUserInfo* createUserInfoFromJsObj(napi_env env, napi_value obj, ElaUserInfo *info) {
         if (!obj || !info) {
             return nullptr;
         }
 
         memset(info, 0, sizeof(ElaUserInfo));
 
-        get_StringProperty(env, obj, "userId", info->userid, ELA_MAX_ID_LEN + 1);
-        get_StringProperty(env, obj, "name", info->name, ELA_MAX_USER_NAME_LEN + 1);
-        get_StringProperty(env, obj, "description", info->description, ELA_MAX_USER_DESCRIPTION_LEN + 1);
-        info->has_avatar = get_BoolProperty(env, obj, "hasAvatar");
-        get_StringProperty(env, obj, "gender", info->gender, ELA_MAX_GENDER_LEN + 1);
-        get_StringProperty(env, obj, "phone", info->phone, ELA_MAX_PHONE_LEN + 1);
-        get_StringProperty(env, obj, "email", info->email, ELA_MAX_EMAIL_LEN + 1);
-        get_StringProperty(env, obj, "region", info->region, ELA_MAX_REGION_LEN + 1);
+        getStringProperty(env, obj, "userId", info->userid, ELA_MAX_ID_LEN + 1);
+        getStringProperty(env, obj, "name", info->name, ELA_MAX_USER_NAME_LEN + 1);
+        getStringProperty(env, obj, "description", info->description, ELA_MAX_USER_DESCRIPTION_LEN + 1);
+        info->has_avatar = getBoolProperty(env, obj, "hasAvatar");
+        getStringProperty(env, obj, "gender", info->gender, ELA_MAX_GENDER_LEN + 1);
+        getStringProperty(env, obj, "phone", info->phone, ELA_MAX_PHONE_LEN + 1);
+        getStringProperty(env, obj, "email", info->email, ELA_MAX_EMAIL_LEN + 1);
+        getStringProperty(env, obj, "region", info->region, ELA_MAX_REGION_LEN + 1);
 
         return info;
     }
 
-    ElaFriendInfo* get_FriendInfoFromJsObj(napi_env env, napi_value obj, ElaFriendInfo *info) {
+    ElaFriendInfo* getFriendInfoFromJsObj(napi_env env, napi_value obj, ElaFriendInfo *info) {
         napi_status status;
         napi_value val;
         napi_valuetype valuetype;
@@ -194,18 +195,18 @@ namespace elca {
         if (status == napi_ok) {
             status = napi_typeof(env, obj, &valuetype);
             if (status == napi_ok || valuetype == napi_object) {
-                get_UserInfoFromJsObj(env, val, &info->user_info);
+                createUserInfoFromJsObj(env, val, &info->user_info);
             }
         }
 
-        get_StringProperty(env, obj, "label", info->label, ELA_MAX_USER_NAME_LEN + 1);
-        info->status = (ElaConnectionStatus)get_Uint32Property(env, obj, "status");
-        info->presence = (ElaPresenceStatus)get_Uint32Property(env, obj, "presence");
+        getStringProperty(env, obj, "label", info->label, ELA_MAX_USER_NAME_LEN + 1);
+        info->status = (ElaConnectionStatus)getUint32Property(env, obj, "status");
+        info->presence = (ElaPresenceStatus)getUint32Property(env, obj, "presence");
 
         return info;
     }
 
-    napi_value create_UserInfoJsObj(napi_env env, const ElaUserInfo *info) {
+    napi_value createUserInfoJsObj(napi_env env, const ElaUserInfo *info) {
         napi_value userid, name, description, has_avatar, gender, phone, email, region;
         napi_status status;
 
@@ -261,7 +262,7 @@ namespace elca {
         return obj;
     }
 
-    napi_value create_FriendInfoJsObj(napi_env env, const ElaFriendInfo *info) {
+    napi_value createFriendInfoJsObj(napi_env env, const ElaFriendInfo *info) {
         napi_value user_info, label, connection_status, presence;
         napi_status status;
 
@@ -269,7 +270,7 @@ namespace elca {
             return value_null;
         }
 
-        user_info = create_UserInfoJsObj(env, &info->user_info);
+        user_info = createUserInfoJsObj(env, &info->user_info);
 
         status = napi_create_string_utf8(env, info->label, NAPI_AUTO_LENGTH , &label);
         CHECK_STATUS;
@@ -300,36 +301,196 @@ namespace elca {
         return obj;
     }
 
-//-----------------------------------------------------------------------------
+    napi_value create_AddressInfoJsObj(napi_env env, const ElaAddressInfo *info) {
+        napi_value type, addr, port, related_addr, related_port;
+        napi_status status;
 
-    void create_Constants(napi_env env, napi_value exports) {
-        napi_value value_0, value_1, value_2, value_3;
+        if (!info) {
+            return value_null;
+        }
+
+        status = napi_create_int32(env, info->type , &type);
+        CHECK_STATUS;
+
+        status = napi_create_string_utf8(env, info->addr, NAPI_AUTO_LENGTH , &addr);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, info->port , &port);
+        CHECK_STATUS;
+
+        status = napi_create_string_utf8(env, info->related_addr, NAPI_AUTO_LENGTH , &related_addr);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, info->related_port , &related_port);
+        CHECK_STATUS;
+
+        napi_value obj;
+        status = napi_create_object(env, &obj);
+        CHECK_STATUS;
+
+        // Set the properties
+        napi_property_descriptor descriptors[] = {
+            { "type", NULL, 0, 0, 0, type, napi_default, 0 },
+            { "address", NULL, 0, 0, 0, addr, napi_default, 0 },
+            { "port", NULL, 0, 0, 0, port, napi_default, 0 },
+            { "relatedAddress", NULL, 0, 0, 0, addr, napi_default, 0 },
+            { "relatedPort", NULL, 0, 0, 0, port, napi_default, 0 },
+        };
+
+        status = napi_define_properties(env, obj,
+                                        sizeof(descriptors) / sizeof(descriptors[0]),
+                                        descriptors);
+        CHECK_STATUS;
+
+        return obj;
+    }
+
+    napi_value createUserInfoFromJsObj(napi_env env, const ElaTransportInfo *info) {
+        napi_value topology, local, remote;
+        napi_status status;
+
+        if (!info) {
+            return value_null;
+        }
+
+        status = napi_create_int32(env, info->topology , &topology);
+        CHECK_STATUS;
+
+        local = create_AddressInfoJsObj(env, &info->local);
+        remote = create_AddressInfoJsObj(env, &info->remote);
+
+        napi_value obj;
+        status = napi_create_object(env, &obj);
+        CHECK_STATUS;
+
+        // Set the properties
+        napi_property_descriptor descriptors[] = {
+            { "topology", NULL, 0, 0, 0, topology, napi_default, 0 },
+            { "local", NULL, 0, 0, 0, local, napi_default, 0 },
+            { "remote", NULL, 0, 0, 0, remote, napi_default, 0 }
+        };
+
+        status = napi_define_properties(env, obj,
+                                        sizeof(descriptors) / sizeof(descriptors[0]),
+                                        descriptors);
+        CHECK_STATUS;
+
+        return obj;
+    }
+
+//-----------------------------------------------------------------------------
+    void addConstantsElement(napi_env env, napi_value exports, const char* name,
+            size_t property_count, napi_property_descriptor *descriptors) {
+        napi_value object;
+        napi_status status;
+
+        status = napi_create_object(env, &object);
+        CHECK_STATUS;
+
+        status = napi_define_properties(env, object, property_count, descriptors);
+        CHECK_STATUS;
+
+        status = napi_set_named_property(env, exports, name, object);
+        CHECK_STATUS;
+    }
+
+
+    void createConstants(napi_env env, napi_value exports) {
+        napi_value value_0, value_1, value_2, value_3, value_4, value_5, value_6, value_7;
+        napi_value value_8, value_0x10;
 
         napi_get_null(env, &value_null);
         napi_get_boolean(env, false, &value_false);
         napi_get_boolean(env, true, &value_true);
+        napi_create_int32(env, -1, &value_n1);
 
         napi_create_uint32(env, 0, &value_0);
         napi_create_uint32(env, 1, &value_1);
         napi_create_uint32(env, 2, &value_2);
         napi_create_uint32(env, 3, &value_3);
+        napi_create_uint32(env, 4, &value_4);
+        napi_create_uint32(env, 5, &value_5);
+        napi_create_uint32(env, 6, &value_6);
+        napi_create_uint32(env, 7, &value_7);
+        napi_create_uint32(env, 8, &value_8);
+        napi_create_uint32(env, 0x10, &value_0x10);
 
-        // Set the properties
         napi_property_descriptor descriptors[] = {
-            //PresenceStatus
-            { "PresenceStatus_None", NULL, 0, 0, 0, value_0, napi_default, 0 },
-            { "PresenceStatus_Away", NULL, 0, 0, 0, value_1, napi_default, 0 },
-            { "PresenceStatus_Busy", NULL, 0, 0, 0, value_2, napi_default, 0 },
-
-            //ConnectionStatus
-            { "ConnectionStatus_Connected", NULL, 0, 0, 0, value_0, napi_default, 0 },
-            { "ConnectionStatus_Disconnected", NULL, 0, 0, 0, value_1, napi_default, 0 },
-
+            { "0", NULL, 0, 0, 0, value_0, napi_default, 0 },
+            { "1", NULL, 0, 0, 0, value_1, napi_default, 0 },
+            { "2", NULL, 0, 0, 0, value_2, napi_default, 0 },
+            { "3", NULL, 0, 0, 0, value_3, napi_default, 0 },
+            { "4", NULL, 0, 0, 0, value_4, napi_default, 0 },
+            { "5", NULL, 0, 0, 0, value_5, napi_default, 0 },
+            { "6", NULL, 0, 0, 0, value_6, napi_default, 0 },
+            { "7", NULL, 0, 0, 0, value_7, napi_default, 0 },
         };
 
-        napi_define_properties(env, exports,
-                                    sizeof(descriptors) / sizeof(descriptors[0]),
-                                    descriptors);
+        //PresenceStatus
+        descriptors[0].utf8name = "NONE";
+        descriptors[1].utf8name = "AWAY";
+        descriptors[2].utf8name = "BUSY";
+        addConstantsElement(env, exports, "PresenceStatus", 3, descriptors);
+
+        //ConnectionStatus
+        descriptors[0].utf8name = "CONNECTED";
+        descriptors[1].utf8name = "DISCONNECTED";
+        addConstantsElement(env, exports, "ConnectionStatus", 2, descriptors);
+
+        //StreamType
+        descriptors[0].utf8name = "AUDIO";
+        descriptors[1].utf8name = "VIDEO";
+        descriptors[2].utf8name = "TEXT";
+        descriptors[3].utf8name = "APPLICATION";
+        descriptors[4].utf8name = "MESSAGE";
+        addConstantsElement(env, exports, "StreamType", 5, descriptors);
+
+        //StreamState
+        descriptors[0].utf8name = "RAW";
+        descriptors[1].utf8name = "INITIALIZED";
+        descriptors[2].utf8name = "TRANSPORT_READY";
+        descriptors[3].utf8name = "CONNECTING";
+        descriptors[4].utf8name = "CONNECTED";
+        descriptors[5].utf8name = "DEACTIVATED";
+        descriptors[6].utf8name = "CLOSED";
+        descriptors[7].utf8name = "FAILED";
+        addConstantsElement(env, exports, "StreamState", 7, descriptors + 1);
+
+        //CandidateType
+        descriptors[0].utf8name = "HOST";
+        descriptors[1].utf8name = "SERVE_RREFLEXIVE";
+        descriptors[2].utf8name = "PEER_REFLEXIVE";
+        descriptors[3].utf8name = "RELAYED";
+        addConstantsElement(env, exports, "CandidateType", 4, descriptors);
+
+        //NetworkTopology
+        descriptors[0].utf8name = "LAN";
+        descriptors[1].utf8name = "P2P";
+        descriptors[2].utf8name = "RELAYED";
+        addConstantsElement(env, exports, "NetworkTopology", 3, descriptors);
+
+        //PortForwardingProtocol
+        descriptors[1].utf8name = "TCP";
+        addConstantsElement(env, exports, "PortForwardingProtocol", 1, descriptors + 1);
+
+        //CloseReason
+        descriptors[0].utf8name = "NORMAL";
+        descriptors[1].utf8name = "TIMEOUT";
+        descriptors[2].utf8name = "ERROR";
+        addConstantsElement(env, exports, "CloseReason", 3, descriptors);
+
+        //StreamMode
+        descriptors[0].utf8name = "COMPRESS";
+        descriptors[0].value = value_1;
+        descriptors[1].utf8name = "PLAIN";
+        descriptors[1].value = value_2;
+        descriptors[2].utf8name = "RELIABLE";
+        descriptors[2].value = value_4;
+        descriptors[3].utf8name = "MULTIPLEXING";
+        descriptors[3].value = value_8;
+        descriptors[4].utf8name = "PORT_FORWARDING";
+        descriptors[4].value = value_0x10;
+        addConstantsElement(env, exports, "StreamMode", 5, descriptors);
     }
 
 } // namespace elca

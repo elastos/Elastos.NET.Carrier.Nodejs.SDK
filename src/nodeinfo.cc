@@ -32,14 +32,14 @@ namespace elca {
         napi_value result;
 
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, (void**)&elca);
-        if (elca && elca->elcarrier) {
-            ret = ela_get_address(elca->elcarrier, address, ELA_MAX_ADDRESS_LEN + 1);
-            if (!ret) return nullptr;
+        if (elca && elca->elacarrier) {
+            ret = ela_get_address(elca->elacarrier, address, ELA_MAX_ADDRESS_LEN + 1);
+            if (!ret) return value_null;
             napi_create_string_utf8(env, address, NAPI_AUTO_LENGTH, &result);
             return result;
         }
 
-        return nullptr;
+        return value_null;
     }
 
     static napi_value elca_get_nodeid(napi_env env, napi_callback_info info) {
@@ -49,14 +49,14 @@ namespace elca {
         napi_value result;
 
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, (void**)&elca);
-        if (elca && elca->elcarrier) {
-            ret = ela_get_nodeid(elca->elcarrier, nodeid, ELA_MAX_ID_LEN + 1);
-            if (!ret) return nullptr;
+        if (elca && elca->elacarrier) {
+            ret = ela_get_nodeid(elca->elacarrier, nodeid, ELA_MAX_ID_LEN + 1);
+            if (!ret) return value_null;
             napi_create_string_utf8(env, nodeid, NAPI_AUTO_LENGTH, &result);
             return result;
         }
 
-        return nullptr;
+        return value_null;
     }
 
     static napi_value elca_get_userid(napi_env env, napi_callback_info info) {
@@ -66,14 +66,14 @@ namespace elca {
         napi_value result;
 
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, (void**)&elca);
-        if (elca && elca->elcarrier) {
-            ret = ela_get_userid(elca->elcarrier, userid, ELA_MAX_ID_LEN + 1);
-            if (!ret) return nullptr;
+        if (elca && elca->elacarrier) {
+            ret = ela_get_userid(elca->elacarrier, userid, ELA_MAX_ID_LEN + 1);
+            if (!ret) return value_null;
             napi_create_string_utf8(env, userid, NAPI_AUTO_LENGTH, &result);
             return result;
         }
 
-        return nullptr;
+        return value_null;
     }
 
     static napi_value elca_get_id_by_address(napi_env env, napi_callback_info info) {
@@ -88,24 +88,21 @@ namespace elca {
         napi_value args[1];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-        if(status != napi_ok || argc < 1) {
-            log_err(env, "elca_get_id_by_address: Wrong number of arguments");
-            return nullptr;
-        }
+        CHECK_STATUS_AND_ARGC("getIdByAddress", 1, value_null);
 
         status = napi_typeof(env, args[0], &valuetype);
-        if (status != napi_ok || valuetype != napi_string) return nullptr;
+        if (status != napi_ok || valuetype != napi_string) return value_null;
 
         status = napi_get_value_string_utf8(env, args[0], address, ELA_MAX_ADDRESS_LEN + 1, &len);
-        if (status != napi_ok) return nullptr;
+        if (status != napi_ok) return value_null;
 
         ret = ela_get_id_by_address(address, user_id, ELA_MAX_ID_LEN + 1);
-        if (!ret) return nullptr;
+        if (!ret) return value_null;
 
         napi_create_string_utf8(env, user_id, NAPI_AUTO_LENGTH, &result);
         return result;
 
-        return nullptr;
+        return value_null;
     }
 
     static napi_value elca_get_self_nospam(napi_env env, napi_callback_info info) {
@@ -115,14 +112,14 @@ namespace elca {
         napi_value result;
 
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, (void**)&elca);
-        if (elca && elca->elcarrier) {
-            ret = ela_get_self_nospam(elca->elcarrier, &nospam);
-            if (ret == -1) return nullptr;
+        if (elca && elca->elacarrier) {
+            ret = ela_get_self_nospam(elca->elacarrier, &nospam);
+            if (ret == -1) return value_null;
             napi_create_uint32(env, nospam, &result);
             return result;
         }
 
-        return nullptr;
+        return value_null;
     }
 
     static napi_value elca_set_self_nospam(napi_env env, napi_callback_info info) {
@@ -136,12 +133,8 @@ namespace elca {
         napi_value args[1];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 1) {
-            log_err(env, "elca_set_self_nospam: Wrong number of arguments");
-            return value_false;
-        }
-
-        if (!elca || !elca->elcarrier) return value_false;
+        CHECK_STATUS_AND_ARGC("setSelfNospam", 1, value_false);
+        CHECK_ELACARRIER_PTR(value_false);
 
         status = napi_typeof(env, args[0], &valuetype);
         if (status != napi_ok || valuetype != napi_number) return value_false;
@@ -149,7 +142,7 @@ namespace elca {
         status = napi_get_value_uint32(env, args[0],  &nospam);
         if (status != napi_ok) return value_false;
 
-        ret = ela_set_self_nospam(elca->elcarrier, nospam);
+        ret = ela_set_self_nospam(elca->elacarrier, nospam);
         if (ret == -1) {
             log_err(env, "Run ela_set_self_nospam error:0x%X", ela_get_error());
             return value_false;
@@ -164,14 +157,14 @@ namespace elca {
         napi_value result;
 
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, (void**)&elca);
-        if (elca && elca->elcarrier) {
-            ret = ela_get_self_presence(elca->elcarrier, &presence);
-            if (ret == -1) return nullptr;
+        if (elca && elca->elacarrier) {
+            ret = ela_get_self_presence(elca->elacarrier, &presence);
+            if (ret == -1) return value_null;
             napi_create_uint32(env, presence, &result);
             return result;
         }
 
-        return nullptr;
+        return value_null;
     }
 
     static napi_value elca_set_self_presence(napi_env env, napi_callback_info info) {
@@ -185,10 +178,7 @@ namespace elca {
         napi_value args[1];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 1) {
-            log_err(env, "elca_set_self_presence: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("setSelfPresence", 1, value_false);
 
         status = napi_typeof(env, args[0], &valuetype);
         if (status != napi_ok || valuetype != napi_number) return value_false;
@@ -196,7 +186,7 @@ namespace elca {
         status = napi_get_value_uint32(env, args[0],  &presence);
         if (status != napi_ok) return value_false;
 
-        ret = ela_set_self_presence(elca->elcarrier, (ElaPresenceStatus)presence);
+        ret = ela_set_self_presence(elca->elacarrier, (ElaPresenceStatus)presence);
         if (ret == -1) return value_false;
         else return value_true;
     }
@@ -206,13 +196,13 @@ namespace elca {
         ElaUserInfo user_info;
 
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, (void**)&elca);
-        if (elca && elca->elcarrier) {
-            if (!ela_get_self_info(elca->elcarrier, &user_info)) {
-                return create_UserInfoJsObj(env, &user_info);
+        if (elca && elca->elacarrier) {
+            if (!ela_get_self_info(elca->elacarrier, &user_info)) {
+                return createUserInfoJsObj(env, &user_info);
             }
         }
 
-        return nullptr;
+        return value_null;
     }
 
     static napi_value elca_set_self_info(napi_env env, napi_callback_info info) {
@@ -226,16 +216,13 @@ namespace elca {
         napi_value args[1];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        if(status != napi_ok || argc < 1) {
-            log_err(env, "elca_set_self_info: Wrong number of arguments");
-            return value_false;
-        }
+        CHECK_STATUS_AND_ARGC("setSelfInfo", 1, value_false);
 
         status = napi_typeof(env, args[0], &valuetype);
         if (status != napi_ok || valuetype != napi_object) return value_false;
 
-        if (get_UserInfoFromJsObj(env, args[0], &user_info)) {
-            ret = ela_set_self_info(elca->elcarrier, &user_info);
+        if (createUserInfoFromJsObj(env, args[0], &user_info)) {
+            ret = ela_set_self_info(elca->elacarrier, &user_info);
         }
 
         if (ret == -1) {
@@ -245,7 +232,7 @@ namespace elca {
         else return value_true;
     }
 
-    void create_NodeInfoFunctions(napi_env env, napi_value carrier, Elca *elca) {
+    void createNodeInfoFunctions(napi_env env, napi_value carrier, Elca *elca) {
         napi_status status;
         napi_value fn[10];
         memset(fn, 0, sizeof(napi_value) * 10);

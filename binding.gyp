@@ -9,6 +9,9 @@
         "src/friend.cc",
         "src/nodeinfo.cc",
         "src/utility.cc",
+        "src/session.cc",
+        "src/stream.cc",
+        "src/channel.cc",
       ],
       "include_dirs": ["<!(echo $CARRIER_NATIVE_SDK)/include"],
       "conditions": [
