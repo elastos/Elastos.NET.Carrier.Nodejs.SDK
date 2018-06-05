@@ -112,15 +112,19 @@ namespace elca {
     static napi_value elca_session_remove_stream(napi_env env, napi_callback_info info) {
         Elca* elca = nullptr;
         int ret;
+        uint32_t count = 0;
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, (void**)&elca);
         CHECK_STREAM_VALUE(nullptr);
 
         ret = ela_session_remove_stream(elca->elasession, elca->stream);
         if (ret != -1) {
+            napi_reference_unref(env, elca->object, &count);
+            if (count == 0) {
+                napi_delete_reference(env, elca->object);
+            }
             for (int i = 0; i < STREAM_CALLBACK_COUNT; i++) {
                 deleteCallbackHandle(env, i, elca);
             }
-            napi_delete_reference(env, elca->object);
             free(elca);
 
             return value_true;

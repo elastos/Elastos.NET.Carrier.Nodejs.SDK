@@ -106,13 +106,18 @@ namespace elca {
 
     static napi_value elca_kill(napi_env env, napi_callback_info info) {
         Elca* elca = nullptr;
+        uint32_t count = 0;
+
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, (void**)&elca);
         if (elca && elca->elacarrier) {
             ela_kill(elca->elacarrier);
+            napi_reference_unref(env, elca->object, &count);
+            if (count == 0) {
+                napi_delete_reference(env, elca->object);
+            }
             for (int i = 0; i < CARRIER_CALLBACK_COUNT; i++) {
                  deleteCallbackHandle(env, i, elca);
             }
-            napi_delete_reference(env, elca->object);
             free(elca);
         }
         return nullptr;

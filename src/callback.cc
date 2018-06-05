@@ -128,6 +128,7 @@ namespace elca {
         napi_status status;
         napi_value argv[8];
         size_t argc = 0;
+        uint32_t count = 0;
 
         _WorkerInfo* info = (_WorkerInfo*)work->data;
         napi_env env = info->env;
@@ -137,6 +138,16 @@ namespace elca {
         CHECK_STATUS;
 
         napi_value object;
+        if (!info->object) {
+            free(info);
+            return;
+        }
+        napi_reference_unref(env, info->object, &count);
+        if (count == 0) {
+            napi_delete_reference(env, info->object);
+            free(info);
+            return;
+        }
         status = napi_get_reference_value(env, info->object, &object);
         CHECK_STATUS;
 
@@ -158,6 +169,12 @@ namespace elca {
             CHECK_STATUS;
 
             napi_value fn;
+            napi_reference_unref(env, info->handle, &count);
+            if (count == 0) {
+                napi_delete_reference(env, info->handle);
+                free(info);
+                return;
+            }
             status = napi_get_reference_value(env, info->handle, &fn);
             if (fn) {
                 napi_value result;
@@ -192,8 +209,10 @@ namespace elca {
         info->get_args = get_args;
         info->args = args;
         info->handle = elca->handle[index];
+        napi_reference_ref(elca->env, info->handle, (uint32_t*)&count);
         info->context = elca->context[index];
         info->object = elca->object;
+        napi_reference_ref(elca->env, elca->object, (uint32_t*)&count);
         info->fn_name = cb_name[index];
 
         uv_queue_work(uv_default_loop(), &info->work, work_Execute, work_Completed);
@@ -621,7 +640,11 @@ namespace elca {
 
     void deleteCallbackHandle(napi_env env, int cb_no, Elca *elca) {
         if (elca->handle[cb_no]) {
-            napi_delete_reference(env, elca->handle[cb_no]);
+            uint32_t count = 0;
+            napi_reference_unref(env, elca->handle[cb_no], &count);
+            if (count == 0) {
+                napi_delete_reference(env, elca->handle[cb_no]);
+            }
             elca->handle[cb_no] = nullptr;
         }
 
