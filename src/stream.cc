@@ -31,7 +31,7 @@ namespace elca {
     static napi_value elca_session_add_stream(napi_env env, napi_callback_info info) {
         Elca* elca = nullptr;
         Elca* stream_elca = nullptr;
-        napi_value session, context;
+        napi_value session = nullptr, context = nullptr;
         napi_value obj = value_null, id;
         napi_status status;
         napi_valuetype valuetype;

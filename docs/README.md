@@ -3,15 +3,59 @@
 ### Constants
 
 ### PresenceStatus:
-    PresenceStatus_None = 0
-    PresenceStatus_Away = 1
-    PresenceStatus_Busy = 2
+    NONE = 0
+    AWAY = 1
+    BUSY = 2
 
 ### ConnectionStatus:
-    ConnectionStatus_Connected = 0
-    ConnectionStatus_Disconnected = 1
+    CONNECTED = 0
+    DISCONNECTED = 1
+
+### StreamType:
+    AUDIO = 0
+    VIDEO = 1
+    TEXT = 2
+    APPLICATION = 3
+    MESSAGE = 4
+
+### StreamState:
+    RAW = 0
+    INITIALIZED = 1
+    TRANSPORT_READY = 2
+    CONNECTING = 3
+    CONNECTED = 4
+    DEACTIVATED = 5
+    CLOSED = 6
+    FAILED = 7
+
+### CandidateType
+     HOST = 0
+     SERVE_RREFLEXIVE = 1
+     PEER_REFLEXIVE = 2
+     RELAYED = 3
+
+### NetworkTopology
+    LAN = 0
+    P2P = 1
+    RELAYED = 2
+
+### PortForwardingProtocol
+    TCP = 1
+
+### CloseReason
+    NORMAL = 0
+    TIMEOUT = 1
+    ERROR = 2
+
+### StreamMode
+    COMPRESS = 1
+    PLAIN = 2
+    RELIABLE = 4
+    MULTIPLEXING = 8
+    PORT_FORWARDING = 0x10
 
 ### Data types
+    //Bootstrap
     object bootstrap {
         string ipv4,
         string ipv6,
@@ -19,29 +63,35 @@
         string publicKey
     }
 
+    //ElaOptions
     object options {
         boolean udpEnabled,
         string persistentLocation,
         bootstrap bootstraps[]
     }
 
+    //ElaCallbacks
     object callbacks {
-        idle(object carrier, [var context]),
-        connectionStatus(object carrier, ConnectionStatus status, [var context]),
-        friendsList(object carrier, friendInfo friend_info, [var context]),
-        friendConnection(object carrier, string friend_id, ConnectionStatus status, [var context]),
-        friendInfo(objet carrier, string friend_id, friendInfo info, [var context]),
-        friendPresence(object carrier, sting friend_id,  PresenceStatus status, [var context]),
-        friendRequest(object carrier, sting user_id, userInfo info, string hello, [var context]),
-        friendAdded(object carrier, friendInfo info, [var context]),
-        friendRemoved(object carrier, string friend_id, [var context]),
-        friendMessage(object carrier, string from, string msg, [var context]) ,
-        friendInvite(object carrier, string from, string data, [var context])
+        idle(object carrier),
+        connectionStatus(object carrier, ConnectionStatus status),
+        friendsList(object carrier, friendInfo friend_info),
+        friendConnection(object carrier, string friend_id, ConnectionStatus status),
+        friendInfo(objet carrier, string friend_id, friendInfo info),
+        friendPresence(object carrier, sting friend_id,  PresenceStatus status),
+        friendRequest(object carrier, sting user_id, userInfo info, string hello),
+        friendAdded(object carrier, friendInfo info),
+        friendRemoved(object carrier, string friend_id),
+        friendMessage(object carrier, string from, string msg) ,
+        friendInvite(object carrier, string from, string data)
     }
 
-    friendsIterate(object carrier, friendInfo info ,[var context])
-    friendInviteResponse(object carrier, string from, int status, string reason, string data, [var context])
+    //ElaFriendsIterateCallback
+    friendsIterate(object carrier, friendInfo info)
 
+    //ElaFriendInviteResponseCallback
+    friendInviteResponse(object carrier, string from, int status, string reason, string data)
+
+    //ElaUserInfo
     object userInfo {
         string userId,
         string name,
@@ -53,6 +103,7 @@
         string region
     }
 
+    //ElaFriendInfo
     object friendInfo {
         object userInfo,
         string label,
@@ -60,9 +111,43 @@
         PresenceStatus presence
     }
 
+    //ElaAddressInfo
+    object addressInfo {
+        int32 type,
+        string address,
+        int32 port,
+        string relatedAddress,
+        int32 relatedPort
+    }
+
+    //ElaTransportInfo
+    object transportInfo {
+        int32 topology,
+        addressInfo local,
+        addressInfo remote
+    }
+
+    //ElaStreamCallbacks
+    object streamCallbacks {
+        stateChanged(object stream, StreamState state),
+        streamData(object stream, Buffer data),
+        channelOpen(object stream, int32 channel_id, string cookie),
+        channelOpened(object stream, int32 channel_id),
+        channelClose(objet stream, int32 channel_id, string reason),
+        channelData(object stream, int32 channel_id, Buffer data),
+        channelPending(object stream, int32 channel_id),
+        channelResume(object stream, int32 channel_id),
+    }
+
+    //ElaSessionRequestCallback
+    sessionRequest(object carrier, string from, string sdp)
+
+    //ElaSessionRequestCompleteCallback
+    sessionRequestComplete(object session, int32 status, string reason, string sdp)
+
 ### Functions
 
-    Object createObject(options opts, callbacks cbs, [var context]) = ela_new
+    Object createObject(options opts, callbacks cbs) = ela_new
 
     object carrier {
         run()                                                       = ela_run
@@ -80,7 +165,7 @@
         boolean setSelfPresence(PresenceStatus presence)            = ela_set_self_presence
         PresenceStatus getSelfPresence()                            = ela_get_self_presence
 
-        getFriends(friendsIterate callback, [var context])          = ela_get_friends
+        getFriends(friendsIterate callback)                         = ela_get_friends
         friendInfo getFriendInfo(string friend_id)                  = ela_get_friend_info
         boolean setFriendLabel(string friend_id, string label)      = ela_set_friend_lable
         boolean isFriend(string id)                                 = ela_is_friend
@@ -92,6 +177,48 @@
                     friendInviteResponse callback)                  = ela_invite_friend
         boolean replyFriendInvite(string id, int status,
                     string reason, string msg)                      = ela_reply_friend_invite
+
+        boolean initSession(sessionRequest callback)                = ela_session_init
+        cleanupSession()                                            = ela_session_cleanup
+
+        session newSession(string address)                          = ela_session_new
+
+        on(stirng name, function callback || null)
+    }
+
+    object session {
+        close()                                                     = ela_session_close
+        string getPeer(string address)                              = ela_session_get_peer
+        boolean request(sessionRequestComplete callback)            = ela_session_request
+        boolean replyRequest(uint32 status, string reason)          = ela_session_reply_request
+        boolean start(string sdp)                                   = ela_session_start
+
+        boolean addService(string service, PortForwardingProtocol protocol, string host, string port)
+                                                                    = ela_session_add_service
+        removeService(string service)                               = ela_session_remove_service
+
+        stream addStream(StreamType type, uint32 options, streamCallbacks callbacks,)
+                                                                    = ela_session_add_stream
+
+        on(stirng name, function callback || null)
+    }
+
+    object stream {
+        remove()                                                    = ela_session_remove_stream
+        uint32 getType()                                            = ela_stream_get_type
+        uint32 getState()                                           = ela_stream_get_state
+        transportInfo getTransportInfo()                            = ela_stream_get_transport_info
+        int32 write(Buffer data)                                    = ela_stream_write
+
+        int32 openChannel()                                         = ela_stream_open_channel
+        boolean closeChannel(int32 id)                              = ela_stream_close_channel
+        int32 writeChannel(int32 id, Buffer data)                   = elca_stream_write_channel
+        boolean pendChannel(int32 id)                               = ela_stream_pend_channel
+        boolean resumeChannel(int32 id)                             = ela_stream_resume_channel
+
+        int32 openPortForwarding(string service, PortForwardingProtocol protocol, string host, string port)
+                                                                    = ela_stream_open_port_forwarding
+        boolean closePortForwarding(uint32 portforwarding)          = ela_stream_close_port_forwarding
 
         on(stirng name, function callback || null)
     }

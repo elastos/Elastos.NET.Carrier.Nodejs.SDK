@@ -19,6 +19,4 @@ nstall with npm:
     carrier.run();
 ```
 
-    [see more.](https://github.com/elastos/Elastos.NET.Carrier.Nodejs.SDK/tree/master/example/demo)
-
-
+See [demo](https://github.com/elastos/Elastos.NET.Carrier.Nodejs.SDK/tree/master/demo) for more detail.

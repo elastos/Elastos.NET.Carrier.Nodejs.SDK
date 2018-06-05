@@ -174,8 +174,8 @@ namespace elca {
         napi_value args[2];
 
         status = napi_get_cb_info(env, info, &argc, args, nullptr, (void**)&elca);
-        CHECK_STATUS_AND_ARGC("session.request", 1, value_null);
-        CHECK_ELASESSION_PTR(value_null);
+        CHECK_STATUS_AND_ARGC("session.request", 1, value_false);
+        CHECK_ELASESSION_PTR(value_false);
 
         if (argc > 1) context = args[1];
 

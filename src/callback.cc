@@ -46,14 +46,14 @@ namespace elca {
     };
 
     const char* stream_cb_name[] = {
-        "state_changed",
-        "stream_data",
-        "channel_open",
-        "channel_opened",
-        "channel_data",
-        "channel_pending",
-        "channel_resume",
-        "channel_close"
+        "stateChanged",
+        "streamData",
+        "channelOpen",
+        "channelOpened",
+        "channelData",
+        "channelPending",
+        "channelResume",
+        "channelClose"
     };
 
     typedef size_t get_arguments(napi_env env, void *args, napi_value* result);

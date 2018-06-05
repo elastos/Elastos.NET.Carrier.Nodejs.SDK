@@ -61,34 +61,62 @@ rl.setPrompt('Command:$ ');
 
 rl.on('line', (input) => {
     do_command(`${input}`);
-    rl.prompt();
 });
 
 var commands = [
-    { cmd:"help",       fn:help,                   help:"help [cmd]" },
+    { cmd:"help",           fn:help,                   help:"help [cmd]" },
 
-    { cmd:"address",    fn:get_address,            help:"address" },
-    { cmd:"nodeid",     fn:get_nodeid,             help:"nodeid" },
-    { cmd:"userid",     fn:get_userid,             help:"userid" },
-    { cmd:"me",         fn:self_info,              help:"me [set] [name | description | gender | phone | email | region] [value]" },
-    { cmd:"nospam",     fn:self_nospam,            help:"nospam [ value ]" },
-    { cmd:"presence",   fn:self_presence,          help:"presence [ none | away | busy ]" },
+    { cmd:"address",        fn:get_address,            help:"address" },
+    { cmd:"nodeid",         fn:get_nodeid,             help:"nodeid" },
+    { cmd:"userid",         fn:get_userid,             help:"userid" },
+    { cmd:"me",             fn:self_info,              help:"me [set] [name | description | gender | phone | email | region] [value]" },
+    { cmd:"nospam",         fn:self_nospam,            help:"nospam [ value ]" },
+    { cmd:"presence",       fn:self_presence,          help:"presence [ none | away | busy ]" },
 
-    { cmd:"fadd",       fn:friend_add,             help:"fadd address hello" },
-    { cmd:"faccept",    fn:friend_accept,          help:"faccept userid" },
-    { cmd:"fremove",    fn:friend_remove,          help:"fremove userid" },
-    { cmd:"friends",    fn:list_friends,           help:"friends" },
-    { cmd:"friend",     fn:show_friend,            help:"friend userid" },
-    { cmd:"label",      fn:label_friend,           help:"label userid name" },
-    { cmd:"msg",        fn:send_message,           help:"msg userid message" },
-    { cmd:"invite",     fn:invite,                 help:"invite userid data" },
-    { cmd:"ireply",     fn:reply_invite,           help:"ireply userid [confirm message | refuse reason]" },
-    { cmd:"exit",       fn:exit,                   help:"exit" }
+    { cmd:"fadd",           fn:friend_add,             help:"fadd address hello" },
+    { cmd:"faccept",        fn:friend_accept,          help:"faccept userid" },
+    { cmd:"fremove",        fn:friend_remove,          help:"fremove userid" },
+    { cmd:"friends",        fn:list_friends,           help:"friends" },
+    { cmd:"friend",         fn:show_friend,            help:"friend userid" },
+    { cmd:"label",          fn:label_friend,           help:"label userid name" },
+    { cmd:"msg",            fn:send_message,           help:"msg userid message" },
+    { cmd:"invite",         fn:invite,                 help:"invite userid data" },
+    { cmd:"ireply",         fn:reply_invite,           help:"ireply userid [confirm message | refuse reason]" },
+
+    { cmd:"sinit",          fn:session_init,           help:"sinit" },
+    { cmd:"snew",           fn:session_new,            help:"snew userid" },
+    { cmd:"speer",          fn:session_peer,           help:"speer" },
+    { cmd:"srequest",       fn:session_request,        help:"srequest" },
+    { cmd:"sreply",         fn:session_reply_request,  help:"sreply ok/sreply refuse [reason]"},
+    { cmd:"sclose",         fn:session_close,          help:"sclose" },
+    { cmd:"scleanup",       fn:session_cleanup,        help:"scleanup" },
+
+    { cmd:"sadd",           fn:stream_add,             help:"sadd [plain] [reliable] [multiplexing] [portforwarding]"},
+    { cmd:"sremove",        fn:stream_remove,          help:"sremove id" },
+    { cmd:"swrite",         fn:stream_write,           help:"swrite streamid string" },
+    { cmd:"sinfo",          fn:stream_get_info,        help:"sinfo id"},
+    { cmd:"stype",          fn:stream_get_type,        help:"stype id"},
+    { cmd:"sstate",         fn:stream_get_state,       help:"sstate id"},
+
+    { cmd:"scopen",         fn:stream_open_channel,    help:"scopen stream [cookie]" },
+    { cmd:"scclose",        fn:stream_close_channel,   help:"scclose stream channel" },
+    { cmd:"scwrite",        fn:stream_write_channel,   help:"scwrite stream channel string" },
+    { cmd:"scpend",         fn:stream_pend_channel,    help:"scpend stream channel" },
+    { cmd:"scresume",       fn:stream_resume_channel,  help:"scresume stream channel" },
+
+    { cmd:"spfadd",         fn:session_add_service,    help:"spfadd name tcp|udp host port" },
+    { cmd:"spfremove",      fn:session_remove_service, help:"spfremove name" },
+    { cmd:"spfopen",        fn:portforwarding_open,    help:"spfopen stream service tcp|udp host port" },
+    { cmd:"spfclose",       fn:portforwarding_close,   help:"spfclose stream pfid" },
+
+//    { cmd:"test",           fn:test,                   help:"test" },
+
+    { cmd:"exit",           fn:exit,                   help:"exit" }
 ]
 
 function do_command(input) {
     var args = input.trim().match(/[^\s"]+|"([^"]*)"/g);
-    if (args[0] == "") {
+    if (!args || args[0] == "") {
         rl.prompt();
         return;
     }
@@ -96,10 +124,12 @@ function do_command(input) {
     for (var i = 0; i < commands.length; i++) {
         if (commands[i].cmd == args[0]) {
             commands[i].fn(args);
+            rl.prompt();
             return;
         }
     }
     console.log("Unknown command:" + args[0]);
+    rl.prompt();
 }
 
 function help(args) {
@@ -233,13 +263,13 @@ function self_presence(argv) {
     }
     else if (argv.length == 2) {
         if (argv[1] == "none") {
-            presence = carrierSdk.PresenceStatus_None;
+            presence = carrierSdk.PresenceStatus.NONE;
         }
         else if (argv[1] == "away") {
-            presence = carrierSdk.PresenceStatus_Away;
+            presence = carrierSdk.PresenceStatus.AWAY;
         }
         else if (argv[1] == "busy") {
-            presence = carrierSdk.PresenceStatus_Busy;
+            presence = carrierSdk.PresenceStatus.BUSY;
         }
         else {
             console.log("Invalid command syntax.");
@@ -382,21 +412,712 @@ function reply_invite(argv) {
         console.log("Send invite reply to inviter failed(0x" +  carrierSdk.getError().toString(16) + ").");
 }
 
+//-----------------------------------------------------------------------------
+var session;
+var session_ctx = {
+    remote_sdp: "",
+    unchanged_streams: 0,
+    need_start: false,
+}
 
+function session_request_callback(carrier, from, sdp) {
+    console.log("");
+    session_ctx.remote_sdp = sdp;
+
+    console.log("Session request from[" + from + "] with SDP:" + sdp);
+    console.log("Reply use following commands:");
+    console.log("  1. snew " + from);
+    console.log("  2. sreply refuse [reason]");
+    console.log("OR:");
+    console.log("  1. snew " + from);
+    console.log("  2. sadd [plain] [reliable] [multiplexing] [portforwarding]");
+    console.log("  3. sreply ok");
+
+    rl.prompt();
+}
+
+function session_request_complete_callback(session, status, reason, sdp) {
+    console.log("");
+
+    if (status != 0) {
+        console.log("Session complete, status: " + status + ", reason:" + reason);
+    }
+    else {
+        session_ctx.remote_sdp = sdp;
+        var ret = session.start(session_ctx.remote_sdp);
+        console.log("Session start " + (ret ? "success" : "failed"));
+    }
+    rl.prompt();
+}
+
+function stream_on_data(stream, data) {
+    console.log("");
+    console.log("Stream [" + stream.id + "] received data ["+ data.toString() + "]");
+    rl.prompt();
+}
+
+function stream_on_state_changed(stream, state) {
+    console.log("");
+    var state_name = [
+        "raw",
+        "initialized",
+        "transport_ready",
+        "connecting",
+        "connected",
+        "deactivated",
+        "closed",
+        "failed"
+    ];
+
+    console.log("Stream [" + stream.id + "] state changed to: " + state_name[state]);
+
+    if (state == carrierSdk.StreamState.TRANSPORT_READY) {
+        --session_ctx.unchanged_streams;
+        if ((session_ctx.unchanged_streams == 0) && (session_ctx.need_start)) {
+            ret = session.start(session_ctx.remote_sdp);
+            session_ctx.need_start = false;
+            console.log("Session start " + (ret ? "success." : "failed."));
+        }
+    }
+
+
+    rl.prompt();
+}
+
+function on_channel_open(stream, channel_id, cookie) {
+    console.log("");
+    console.log("Stream request open new channel:" + channel_id + " cookie:" + cookie);
+    rl.prompt();
+    return true;
+}
+
+function on_channel_opened(stream, channel_id) {
+    console.log("");
+    console.log("Channel " + stream.id + ":" + channel_id + " opened.");
+    rl.prompt();
+}
+
+function on_channel_close(stream, channel_id, reason) {
+    console.log("");
+    console.log("Channel " + stream.id + ":" + channel_id + " closed.");
+}
+
+function on_channel_data(stream, channel_id, data) {
+    console.log("");
+    console.log("Channel " + stream.id + ":" + channel_id + " received data [" + data.toString() + "]");
+    rl.prompt();
+    return true;
+}
+
+function on_channel_pending(stream, channel_id) {
+    console.log("");
+    console.log("Channel " + stream.id + ":" + channel_id + " is pending.");
+    rl.prompt();
+}
+
+function on_channel_resume(stream, channel_id) {
+    console.log("");
+    console.log("Channel " + stream.id + ":" + channel_id + " resumed.");
+    rl.prompt();
+}
+
+function session_init(argv) {
+    if (argv.length != 1) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    session_ctx.remote_sdp = "";
+    var ret = carrier.initSession(session_request_callback);
+    if (!ret) {
+        console.log("Session initialized failed.");
+    }
+    else {
+        console.log("Session initialized successfully.");
+    }
+}
+
+function session_cleanup(argv) {
+    if (argv.length != 1) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    carrier.cleanupSession();
+    console.log("Session cleaned up.");
+}
+
+function session_new(argv) {
+    if (argv.length != 2) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    session = carrier.newSession(argv[1]);
+    if (!session) {
+        console.log("Create session failed.");
+    }
+    else {
+        console.log("Create session successfully.");
+        session.stream = [];
+        session_ctx.need_start = false;
+        session_ctx.unchanged_streams = 0;
+    }
+}
+
+function session_close(argv) {
+    if (argv.length != 1) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (session) {
+        session.close();
+        session = null;
+        console.log("Session closed.");
+    } else {
+        console.log("No session available.");
+    }
+}
+
+function stream_add(argv) {
+    var callbacks = new Object;
+    var options= 0;
+
+    callbacks.stateChanged = stream_on_state_changed;
+    callbacks.streamData = stream_on_data;
+
+    if (!session) {
+        console.log("No session available.");
+    }
+
+    if (argv.length < 1) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+    else if (argv.length > 1) {
+        for (var i = 1; i < argv.length; i++) {
+            if (argv[i] == "reliable") {
+                options |= carrierSdk.StreamMode.RELIABLE;
+            }
+            else if (argv[i] == "plain") {
+                options |= carrierSdk.StreamMode.PLAIN;
+            }
+            else if (argv[i] == "multiplexing") {
+                options |= carrierSdk.StreamMode.MULTIPLEXING;
+            }
+            else if (argv[i] == "portforwarding") {
+                options |= carrierSdk.StreamMode.PORT_FORWARDING;
+            } else {
+                console.log("Invalid command syntax.");
+                return;
+            }
+        }
+    }
+
+    if ((options & carrierSdk.StreamMode.MULTIPLEXING) || (options & carrierSdk.StreamMode.PORT_FORWARDING)) {
+        callbacks.channelOpen = on_channel_open;
+        callbacks.channelOpened = on_channel_opened;
+        callbacks.channelData = on_channel_data;
+        callbacks.channelPending = on_channel_pending;
+        callbacks.channelResume = on_channel_resume;
+        callbacks.channelClose = on_channel_close;
+    }
+
+    var stream = session.addStream(carrierSdk.StreamType.TEXT, options, callbacks);
+    if (!stream) {
+        console.log("Add stream failed.");
+    }
+    else {
+        session_ctx.unchanged_streams++;
+        session.stream[stream.id] = stream;
+        stream.channel = [];
+        console.log("Add stream successfully and stream id " + stream.id);
+    }
+}
+
+function stream_remove(argv) {
+    if (argv.length != 2) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var stream = session.stream[parseInt(argv[1])];
+    if (!stream) {
+        console.log("stream " + argv[1] + " is invalid.");
+        return;
+    }
+    var ret = stream.remove();
+    if (!ret) {
+        console.log("Remove stream " + stream.id + " failed.");
+    }
+    else {
+        console.log("Remove stream " + stream.id + " success.");
+    }
+}
+
+function session_peer(argv) {
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var peer = session.getPeer();
+    if (!peer) {
+        console.log("Get peer failed.");
+    }
+    else {
+        console.log("Get peer: " + peer);
+    }
+}
+
+function session_request(argv) {
+    if (argv.length != 1) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var ret = session.request(session_request_complete_callback);
+    if (!ret) {
+        console.log("session request failed.");
+    }
+    else {
+        console.log("session request successfully.");
+    }
+}
+
+function session_reply_request(argv) {
+    var ret;
+    if ((argv.length != 2) && (argv.length != 3)) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+
+    if ((argv[1] == "ok") && (argv.length == 2)) {
+        ret = session.replyRequest(0, null);
+        if (!ret) {
+            console.log("response invite failed.");
+        }
+        else {
+            console.log("response invite successuflly.");
+
+            if (session_ctx.unchanged_streams > 0) {
+                session_ctx.need_start = true;
+            }
+            else {
+                ret = session.start(session_ctx.remote_sdp);
+                console.log("Session start " + (ret ? "success." : "failed."));
+            }
+        }
+    }
+    else if ((argv[1] == "refuse") && (argv.length == 3)) {
+        ret = session.replyRequest(1, argv[2]);
+        if (!ret) {
+            console.log("response invite failed.");
+        }
+        else {
+            console.log("response invite successuflly.");
+        }
+    }
+    else {
+        console.log("Unknown sub command.");
+        return;
+    }
+}
+
+function stream_write(argv) {
+    if (argv.length != 3) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var stream = session.stream[parseInt(argv[1])];
+    if (!stream) {
+        console.log("stream " + argv[1] + " is invalid.");
+        return;
+    }
+    var buf = new Buffer(argv[2]);
+    var rc = stream.write(buf);
+    if (rc < 0) {
+        console.log("write data failed.");
+    }
+    else {
+        console.log("write data successfully.");
+    }
+}
+
+function stream_get_info(argv) {
+    var info;
+
+    var topology_name = [
+        "LAN",
+        "P2P",
+        "RELAYED"
+    ];
+
+    var addr_type = [
+        "HOST   ",
+        "SREFLEX",
+        "PREFLEX",
+        "RELAY  "
+    ];
+
+    if (argv.length != 2) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var stream = session.stream[parseInt(argv[1])];
+    if (!stream) {
+        console.log("stream " + argv[1] + " is invalid.");
+        return;
+    }
+    info = stream.getTransportInfo();
+    if (!info) {
+        console.log("get remote addr failed.");
+        return;
+    }
+
+    console.log("Stream transport information:");
+    console.log("    Network: " + topology_name[info.topology]);
+
+    console.log("      Local: " + addr_type[info.local.type] + " " + info.local.address + ":" + info.local.port);
+    if (info.local.relatedAddress)
+        console.log("       related " + info.local.relatedAddress + ":" + info.local.relatedPort);
+    else
+        console.log("");
+
+    console.log("     Remote: " + addr_type[info.remote.type] + " " + info.remote.address + ":" + info.remote.port);
+    if (info.remote.relatedAddress)
+        console.log("       related " + info.remote.relatedAddress + ":" + info.remote.relatedPort);
+    else
+        console.log("");
+}
+
+function stream_get_type(argv) {
+    var info;
+
+    var type_name = [
+        "audio",
+        "video",
+        "text",
+        "application",
+        "message"
+    ];
+
+    if (argv.length != 2) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var stream = session.stream[parseInt(argv[1])];
+    if (!stream) {
+        console.log("stream " + argv[1] + " is invalid.");
+        return;
+    }
+    var type = stream.getType();
+    if (!type) {
+        console.log("get type failed.");
+        return;
+    }
+
+    console.log("Stream type: " + type_name[type]);
+}
+
+function stream_get_state(argv) {
+    var info;
+
+    var state_name = [
+        "raw",
+        "initialized",
+        "transport_ready",
+        "connecting",
+        "connected",
+        "deactivated",
+        "closed",
+        "failed"
+    ];
+
+    if (argv.length != 2) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var stream = session.stream[parseInt(argv[1])];
+    if (!stream) {
+        console.log("stream " + argv[1] + " is invalid.");
+        return;
+    }
+    var state = stream.getState();
+    if (!state) {
+        console.log("get state failed.");
+        return;
+    }
+
+    console.log("Stream state: " + state_name[state]);
+}
+
+function stream_open_channel(argv) {
+    if (argv.length < 2) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var stream = session.stream[parseInt(argv[1])];
+    if (!stream) {
+        console.log("stream " + argv[1] + " is invalid.");
+        return;
+    }
+    var cookie = null;
+    if (argv.length == 3) {
+        cookie = argv[2];
+    }
+    var ch = stream.openChannel(cookie);
+    if (!ch) {
+        console.log("Create channel failed.");
+    } else {
+        console.log("Channel " + ch + " created.");
+    }
+}
+
+function stream_close_channel(argv) {
+    if (argv.length != 3) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var stream = session.stream[parseInt(argv[1])];
+    if (!stream) {
+        console.log("stream " + argv[1] + " is invalid.");
+        return;
+    }
+    var ret = stream.closeChannel(parseInt(argv[2]));
+    if (!ret) {
+        console.log("Close channel failed.");
+    } else {
+        console.log("Channel %s closed.", argv[2]);
+    }
+}
+
+function stream_write_channel(argv) {
+    if (argv.length != 4) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var stream = session.stream[parseInt(argv[1])];
+    if (!stream) {
+        console.log("stream " + argv[1] + " is invalid.");
+        return;
+    }
+    var buf = new Buffer(argv[3]);
+    var rc = stream.writeChannel(parseInt(argv[2]), buf);
+    if (rc < 0) {
+        console.log("Write channel failed.");
+    } else {
+        console.log("Channel %s write successfully.", argv[2]);
+    }
+}
+
+function stream_pend_channel(argv) {
+    if (argv.length != 3) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var stream = session.stream[parseInt(argv[1])];
+    if (!stream) {
+        console.log("stream " + argv[1] + " is invalid.");
+        return;
+    }
+    var ret = stream.pendChannel(parseInt(argv[2]));
+    if (!ret) {
+        console.log("Pend channel failed.");
+    } else {
+        console.log("Channel " + argv[2] + " input is pending.", );
+    }
+}
+
+function stream_resume_channel(argv) {
+    if (argv.length != 3) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var stream = session.stream[parseInt(argv[1])];
+    if (!stream) {
+        console.log("stream " + argv[1] + " is invalid.");
+        return;
+    }
+    var ret = stream.resumeChannel(parseInt(argv[2]));
+    if (!ret) {
+        console.log("Resume channel(input) failed.");
+    } else {
+        console.log("Channel " + argv[2] + " input is resumed.");
+    }
+}
+
+function session_add_service(argv) {
+    var protocol;
+
+    if (argv.length != 5) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (argv[2] == "tcp")
+        protocol = carrierSdk.PortForwardingProtocol.TCP;
+    else {
+        console.log("Unknown protocol " + argv[2]);
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var ret = session.addService(argv[1], protocol, argv[3], argv[4]);
+    console.log("Add service ", argv[1] + " " + (ret ? "success" : "failed"));
+}
+
+function session_remove_service(argv) {
+    if (argv.length != 2) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    session.removeService(argv[1]);
+    console.log("Service " + argv[1] + " removed.");
+}
+
+function portforwarding_open(argv) {
+    var protocol;
+    var pfid;
+
+    if (argv.length != 6) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    if (argv[3] == "tcp")
+        protocol = carrierSdk.PortForwardingProtocol.TCP;
+    else {
+        console.log("Unknown protocol %s.", argv[3]);
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var stream = session.stream[parseInt(argv[1])];
+    if (!stream) {
+        console.log("stream " + argv[1] + " is invalid.");
+        return;
+    }
+    var pfid = stream.openPortForwarding(argv[2], protocol, argv[4], argv[5]);
+
+    if (pfid > 0) {
+        console.log("Open portforwarding to service " + argv[2] + " <<== " + argv[4] + ":" + argv[5] + " success, id is " + pfid);
+    } else {
+        console.log("Open portforwarding to service " + argv[2] + " <<== " + argv[4] + ":" + argv[5] + " failed.");
+    }
+}
+
+function portforwarding_close(argv)
+{
+    var pfid;
+
+    if (argv.length != 3) {
+        console.log("Invalid command syntax.");
+        return;
+    }
+
+    var pfid = parseInt(argv[2]);
+    if (pfid <= 0) {
+        console.log("Invalid portforwarding id %s.", argv[2]);
+        return;
+    }
+
+    if (!session) {
+        console.log("session is invalid.");
+        return;
+    }
+    var stream = session.stream[parseInt(argv[1])];
+    if (!stream) {
+        console.log("stream " + argv[1] + " is invalid.");
+        return;
+    }
+    var ret = stream.closePortForwarding(pfid);
+    console.log("Portforwarding " + pfid + " closed " + (ret ? "success." : "failed."));
+}
 
 //Callback Functions
 function idle_callback(carrier, context) {
+    pring(dgjalgj);
     // console.log("call idle_callback.");
 }
 
 function connection_callback(carrier, status, context) {
     console.log("");
     switch (status) {
-        case carrierSdk.ConnectionStatus_Connected:
+        case carrierSdk.ConnectionStatus.CONNECTED:
             console.log("Connected to carrier network.");
             break;
 
-        case carrierSdk.ConnectionStatus_Disconnected:
+        case carrierSdk.ConnectionStatus.DISCONNECTED:
             console.log("Disconnect from carrier network.");
             break;
 
@@ -444,11 +1165,11 @@ function friends_list_callback(carrier, friend_info, context) {
 function friend_connection_callback(carrier, friendid,  status, context) {
     console.log("");
     switch (status) {
-        case carrierSdk.ConnectionStatus_Connected:
+        case carrierSdk.ConnectionStatus.CONNECTED:
             console.log("Friend[" + friendid +"] connection changed to be online");
             break;
 
-        case carrierSdk.ConnectionStatus_Disconnected:
+        case carrierSdk.ConnectionStatus.DISCONNECTED:
             console.log("Friend[" + friendid +"] connection changed to be offline.");
             break;
 
@@ -467,8 +1188,8 @@ function friend_info_callback(carrier, friendid, info, context) {
 
 function friend_presence_callback(carrier, friendid,  status, context) {
     console.log("");
-    if (status >= carrierSdk.PresenceStatus_None &&
-        status <= carrierSdk.PresenceStatus_Busy) {
+    if (status >= carrierSdk.PresenceStatus.NONE &&
+        status <= carrierSdk.PresenceStatus.BUSY) {
         console.log("Friend[" + friendid + "] change presence to " + presence_name[status]);
     }
     else {
@@ -539,22 +1260,12 @@ var callbacks = {
     friendInvite: invite_request_callback
 }
 
-// function printConstants() {
-//     console.log(carrierSdk.PresenceStatus_None);
-//     console.log(carrierSdk.PresenceStatus_Away);
-//     console.log(carrierSdk.PresenceStatus_Busy);
-//     console.log(carrierSdk.ConnectionStatus_Connected);
-//     console.log(carrierSdk.ConnectionStatus_Disconnected);
-// }
-
 //--------------------------------------------------------
-var context = "context";
-
 console.log(carrierSdk.getVersion());
 // carrierSdk.logInit(4, null); //ElaLogLevel_Info
 
+var session = null;
 var carrier = carrierSdk.createObject(opts, callbacks);
-
 carrier.on("idle", idle_callback); //add idle event
 carrier.on("idle", null); //delete idle event
 

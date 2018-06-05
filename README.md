@@ -31,7 +31,7 @@ Yes, we are working on the SDK for Android, iOS, Mac, Windows, Linux, Nodejs and
 
 # Build from source
 
-## Ubuntu
+## Ubuntu and Mac
 
 ### Install Pre-Requirements
 
@@ -66,8 +66,15 @@ sudo npm install -g node-gyp
 ### Build
 
 Set the environment value about carrier native sdk header files and libraries path.
+
+Ubuntu:
 ```shell
 export CARRIER_NATIVE_SDK=$(SRC_CARRIER_NATIVE_SDK_ROOT)/build/_dist/Linux-x86_64/debug
+```
+Mac:
+```shell
+rm $(SRC_CARRIER_NATIVE_SDK_ROOT)/build/_dist/Darwin-x86_64/debug/lib/*.dylib
+export CARRIER_NATIVE_SDK=$(SRC_CARRIER_NATIVE_SDK_ROOT)/build/_dist/Darwin-x86_64/debug
 ```
 if $(SRC_CARRIER_NATIVE_SDK_ROOT) is a relative path, please modify binding.gyp :
 "-L<!(echo $CARRIER_NATIVE_SDK)/lib" ==> "-L<(module_root_dir)/<!(echo $CARRIER_NATIVE_SDK)/lib"
@@ -103,10 +110,10 @@ Notice that the robot node only accept add request with message **"elastos"**, o
 ## Web Demo
 [client](./example/web-demo-client)
 [server](./example/web-demo-server)
-This is a web UI demo based on original [demo app](./example/demo). It use web UI instead of command line. It demos the same feature as the original demo. 
+This is a web UI demo based on original [demo app](./example/demo). It use web UI instead of command line. It demos the same feature as the original demo.
 
 ## More to come
-Please create your own sample app and let us know. We will add your project links here and we will give you ELA reward. 
+Please create your own sample app and let us know. We will add your project links here and we will give you ELA reward.
 
 # Community Contribution
 ## How to run the demo.js - Medium
