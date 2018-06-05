@@ -134,7 +134,7 @@ namespace elca {
         CHECK_ELASESSION_PTR(nullptr);
 
         ela_session_close(elca->elasession);
-        for (int i = 0; i < CALLBACK_COUNT; i++) {
+        for (int i = 0; i < SESSION_CALLBACK_COUNT; i++) {
                 deleteCallbackHandle(env, i, elca);
         }
         napi_delete_reference(env, elca->object);

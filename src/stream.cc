@@ -117,7 +117,7 @@ namespace elca {
 
         ret = ela_session_remove_stream(elca->elasession, elca->stream);
         if (ret != -1) {
-            for (int i = 0; i < CALLBACK_COUNT; i++) {
+            for (int i = 0; i < STREAM_CALLBACK_COUNT; i++) {
                 deleteCallbackHandle(env, i, elca);
             }
             napi_delete_reference(env, elca->object);

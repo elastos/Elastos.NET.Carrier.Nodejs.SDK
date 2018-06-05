@@ -57,7 +57,8 @@ Install npm package
         exit
 ```
 
-#Stream connect steps:
+```
+Stream connect steps:
                 A                                   B
 1               sinit                               sinit
 2               snew B_id
@@ -77,5 +78,6 @@ step 4 condition:   a. Stream [1] state changed to: initialized
                     b. B connection changed to be online
 step 5 3) condition:    a. Stream [1] state changed to: initialized
 
-#Note:
+Note:
 spfopen conditon:  sadd reliable multiplexing portforwarding
+```

@@ -109,7 +109,7 @@ namespace elca {
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, (void**)&elca);
         if (elca && elca->elacarrier) {
             ela_kill(elca->elacarrier);
-            for (int i = 0; i < CALLBACK_COUNT; i++) {
+            for (int i = 0; i < CARRIER_CALLBACK_COUNT; i++) {
                  deleteCallbackHandle(env, i, elca);
             }
             napi_delete_reference(env, elca->object);
