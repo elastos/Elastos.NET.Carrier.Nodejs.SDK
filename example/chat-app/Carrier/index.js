@@ -213,17 +213,17 @@
         session_request_callback : (carrier, from, sdp)=>{
           F.session_ctx.remote_sdp = sdp;
 
-          const log = `
-            Session request from[" + ${from} + "] with SDP: 
-            ${sdp}
+          const log = ` \n
+            Session request from[${from}] with SDP:  \n
+            ${sdp} \n
             
-            Reply use following commands:
-              1. snew " + ${from}
-              2. sreply refuse [reason]
+            Reply use following commands: \n
+              1. snew ${from} \n
+              2. sreply refuse [reason] \n
             OR:
-              1. snew " + ${from}
-              2. sadd [plain] [reliable] [multiplexing] [portforwarding]
-              3. sreply ok
+              1. snew ${from} \n
+              2. sadd [plain] [reliable] [multiplexing] [portforwarding] \n
+              3. sreply ok \n
           `;
 
           _log.debug(log);
@@ -498,7 +498,7 @@
         streamData : F.callbacks.stream_on_data
       };
 
-      if(argv.length > 1){
+      if(argv.length > 0){
         for(let i = 0; i < argv.length; i++){
           const key = argv[i];
           if(key === 'reliable'){
@@ -541,7 +541,7 @@
     },
 
     stream_remove(streamId){
-      const stream = session.stream[streamId];
+      const stream = F.session.stream[streamId];
       if(!stream){
         throw ("stream " + streamId + " is invalid.");
       }
@@ -553,7 +553,7 @@
       return true;
     },
     stream_write(streamId, buffer){
-      const stream = session.stream[streamId];
+      const stream = F.session.stream[streamId];
       if(!stream){
         throw ("stream " + streamId + " is invalid.");
       }
@@ -580,7 +580,7 @@
         "RELAY  "
       ];
 
-      const stream = session.stream[streamId];
+      const stream = F.session.stream[streamId];
       if(!stream){
         throw ("stream " + streamId + " is invalid.");
       }
@@ -612,7 +612,7 @@
         "message"
       ];
 
-      const stream = session.stream[streamId];
+      const stream = F.session.stream[streamId];
       if(!stream){
         throw ("stream " + streamId + " is invalid.");
       }
@@ -638,7 +638,7 @@
         "failed"
       ];
 
-      const stream = session.stream[streamId];
+      const stream = F.session.stream[streamId];
       if(!stream){
         throw ("stream " + streamId + " is invalid.");
       }

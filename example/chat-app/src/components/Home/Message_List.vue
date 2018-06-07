@@ -10,7 +10,8 @@
         <template slot="prepend" style="width: 100px;">{{min_name()}}</template>
       </el-input>
 
-      <el-button @click.native="createSession()">create session</el-button>
+      <!--<el-button @click.native="createSession()">create session</el-button>-->
+      <!--<input type="file" ref="upload" @change="upload()" />-->
     </div>
   </div>
 
@@ -21,7 +22,8 @@
   export default {
     data(){
       return {
-        msg : ''
+        msg : '',
+        stream : null,
       };
     },
     components : {
@@ -104,10 +106,32 @@
 
         const carrier = this.$root.getCarrier();
         carrier.execute('session_newSession', this.current.userId);
-        carrier.execute('session_addStream', ['reliable']);
+        this.stream = carrier.execute('session_addStream', ['plain'], 'APPLICATION');
         _.delay(()=>{
           carrier.execute('session_request');
-        }, 2000);
+        }, 5000);
+
+      },
+      upload(){
+        const obj = this.$refs.upload;
+        const file = obj.files[0];
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e)=>{
+          const binary = e.target.result;
+          const buffer = new Buffer(binary);
+          console.log(new Buffer('aaa'), buffer);
+          //
+
+          try{
+            // this.$root.getCarrier().execute('stream_write', this.stream.id, new Buffer('aaa'))
+            this.$root.getCarrier().execute('stream_write', this.stream.id, buffer)
+          }catch(e){
+            console.error(e);
+          }
+
+        }
 
       }
     }

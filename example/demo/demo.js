@@ -452,7 +452,7 @@ function session_request_complete_callback(session, status, reason, sdp) {
 
 function stream_on_data(stream, data) {
     console.log("");
-    console.log("Stream [" + stream.id + "] received data ["+ data.toString() + "]");
+    console.log("Stream [" + stream.id + "] received data ["+ data + "]");
     rl.prompt();
 }
 
@@ -623,7 +623,7 @@ function stream_add(argv) {
         callbacks.channelResume = on_channel_resume;
         callbacks.channelClose = on_channel_close;
     }
-
+console.log(111, carrierSdk.StreamType.TEXT, options);
     var stream = session.addStream(carrierSdk.StreamType.TEXT, options, callbacks);
     if (!stream) {
         console.log("Add stream failed.");
