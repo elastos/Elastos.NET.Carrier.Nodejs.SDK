@@ -9,12 +9,15 @@
       <el-input clearable placeholder="Input message" v-model="msg" @keyup.native="send($event)">
         <template slot="prepend" style="width: 100px;">{{min_name()}}</template>
       </el-input>
+
+      <el-button @click.native="createSession()">create session</el-button>
     </div>
   </div>
 
 </template>
 <script>
   import Message_Item from './Message_Item';
+  import _ from 'lodash';
   export default {
     data(){
       return {
@@ -91,6 +94,20 @@
           const div = this.$refs.ul;
           div.scrollTop = div.scrollHeight;
         });
+
+      },
+      createSession(){
+        if(!this.current.online){
+          this.$root.errorMessage('This friend is not online, couldn\'t send message');
+          return false;
+        }
+
+        const carrier = this.$root.getCarrier();
+        carrier.execute('session_newSession', this.current.userId);
+        carrier.execute('session_addStream', ['reliable']);
+        _.delay(()=>{
+          carrier.execute('session_request');
+        }, 2000);
 
       }
     }

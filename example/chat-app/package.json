@@ -15,7 +15,7 @@
     "nw": "nw ."
   },
   "dependencies": {
-    "elastos_carrier_addon": "0.0.4",
+    "elastos_carrier_addon": "0.0.9",
     "element-ui": "^2.3.6",
     "fs-extra": "^5.0.0",
     "lodash": "^4.17.5",
