@@ -536,6 +536,119 @@
       stream.channel = [];
       F.session.stream[stream.id] = stream;
       _log.debug("Add stream successfully and stream id " + stream.id);
+
+      return stream;
+    },
+
+    stream_remove(streamId){
+      const stream = session.stream[streamId];
+      if(!stream){
+        throw ("stream " + streamId + " is invalid.");
+      }
+      const ret = stream.remove();
+      if(!ret){
+        throw("Remove stream " + stream.id + " failed.");
+      }
+      _log.debug("Remove stream " + stream.id + " success.");
+      return true;
+    },
+    stream_write(streamId, buffer){
+      const stream = session.stream[streamId];
+      if(!stream){
+        throw ("stream " + streamId + " is invalid.");
+      }
+
+      const rc = stream.write(buffer);
+      if(rc < 0){
+        throw ("write data failed.");
+      }
+      _log.debug("write data successfully.");
+
+      return true;
+    },
+    stream_getTransportInfo(streamId){
+      const topology_name = [
+        "LAN",
+        "P2P",
+        "RELAYED"
+      ];
+
+      const addr_type = [
+        "HOST   ",
+        "SREFLEX",
+        "PREFLEX",
+        "RELAY  "
+      ];
+
+      const stream = session.stream[streamId];
+      if(!stream){
+        throw ("stream " + streamId + " is invalid.");
+      }
+      const info = stream.getTransportInfo();
+      if(!info){
+        throw ("get remote addr failed.");
+      }
+
+      console.log(info);
+
+      const log = `
+        Stream transport information:
+          Network: ${topology_name[info.topology]}
+          Local: ${addr_type[info.local.type]} ${info.local.address} : ${info.local.port}
+          related ${info.local.relatedAddress} : ${info.local.relatedPort}
+          Remote: ${addr_type[info.remote.type]} ${info.remote.address} : ${info.remote.port}
+          related ${info.remote.relatedAddress} : ${info.remote.relatedPort}
+      `;
+
+      _log.debug(log);
+      return true;
+    },
+    stream_getType(streamId){
+      const type_name = [
+        "audio",
+        "video",
+        "text",
+        "application",
+        "message"
+      ];
+
+      const stream = session.stream[streamId];
+      if(!stream){
+        throw ("stream " + streamId + " is invalid.");
+      }
+      const type = stream.getType();
+      if(!type){
+        throw ("get type failed.");
+      }
+
+      _log.debug("Stream type: " + type_name[type]);
+
+      return type_name[type];
+    },
+
+    stream_getState(streamId){
+      const state_name = [
+        "raw",
+        "initialized",
+        "transport_ready",
+        "connecting",
+        "connected",
+        "deactivated",
+        "closed",
+        "failed"
+      ];
+
+      const stream = session.stream[streamId];
+      if(!stream){
+        throw ("stream " + streamId + " is invalid.");
+      }
+      const state = stream.getState();
+      if(!state){
+        throw ("get state failed.");
+      }
+
+      _log.debug("Stream state: " + state_name[state]);
+      return state_name[state];
     },
 
     close(){
