@@ -20,6 +20,9 @@
         <br />
         <el-button v-if="file" @click.native="sendTestStream()">Send aaa</el-button>
         <el-button v-if="file" @click.native="sendFileStream()">Send file</el-button>
+        <hr />
+
+        <el-button @click.native="receiveRequest()">receive request</el-button>
 
       </el-main>
     </el-container>
@@ -37,6 +40,9 @@
 
   import Loading from '../components/common/Loading';
   import CarrierModel from '../service/CarrierModel';
+
+  import {File} from '@/utility';
+  import _ from 'lodash';
 
   export default {
     data(){
@@ -92,10 +98,11 @@
         const file = obj.files[0];
 
         this.file = file;
+        console.log(file);
       },
       sendTestStream(){
         const buffer = new Buffer('aaa');
-        console.log(buffer);
+
         try {
           this.$root.getCarrier().execute('stream_write', this.stream.id, buffer);
         } catch (e) {
@@ -103,20 +110,28 @@
         }
       },
       sendFileStream(){
-        const file = this.file;
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (e) => {
-          const binary = e.target.result;
-          const buffer = new Buffer(binary);
-          console.log(buffer);
-          try {
-            this.$root.getCarrier().execute('stream_write', this.stream.id, buffer)
-          } catch (e) {
-            console.error(e);
-          }
+        const f = new File(this.file);
+        const list = f.buildFileBuffer();
 
+        try {
+          _.each(list, (buffer)=>{
+            console.log(buffer);
+            // this.$root.getCarrier().execute('stream_write', this.stream.id, buffer);
+            File.onStreamData(buffer, (type, d)=>{
+              console.log(type, d);
+            })
+          });
+        } catch (e) {
+          console.error(e);
         }
+      },
+
+      receiveRequest(){
+        this.createSession();
+        _.delay(()=>{
+          this.$root.getCarrier().execute('session_replyRequest', true);
+        }, 5000);
+
       }
     }
   };

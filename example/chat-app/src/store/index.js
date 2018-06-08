@@ -5,13 +5,15 @@ import me from './me';
 import friend from './friend';
 import log from './log';
 import account from './account';
+import stream from './stream';
 
 const storeOpts = {
   modules: {
     me : me,
     log,
     friend,
-    account
+    account,
+    stream
   },
   state: {
   },

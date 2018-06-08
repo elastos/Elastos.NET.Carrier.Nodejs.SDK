@@ -264,7 +264,10 @@
         stream_on_data : (stream, data)=>{
           _log.debug("Stream [" + stream.id + "] received data ["+ data.toString() + "]");
 
-          // TODO sync data
+          F.syncData('stream/carrier_data', {
+            stream,
+            data
+          });
         },
 
         on_channel_open : (stream, channel_id, cookie)=>{

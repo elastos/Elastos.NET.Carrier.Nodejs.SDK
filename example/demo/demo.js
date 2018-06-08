@@ -452,7 +452,7 @@ function session_request_complete_callback(session, status, reason, sdp) {
 
 function stream_on_data(stream, data) {
     console.log("");
-    console.log("Stream [" + stream.id + "] received data ["+ data + "]");
+    console.log("Stream [" + stream.id + "] received data ["+ data.toString() + "]");
     rl.prompt();
 }
 

@@ -2,6 +2,7 @@ import Log from './Log';
 import _ from 'lodash';
 import Message from './Message';
 import Notification from './Notification';
+import File from './File';
 
 // nw
 const getNW = ()=>{
@@ -60,6 +61,7 @@ export const cache = (key, value)=>{
 export {
   Log,
   Message,
-  Notification
+  Notification,
+  File
 };
 
