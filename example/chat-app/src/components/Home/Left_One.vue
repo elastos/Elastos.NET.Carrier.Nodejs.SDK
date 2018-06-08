@@ -13,6 +13,9 @@
       </el-badge>
     </el-tooltip>
 
+    <el-button @click="goToA()">A</el-button>
+    <el-button @click="goToB()">B</el-button>
+
 
     <el-dialog title="Add friend" custom-class="d_dialog" width="70vw" append-to-body :visible.sync="dialogFormVisible">
       <el-form :model="form" :rules="formRules" ref="form">
@@ -105,6 +108,12 @@
         }catch(e){
 
         }
+      },
+      goToA(){
+        this.$router.push('home');
+      },
+      goToB(){
+        this.$router.push('session_test');
       }
     }
   }

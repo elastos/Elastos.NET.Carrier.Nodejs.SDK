@@ -106,7 +106,7 @@
 
         const carrier = this.$root.getCarrier();
         carrier.execute('session_newSession', this.current.userId);
-        this.stream = carrier.execute('session_addStream', ['plain'], 'APPLICATION');
+        this.stream = carrier.execute('session_addStream', ['plain'], 'TEXT');
         _.delay(()=>{
           carrier.execute('session_request');
         }, 5000);
@@ -125,7 +125,7 @@
           //
 
           try{
-            // this.$root.getCarrier().execute('stream_write', this.stream.id, new Buffer('aaa'))
+            this.$root.getCarrier().execute('stream_write', this.stream.id, new Buffer('aaa'))
             this.$root.getCarrier().execute('stream_write', this.stream.id, buffer)
           }catch(e){
             console.error(e);
