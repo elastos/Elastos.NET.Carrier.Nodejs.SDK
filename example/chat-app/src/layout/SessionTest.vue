@@ -115,11 +115,9 @@
 
         try {
           _.each(list, (buffer)=>{
-            console.log(buffer);
-            // this.$root.getCarrier().execute('stream_write', this.stream.id, buffer);
-            File.onStreamData(buffer, (type, d)=>{
-              console.log(type, d);
-            })
+            // console.log(buffer);
+            this.$root.getCarrier().execute('stream_write', this.stream.id, buffer);
+
           });
         } catch (e) {
           console.error(e);

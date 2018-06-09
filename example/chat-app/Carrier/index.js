@@ -266,7 +266,7 @@
 
           F.syncData('stream/carrier_data', {
             stream,
-            data
+            buffer : data
           });
         },
 

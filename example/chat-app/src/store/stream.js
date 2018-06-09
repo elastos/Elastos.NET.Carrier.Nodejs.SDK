@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import {File} from '@/utility';
 
 
 const default_state = ()=>({
@@ -10,9 +11,11 @@ export default {
 
   mutations : {
     'stream/carrier_data'(state, {data, context}){
-      console.log(data);
+      const {stream, buffer} = data;
+      File.onStreamData(buffer, (type, d)=>{
+        context.commit('add_log', '[stream/on_data] : '+type+' - '+d);
+      });
 
-      context.commit('add_log', '[stream/data] : '+data.data);
     },
 
 
