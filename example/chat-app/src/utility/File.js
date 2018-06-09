@@ -5,6 +5,10 @@ const DATA_START = '__file__start__';
 const DATA_END = '__file__end__';
 const DIR = nw.process.cwd()+'/.files/';
 
+if(!fs.existsSync(DIR)){
+  fs.mkdirSync(DIR);
+}
+
 const receive = {
   flag : false,
   file : {},
