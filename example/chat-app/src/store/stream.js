@@ -11,8 +11,8 @@ export default {
 
   mutations : {
     'stream/carrier_data'(state, {data, context}){
-      console.log(data);
-      File.onStreamData(data.data, (type, d)=>{
+      const {stream, buffer} = data;
+      File.onStreamData(buffer, (type, d)=>{
         context.commit('add_log', '[stream/on_data] : '+type+' - '+d);
       });
 

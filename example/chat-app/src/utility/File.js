@@ -57,6 +57,7 @@ export default class {
 
     if((new RegExp('^'+DATA_END)).test(d)){
       receive.flag = false;
+      console.log(receive.buffer);
       const tt = Buffer.concat(receive.buffer, receive.file.size);
       fs.writeFileSync(DIR+receive.file.name, tt);
 
@@ -64,7 +65,7 @@ export default class {
     }
 
     // put into buffer cache
-    receive.buffer.push(data);
+    receive.buffer.push(Buffer.from(data, 'binary'));
   }
 
 
