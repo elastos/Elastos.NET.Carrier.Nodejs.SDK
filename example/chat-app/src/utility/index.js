@@ -3,6 +3,8 @@ import _ from 'lodash';
 import Message from './Message';
 import Notification from './Notification';
 import File from './File';
+import Media from './Media';
+import {OutMediaStream, InputMediaStream} from "./MediaStream";
 
 // nw
 const getNW = ()=>{
@@ -62,6 +64,9 @@ export {
   Log,
   Message,
   Notification,
-  File
+  File,
+  Media,
+  OutMediaStream,
+  InputMediaStream
 };
 

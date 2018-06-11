@@ -14,20 +14,22 @@ const receive = {
   file : {},
   buffer : []
 };
-export default class {
+export default class File {
   constructor(file){
     this.file = file;
   }
 
+  static cutBuffer(chunk, size=2048){
+    const buffer = Buffer.from(chunk, 'binary');
+    const buf_list = _.chunk(buffer, size);
+    return _.map(buf_list, (item)=>{
+      return Buffer.from(item, 'binary');
+    });
+  }
+
   getCutBufferList(length=2048){
     const fb = fs.readFileSync(this.file.path);
-    const buffer = new Buffer(fb, 'binary');
-
-    const buf_list = _.chunk(buffer, length);
-
-    return _.map(buf_list, (item)=>{
-      return new Buffer(item);
-    });
+    return File.cutBuffer(fb, length);
   }
 
   buildFileBuffer(){

@@ -3,7 +3,8 @@ import {File} from '@/utility';
 
 
 const default_state = ()=>({
-  data_buffer : []
+  data_buffer : [],
+  connect : false
 });
 
 export default {
@@ -16,6 +17,16 @@ export default {
         context.commit('add_log', '[stream/on_data] : '+type+' - '+d);
       });
 
+    },
+    'stream/connect_state'(state, {data}){
+      // TODO
+      console.log(111, data);
+      if(data === 'connected'){
+        state.connect = true;
+      }
+      else{
+        state.connect = false;
+      }
     },
 
 

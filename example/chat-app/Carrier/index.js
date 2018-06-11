@@ -251,6 +251,7 @@
             "failed"
           ];
           _log.debug("Stream [" + stream.id + "] state changed to: " + state_name[state]);
+          F.syncData('stream/connect_state', state_name[state]);
 
           if(state == SDK.StreamState.TRANSPORT_READY){
             --F.session_ctx.unchanged_streams;

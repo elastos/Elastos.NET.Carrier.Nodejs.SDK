@@ -5,6 +5,7 @@ import ElementUI from 'element-ui';
 import store from './store';
 import boot from './boot';
 
+
 Vue.config.productionTip = false;
 
 Vue.use(ElementUI);

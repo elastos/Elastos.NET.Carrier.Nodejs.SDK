@@ -36,6 +36,7 @@ module.exports = {
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),
+      '@third': resolve('third')
     }
   },
   module: {
@@ -92,6 +93,10 @@ module.exports = {
     net: 'empty',
     tls: 'empty',
     child_process: 'empty'
+  },
+  externals: {
+    "fluent-ffmpeg" : 'require("fluent-ffmpeg")'
+
   },
   // target: 'node-webkit'
 }

@@ -24,6 +24,16 @@
 
         <el-button @click.native="receiveRequest()">receive request</el-button>
 
+        <hr />
+        <el-button @click.native="openCamera()">Open camera</el-button>
+        <hr />
+        <video :src="video_url" ref="video_obj" autoplay id="" controls="controls">
+
+        </video>
+        <hr/>
+
+        <div id="abjsd"></div>
+
       </el-main>
     </el-container>
 
@@ -41,14 +51,16 @@
   import Loading from '../components/common/Loading';
   import CarrierModel from '../service/CarrierModel';
 
-  import {File} from '@/utility';
+  import {File, Media, OutMediaStream, InputMediaStream} from '@/utility';
   import _ from 'lodash';
+  // import ChimeePlayer from 'chimee-player';
 
   export default {
     data(){
       return {
         stream : null,
-        file : null
+        file : null,
+        video_url : null
       }
     },
     components : {
@@ -64,6 +76,9 @@
     computed : {
       current(){
         return this.$store.state.friend.currentSelect;
+      },
+      carrier_session(){
+        return this.$store.state.stream.connect;
       }
     },
 
@@ -72,9 +87,21 @@
     },
 
     mounted(){
-
-
-
+      // const cp = nw.require('chimee-player');
+      // console.log(ChimeePlayer)
+      // new ChimeePlayer({
+      //   wrapper: '#abjsd',  // video dom容器
+      //   src: 'http://chimee.org/vod/1.mp4',
+      //   autoplay: true,
+      //   controls: true
+      // });
+      // var wjs = nw.require("wcjs-player");
+      // var player = new wjs("#abjsd").addPlayer({
+      //   autoplay: true,
+      //   wcjs: nw.require('wcjs-prebuilt')
+      // });
+      // player.addPlaylist("http://chimee.org/vod/1.mp4");
+      // this.video_url = 'file:///Users/jacky.li/Desktop/ab.webm'
     },
     methods: {
       createSession(){
@@ -129,6 +156,104 @@
         _.delay(()=>{
           this.$root.getCarrier().execute('session_replyRequest', true);
         }, 5000);
+
+      },
+
+      async openCamera(){
+        const m = new Media();
+
+
+        const ms = new MediaSource();
+        const q = [];
+
+
+        ms.addEventListener('sourceopen', async ()=>{
+          // const sb = ms.addSourceBuffer('video/webm; codecs="vp8, vorbis"');
+          const sb = ms.addSourceBuffer('video/mp4; codecs="avc1.58A01E, mp4a.40.2"');
+          const out_stream = new OutMediaStream({
+
+          }, (chunk, done)=>{
+
+            const list = File.cutBuffer(chunk);
+            try {
+              _.each(list, (buffer)=>{
+                // console.log(buffer);
+                // this.$root.getCarrier().execute('stream_write', this.stream.id, buffer);
+                // q.push(buffer);
+
+                // q.push(buffer);
+                // loop();
+              });
+              q.push(Buffer.from(chunk, 'binary'));
+              loop();
+              done();
+            } catch (e) {
+              console.error(e);
+            }
+
+
+          });
+
+          const res = await m.openMedia(out_stream);
+
+          sb.addEventListener('update', (e)=>{ // Note: Have tried 'updateend'
+            // console.log(123, e);
+
+          });
+
+          sb.onerror = (e, err)=>{
+            // console.error(1, e, err);
+          }
+
+          sb.addEventListener('updateend', ()=>{
+            // console.log(111);
+            // ms.endOfStream();
+            this.$refs.video_obj.play();
+          }, false);
+
+          const loop = ()=>{
+            if(!sb.updating){
+              const buf = q.shift();
+              if(buf){
+                // console.log(buf);
+                sb.appendBuffer(buf);
+
+              }
+
+            }
+
+
+          }
+
+//           loop();
+
+
+        });
+        this.video_url = nw.global.URL.createObjectURL(ms);
+        console.log(nw.global.URL.createObjectURL(ms))
+        // const input_stream = new InputMediaStream({}, ds);
+        //
+        //
+        // // const obj = this.$refs.video_obj;
+        // // obj.onloadedmetadata = (e)=>{
+        // //   // console.log(x, stream, stream.getVideoTracks())
+        // // };
+        // input_stream.on('readable', () => {
+        //   console.log('缓存剩余数据大小: ', input_stream._readableState.length + ' byte')
+        //   console.log('------------------------------------')
+        //   input_stream.read(1);
+        // })
+        //
+        // const fs = nw.require('fs');
+        // const ss = fs.createReadStream('/Users/jacky.li/Desktop/test.mp4');
+
+
+
+        // const res = await m.openMedia(true, true);
+        // this.video_url = nw.global.URL.createObjectURL(res);
+        // this.$refs.video_obj.onloadedmetadata = ()=>{
+        //   this.$refs.video_obj.play();
+        // };
 
       }
     }
