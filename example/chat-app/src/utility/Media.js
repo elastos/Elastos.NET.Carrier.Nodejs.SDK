@@ -43,22 +43,32 @@ export default class {
 
 
     // const arg = '-f avfoundation -framerate 30 -video_size 640x480 -i 0 -vcodec libx264 -preset ultrafast -acodec libfaac -f mpeg pipe:1';
-    const arg = '-i /Users/jacky.li/Desktop/test.mp4 -framerate 30 -video_size 640x480 -vcodec libx264 -preset ultrafast -f mpeg pipe:1';
+    // const arg = '-i /Users/jacky.li/Desktop/test.mp4 -video_size 640x480 -c:v libx264 -profile:v baseline -level 3.0 -pass 1 -f mpeg -movflags frag_keyframe+empty_moov pipe:1';
     // http://221.228.226.5/15/t/s/h/v/tshvhsxwkbjlipfohhamjkraxuknsc/sh.yinyuetai.com/88DC015DB03C829C2126EEBBB5A887CB.mp4
     // const arg = '-i /Users/jacky.li/Desktop/test.mp4 -acodec libmp3lame -s 320x240 -f mpeg pipe:1';
-    // const arg = '-f avfoundation -framerate 24 -i 0 -c:v libvpx -strict -2 -f webm pipe:1';
+    const arg = '-i /Users/jacky.li/Desktop/test.mp4 -c:v libvpx -crf 10 -b:v 1M -c:a libvorbis -f webm pipe:1';
+    // const arg = '-f avfoundation -framerate 30 -video_size 640x480 -i 0 -b:v 1M -c:v libvpx -c:a libvorbis -f webm pipe:1';
     const cmd = spawn('ffmpeg', arg.split(' '));
+    let pp = {
+      buffer : [],
+      info : []
+    };
     cmd.stdout.on('data', function(data){
+      pp.buffer.push(data);
       out_stream.write(data);
+      // pp.push(data);
     });
 
 
-    cmd.stderr.on('data', function(data){
-      console.log('error from child: ' + data);
+    cmd.stderr.on('data', function(d1){
+      console.log('Info from child: ' + d1);
+      pp.info.push(d1.toString());
     });
 
     cmd.on('close', function(code){
       console.log('child exists with code: ' + code);
+
+      console.log(pp);
     });
 
 

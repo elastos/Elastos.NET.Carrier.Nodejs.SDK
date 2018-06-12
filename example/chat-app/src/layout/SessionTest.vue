@@ -27,7 +27,7 @@
         <hr />
         <el-button @click.native="openCamera()">Open camera</el-button>
         <hr />
-        <video :src="video_url" ref="video_obj" autoplay id="" controls="controls">
+        <video :src="video_url" ref="video_obj" id="" controls="controls">
 
         </video>
         <hr/>
@@ -160,32 +160,51 @@
       },
 
       async openCamera(){
+
         const m = new Media();
 
 
         const ms = new MediaSource();
         const q = [];
 
+        const vo = this.$refs.video_obj;
 
+let index = 0;
+let streaming = false;
         ms.addEventListener('sourceopen', async ()=>{
-          // const sb = ms.addSourceBuffer('video/webm; codecs="vp8, vorbis"');
-          const sb = ms.addSourceBuffer('video/mp4; codecs="avc1.58A01E, mp4a.40.2"');
+          const sb = ms.addSourceBuffer('video/webm; codecs="vp8, vorbis"');
+          // const sb = ms.addSourceBuffer('video/mp4; codecs="avc1.64001E, mp4a.40.2');
+
+          // const sb = ms.addSourceBuffer('audio/mpeg');
+
+          sb.mode = 'sequence';
           const out_stream = new OutMediaStream({
 
           }, (chunk, done)=>{
 
             const list = File.cutBuffer(chunk);
+            if(vo.networkState===3){
+              done();
+              return false;
+            }
             try {
               _.each(list, (buffer)=>{
                 // console.log(buffer);
                 // this.$root.getCarrier().execute('stream_write', this.stream.id, buffer);
-                // q.push(buffer);
 
                 // q.push(buffer);
-                // loop();
+                // if(!streaming){
+                //   streaming = true;
+                //   loop();
+                // }
+
               });
               q.push(Buffer.from(chunk, 'binary'));
-              loop();
+              if(!streaming){
+                streaming = true;
+                loop();
+              }
+              // loop();
               done();
             } catch (e) {
               console.error(e);
@@ -202,35 +221,54 @@
           });
 
           sb.onerror = (e, err)=>{
-            // console.error(1, e, err);
+            console.error(1, e, err);
           }
 
           sb.addEventListener('updateend', ()=>{
+            index++;
+            console.log(111, index, q.length);
+            if(index > 20){
+              vo.play();
+            }
+
             // console.log(111);
             // ms.endOfStream();
-            this.$refs.video_obj.play();
+            // this.$refs.video_obj.play();
           }, false);
 
+
+
           const loop = ()=>{
+
+            // console.log(q);
             if(!sb.updating){
               const buf = q.shift();
               if(buf){
-                // console.log(buf);
+
+                console.log(vo.networkState, buf);
+
                 sb.appendBuffer(buf);
+
 
               }
 
             }
 
+            if(streaming){
+              _.delay(loop, 10);
+            }
+
 
           }
 
+          // _.delay(loop, 1000);
 //           loop();
 
-
+window._sb = sb;
+          window._ms = ms;
         });
         this.video_url = nw.global.URL.createObjectURL(ms);
-        console.log(nw.global.URL.createObjectURL(ms))
+
         // const input_stream = new InputMediaStream({}, ds);
         //
         //
