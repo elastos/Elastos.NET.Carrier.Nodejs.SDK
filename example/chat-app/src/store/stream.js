@@ -35,19 +35,16 @@ export default {
       });
 
     },
-    'stream/connect_state'(state, {data}){
-      // TODO
-      console.log(111, data);
-      if(data === 'connected'){
-        state.connect = true;
-      }
-      else{
-        state.connect = false;
-      }
-    },
 
+    /*
+    * userId is required
+    *
+    * */
     'stream/session_state'(state, {data}){
       const {sessionState, streamId, userId} = data;
+      if(!userId){
+        throw 'invalid userId';
+      }
       let tmp = {
         state : 0
       };

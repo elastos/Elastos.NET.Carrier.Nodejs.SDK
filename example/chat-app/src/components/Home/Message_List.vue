@@ -13,19 +13,26 @@
       </el-input>
 
       <!--<el-button @click.native="createSession()">create session</el-button>-->
-      <!--<input type="file" ref="upload" @change="upload()" />-->
+      <input type="file" hidden ref="upload" @change="upload()" />
     </div>
+
+    <el-dialog title="Upload Dialog" :visible.sync="uploadDialog">
+      <p>stream status : {{session_state}}</p>
+      <el-button @click="transformFile()" v-if="session_state==='connected'">Send File</el-button>
+    </el-dialog>
   </div>
 
 </template>
 <script>
   import Message_Item from './Message_Item';
+  import {File, Media, OutMediaStream, InputMediaStream} from '@/utility';
   import _ from 'lodash';
   export default {
     data(){
       return {
         msg : '',
-        stream : null,
+        file : null,
+        uploadDialog : false
       };
     },
     components : {
@@ -39,7 +46,19 @@
         return this.$store.getters.getFriendMessageList();
       },
       session(){
-        return this.$store.state.stream.session;
+        if(this.current){
+          return this.$store.state.stream.session[this.current.userId];
+        }
+
+        return null;
+      },
+      session_state(){
+        const carrier = this.$root.getCarrier();
+        if(this.session && !_.isUndefined(this.session.state)){
+          return carrier.getStaticVar('session_state')[this.session.state];
+        }
+
+        return 'NA';
       }
     },
     watch : {
@@ -109,41 +128,33 @@
           return false;
         }
 
+        if(this.session_state === 'connected'){
+          return false;
+        }
+
         const carrier = this.$root.getCarrier();
         carrier.execute('session_newSession', this.current.userId);
-        const stream = carrier.execute('session_addStream', ['plain'], 'TEXT');
+        const stream = carrier.execute('session_addStream', this.current.userId, ['plain'], 'TEXT');
         this.$root.syncData('stream/session_state', {
           userId : this.current.userId,
           streamId : stream.id
         });
 
 
-        // _.delay(()=>{
-        //   carrier.execute('session_request');
-        // }, 5000);
-
       },
       upload(){
         const obj = this.$refs.upload;
         const file = obj.files[0];
 
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (e)=>{
-          const binary = e.target.result;
-          const buffer = new Buffer(binary);
-          console.log(new Buffer('aaa'), buffer);
-          //
+        console.log(this.session.state, file);
 
-          try{
-            this.$root.getCarrier().execute('stream_write', this.stream.id, new Buffer('aaa'))
-            this.$root.getCarrier().execute('stream_write', this.stream.id, buffer)
-          }catch(e){
-            console.error(e);
-          }
-
+        if(this.session && this.session.state !== 4){
+          this.$root.getCarrier().execute('session_request', this.current.userId);
         }
 
+        this.file = file;
+        this.uploadDialog = true;
+        obj.value = '';
       },
 
       sendFile(){
@@ -153,6 +164,22 @@
         }
 
         this.createSession();
+
+        this.$refs.upload.click();
+      },
+      transformFile(){
+        const f = new File(this.file);
+        const list = f.buildFileBuffer();
+
+        try {
+          _.each(list, (buffer)=>{
+            // console.log(buffer);
+            this.$root.getCarrier().execute('stream_write', this.session.id, buffer);
+
+          });
+        } catch (e) {
+          console.error(e);
+        }
       }
     }
   }

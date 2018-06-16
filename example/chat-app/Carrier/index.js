@@ -214,7 +214,8 @@
         },
 
         session_request_callback : (carrier, from, sdp)=>{
-          F.session_ctx.remote_sdp = sdp;
+          const session = F.getSessionByUid(from);
+          session.session_ctx.remote_sdp = sdp;
 
           const log = ` \n
             Session request from[${from}] with SDP:  \n
@@ -233,13 +234,21 @@
 
         },
         session_request_complete_callback : (session, status, reason, sdp)=>{
+          console.log(2222, session);
+          const friendId = SID_UID_MAP[session.stream.id];
           if(status !== 0){
-            _log.debug("Session complete, status: " + status + ", reason:" + reason);
+            _log.debug("Session complete, status: " + status + ", reason:" + reason + ". fro "+friendId);
+
+            F.syncData('stream/session_state', {
+              sessionState : status,
+              userId : friendId,
+              streamId : session.stream.id
+            });
           }
           else{
-            F.session_ctx.remote_sdp = sdp;
-            const ret = F.session.start(sdp);
-            _log.debug("Session start " + (ret ? "success" : "failed"));
+            session.session_ctx.remote_sdp = sdp;
+            const ret = session.start(sdp);
+            _log.debug("Session start " + (ret ? "success" : "failed") + ". fro "+ friendId);
           }
         },
         stream_on_state_changed : (stream, state)=>{
@@ -254,13 +263,19 @@
             "failed"
           ];
           _log.debug("Stream [" + stream.id + "] state changed to: " + state_name[state]);
-          F.syncData('stream/connect_state', state_name[state]);
+          const friendId = SID_UID_MAP[stream.id];
+          F.syncData('stream/session_state', {
+            sessionState : state,
+            userId : friendId,
+            streamId : stream.id
+          });
+          const session = F.getSessionByStreamId(stream.id);
 
           if(state == SDK.StreamState.TRANSPORT_READY){
-            --F.session_ctx.unchanged_streams;
-            if((F.session_ctx.unchanged_streams == 0) && (F.session_ctx.need_start)){
-              const ret = F.session.start(F.session_ctx.remote_sdp);
-              F.session_ctx.need_start = false;
+            --session.session_ctx.unchanged_streams;
+            if((session.session_ctx.unchanged_streams == 0) && (session.session_ctx.need_start)){
+              const ret = session.start(session.session_ctx.remote_sdp);
+              session.session_ctx.need_start = false;
               _log.debug("Session start " + (ret ? "success." : "failed."));
             }
           }
@@ -425,7 +440,7 @@
         throw 'invalid friend id';
       }
       const session = F.carrier.newSession(friendId);
-      session.stream = [];
+      session.stream = null;
       session.session_ctx = _.clone(F.session_ctx);
       session.session_ctx.need_start = false;
       session.session_ctx.unchanged_streams = 0;
@@ -549,7 +564,7 @@
       }
       session.session_ctx.unchanged_streams++;
       stream.channel = [];
-      session.stream[stream.id] = stream;
+      session.stream = stream;
       SID_UID_MAP[stream.id] = friendId;
       _log.debug("Add stream successfully and stream id is " + stream.id);
 
@@ -693,7 +708,7 @@
     },
     getStreamByStreamId(streamId){
       const session = F.getSessionByStreamId(streamId);
-      const stream = session.stream[streamId];
+      const stream = session.stream;
 
       return stream;
     },
@@ -705,6 +720,24 @@
       setTimeout(()=>{
         F.init.apply(F, F.init_args);
       }, 2000);
+    },
+
+
+    getStaticVar(type){
+      if(type === 'session_state'){
+        return [
+          "raw",
+          "initialized",
+          "transport_ready",
+          "connecting",
+          "connected",
+          "deactivated",
+          "closed",
+          "failed"
+        ];
+      }
+
+      return null;
     }
   };
 
