@@ -16,6 +16,10 @@
     return str;
   };
 
+  const SID_UID_MAP = {};
+  const _sessions = {};
+
+
   const F = {
     connection_name : [
       "online",
@@ -36,7 +40,6 @@
 
     ready : false,
 
-    session : null,
     session_ctx : {
       remote_sdp: "",
       unchanged_streams: 0,
@@ -408,7 +411,7 @@
     },
 
     session_initSession(){
-      F.session_ctx.remote_sdp = '';
+
       const ret = F.carrier.initSession(F.callbacks.session_request_callback);
       if(!ret){
         throw 'Session initialized failed.';
@@ -421,60 +424,67 @@
       if(!friendId){
         throw 'invalid friend id';
       }
-      F.session = F.carrier.newSession(friendId);
+      const session = F.carrier.newSession(friendId);
+      session.stream = [];
+      session.session_ctx = _.clone(F.session_ctx);
+      session.session_ctx.need_start = false;
+      session.session_ctx.unchanged_streams = 0;
+      _sessions[friendId] = session;
 
-      _log.debug("Create session successfully.");
-      F.session.stream = [];
-      F.session_ctx.need_start = false;
-      F.session_ctx.unchanged_streams = 0;
+      _log.debug("Create session successfully for "+friendId);
+
       return true;
     },
-    session_getPeer(){
-      const peer = F.session.getPeer();
+    session_getPeer(friendId){
+      const session = F.getSessionByUid(friendId);
+      const peer = session.getPeer();
       if(!peer){
         throw ("Get peer failed.");
       }
-      _log.debug("Get peer: " + peer);
+      _log.debug("Get peer for "+friendId+" : " + peer);
       return peer;
     },
-    session_request(){
-      const ret = F.session.request(F.callbacks.session_request_complete_callback);
+    session_request(friendId){
+      const session = F.getSessionByUid(friendId);
+      const ret = session.request(F.callbacks.session_request_complete_callback);
       if(!ret){
-        throw ("session request failed.");
+        throw ("session request failed for "+friendId);
       }
-      _log.debug("session request successfully.");
+      _log.debug("session request successfully for "+friendId);
       return true;
     },
-    session_replyRequest(accept, reason=''){
+    session_replyRequest(friendId, accept, reason=''){
       let ret;
+      const session = F.getSessionByUid(friendId);
       if(accept){
-        ret = F.session.replyRequest(0, null);
+        ret = session.replyRequest(0, null);
         if(!ret){
-          throw '[accept] response invite failed.';
+          throw '[accept] response invite failed for '+friendId;
         }
-        _log.debug("[accept] response invite successfully.");
-        if(F.session_ctx.unchanged_streams > 0) {
-          F.session_ctx.need_start = true;
+        _log.debug("[accept] response invite successfully for "+friendId);
+        if(session.session_ctx.unchanged_streams > 0) {
+          session.session_ctx.need_start = true;
         }
         else{
-          ret = F.session.start(F.session_ctx.remote_sdp);
-          _log.debug("Session start " + (ret ? "success." : "failed."));
+          ret = session.start(session.session_ctx.remote_sdp);
+          _log.debug("Session start " + (ret ? "success." : "failed for "+friendId));
         }
       }
       else{
-        ret = F.session.replyRequest(1, reason);
+        ret = session.replyRequest(1, reason);
         if(!ret){
-          throw '[reject] response invite failed.';
+          throw '[reject] response invite failed for'+friendId;
         }
-        _log.debug("[reject] response invite successfully.");
+        _log.debug("[reject] response invite successfully for "+friendId);
       }
 
       return true;
     },
-    session_close(){
-      F.session.close();
-      F.session = null;
-      _log.debug("Session closed.");
+    session_close(friendId){
+      const session = F.getSessionByUid(friendId);
+      session.close();
+
+      _log.debug("Session closed for "+friendId);
     },
     session_cleanupSession(){
       F.carrier.cleanupSession();
@@ -493,7 +503,7 @@
     * MESSAGE = 4
     *
     * */
-    session_addStream(types=['reliable'], streamType='TEXT'){
+    session_addStream(friendId, types=['reliable'], streamType='TEXT'){
       const argv = types;
       let param = 0;
 
@@ -532,20 +542,22 @@
         callbacks.channelClose = F.callbacks.on_channel_close;
       }
 
-      const stream = F.session.addStream(SDK.StreamType[streamType], param, callbacks);
+      const session = F.getSessionByUid(friendId);
+      const stream = session.addStream(SDK.StreamType[streamType], param, callbacks);
       if(!stream){
-        throw ("Add stream failed.");
+        throw ("Add stream failed for "+friendId);
       }
-      F.session_ctx.unchanged_streams++;
+      session.session_ctx.unchanged_streams++;
       stream.channel = [];
-      F.session.stream[stream.id] = stream;
-      _log.debug("Add stream successfully and stream id " + stream.id);
+      session.stream[stream.id] = stream;
+      SID_UID_MAP[stream.id] = friendId;
+      _log.debug("Add stream successfully and stream id is " + stream.id);
 
       return stream;
     },
 
     stream_remove(streamId){
-      const stream = F.session.stream[streamId];
+      const stream = F.getStreamByStreamId(streamId);
       if(!stream){
         throw ("stream " + streamId + " is invalid.");
       }
@@ -557,7 +569,7 @@
       return true;
     },
     stream_write(streamId, buffer){
-      const stream = F.session.stream[streamId];
+      const stream = F.getStreamByStreamId(streamId);
       if(!stream){
         throw ("stream " + streamId + " is invalid.");
       }
@@ -584,7 +596,7 @@
         "RELAY  "
       ];
 
-      const stream = F.session.stream[streamId];
+      const stream = F.getStreamByStreamId(streamId);
       if(!stream){
         throw ("stream " + streamId + " is invalid.");
       }
@@ -616,7 +628,7 @@
         "message"
       ];
 
-      const stream = F.session.stream[streamId];
+      const stream = F.getStreamByStreamId(streamId);
       if(!stream){
         throw ("stream " + streamId + " is invalid.");
       }
@@ -642,7 +654,7 @@
         "failed"
       ];
 
-      const stream = F.session.stream[streamId];
+      const stream = F.getStreamByStreamId(streamId);
       if(!stream){
         throw ("stream " + streamId + " is invalid.");
       }
@@ -667,6 +679,24 @@
     },
 
 
+
+    getSessionByUid(userId){
+      const session = _sessions[userId];
+      if(!session){
+        throw 'get session error : invalid userId => '+userId;
+      }
+      return session;
+    },
+    getSessionByStreamId(streamId){
+      const userId = SID_UID_MAP[streamId];
+      return F.getSessionByUid(userId);
+    },
+    getStreamByStreamId(streamId){
+      const session = F.getSessionByStreamId(streamId);
+      const stream = session.stream[streamId];
+
+      return stream;
+    },
 
     restart(){
       F.close();

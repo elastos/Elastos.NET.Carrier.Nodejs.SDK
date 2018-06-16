@@ -8,6 +8,8 @@
     <div class="d_send">
       <el-input clearable placeholder="Input message" v-model="msg" @keyup.native="send($event)">
         <template slot="prepend" style="width: 100px;">{{min_name()}}</template>
+
+        <el-button class="" @click="sendFile()" slot="append" icon="el-icon-plus"></el-button>
       </el-input>
 
       <!--<el-button @click.native="createSession()">create session</el-button>-->
@@ -35,6 +37,9 @@
       },
       list(){
         return this.$store.getters.getFriendMessageList();
+      },
+      session(){
+        return this.$store.state.stream.session;
       }
     },
     watch : {
@@ -106,10 +111,16 @@
 
         const carrier = this.$root.getCarrier();
         carrier.execute('session_newSession', this.current.userId);
-        this.stream = carrier.execute('session_addStream', ['plain'], 'TEXT');
-        _.delay(()=>{
-          carrier.execute('session_request');
-        }, 5000);
+        const stream = carrier.execute('session_addStream', ['plain'], 'TEXT');
+        this.$root.syncData('stream/session_state', {
+          userId : this.current.userId,
+          streamId : stream.id
+        });
+
+
+        // _.delay(()=>{
+        //   carrier.execute('session_request');
+        // }, 5000);
 
       },
       upload(){
@@ -133,6 +144,15 @@
 
         }
 
+      },
+
+      sendFile(){
+        if(!this.current.userId){
+          this.$root.errorMessage('Please select a friend to chat');
+          return false;
+        }
+
+        this.createSession();
       }
     }
   }
@@ -164,10 +184,12 @@
         padding: 0 8px;
       }
 
-      .el-input__inner, .el-input-group__prepend{
+      .el-input__inner, .el-input-group__prepend, .el-input-group__append{
         background: #474b53;
         color: #eeeeee;
       }
+
+
     }
   }
 </style>

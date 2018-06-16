@@ -3,7 +3,6 @@ import storage from './storage';
 import {Message, nwBuild, Notification, cache} from './utility';
 
 var fs = require('fs');
-console.log(1111, fs);
 
 const initForNW = (store)=>{
   const win = nw.Window.get();
