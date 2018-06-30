@@ -13,8 +13,13 @@
       </el-badge>
     </el-tooltip>
 
-    <el-button @click="goToA()">A</el-button>
-    <el-button @click="goToB()">B</el-button>
+    <el-tooltip placement="bottom">
+      <div slot="content">Own Cloud</div>
+      <i @click="goToCloud()" class="cc-icon el-icon-sold-out"></i>
+    </el-tooltip>
+
+    <!--<el-button @click="goToA()">A</el-button>-->
+    <!--<el-button @click="goToB()">B</el-button>-->
 
 
     <el-dialog title="Add friend" custom-class="d_dialog" width="70vw" append-to-body :visible.sync="dialogFormVisible">
@@ -114,6 +119,9 @@
       },
       goToB(){
         this.$router.push('session_test');
+      },
+      goToCloud(){
+        this.$router.push('own_cloud');
       }
     }
   }

@@ -4,6 +4,7 @@ import Home from '@/layout/Home';
 import Login from '@/layout/Login';
 import Setting from '@/layout/Setting';
 import SessionTest from '@/layout/SessionTest';
+import OwnCould from '@/layout/OwnCould';
 
 Vue.use(Router);
 
@@ -28,6 +29,11 @@ export default new Router({
       path : '/session_test',
       name : 'session_test',
       component : SessionTest
+    },
+    {
+      path : '/own_cloud',
+      name : 'own_cloud',
+      component : OwnCould
     },
 
 

@@ -623,7 +623,7 @@ function stream_add(argv) {
         callbacks.channelResume = on_channel_resume;
         callbacks.channelClose = on_channel_close;
     }
-console.log(111, carrierSdk.StreamType.TEXT, options);
+
     var stream = session.addStream(carrierSdk.StreamType.TEXT, options, callbacks);
     if (!stream) {
         console.log("Add stream failed.");
