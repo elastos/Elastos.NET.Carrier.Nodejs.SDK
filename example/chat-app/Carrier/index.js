@@ -654,6 +654,65 @@
       return state_name[state];
     },
 
+    session_addService(name, protocal, host, port){
+      let protocol;
+
+      if (protocal === "tcp")
+        protocol = SDK.PortForwardingProtocol.TCP;
+      else {
+        throw ("Unknown protocol " + protocal);
+      }
+
+      const ret = F.session.addService(name, protocol, host, port);
+      _log.debug("Add service ", name + " " + (ret ? "success" : "failed"));
+
+      return true;
+    },
+    session_removeService(name){
+      F.session.removeService(name);
+      _log.debug("Service " + name + " removed.");
+      return true;
+    },
+    stream_openPortForwarding(streamId, serviceName, protocol, host, port){
+      if(protocol === "tcp")
+        protocol = SDK.PortForwardingProtocol.TCP;
+      else {
+        throw ("Unknown protocol "+protocol+".");
+      }
+
+      const stream = F.session.stream[streamId];
+      if(!stream){
+        throw("stream " + streamId + " is invalid.");
+      }
+      console.log(stream, serviceName, protocol, host, port)
+      const pfid = stream.openPortForwarding(serviceName, protocol, host, port);
+
+      if(pfid > 0){
+        _log.debug("Open portforwarding to service " + serviceName + " <<== " + host + ":" + port + " success, id is " + pfid);
+      }
+      else{
+        throw ("Open portforwarding to service " + serviceName + " <<== " + host + ":" + port + " failed.");
+      }
+
+      return pfid;
+    },
+    stream_closePortForwarding(streamId, pfid){
+      const p_id = parseInt(pfid, 10);
+
+      if(p_id <= 0){
+        throw ("Invalid portforwarding id "+p_id+".");
+      }
+
+      const stream = F.session.stream[streamId];
+      if(!stream){
+        throw("stream " + streamId + " is invalid.");
+      }
+      const res = stream.closePortForwarding(p_id);
+      _log.debug("Portforwarding " + pfid + " closed " + (ret ? "success." : "failed."));
+
+      return true;
+    },
+
     close(){
       console.log('kill carrier node');
       try{

@@ -1067,6 +1067,7 @@ function portforwarding_open(argv) {
         console.log("stream " + argv[1] + " is invalid.");
         return;
     }
+    console.log(argv[2], protocol, argv[4], argv[5])
     var pfid = stream.openPortForwarding(argv[2], protocol, argv[4], argv[5]);
 
     if (pfid > 0) {

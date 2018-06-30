@@ -85,7 +85,7 @@
 
         const carrier = this.$root.getCarrier();
         carrier.execute('session_newSession', this.current.userId);
-        this.stream = carrier.execute('session_addStream', ['plain'], 'TEXT');
+        this.stream = carrier.execute('session_addStream', ['portforwarding', 'multiplexing', 'reliable'], 'TEXT');
 
 
       },

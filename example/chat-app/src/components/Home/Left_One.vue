@@ -18,8 +18,8 @@
       <i @click="goToCloud()" class="cc-icon el-icon-sold-out"></i>
     </el-tooltip>
 
-    <!--<el-button @click="goToA()">A</el-button>-->
-    <!--<el-button @click="goToB()">B</el-button>-->
+    <el-button @click="goToA()">A</el-button>
+    <el-button @click="goToB()">B</el-button>
 
 
     <el-dialog title="Add friend" custom-class="d_dialog" width="70vw" append-to-body :visible.sync="dialogFormVisible">
