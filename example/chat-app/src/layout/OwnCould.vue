@@ -51,6 +51,8 @@
   let oc;
   export default {
     data(){
+
+      // TODO add state to vuex
       return {
         C : {
 
