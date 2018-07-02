@@ -1,29 +1,42 @@
 <template>
-  <el-container class="cc-box c_home">
+  <el-container class="cc-box c_home c_own_cloud">
     <el-aside class="d_left_one" width="70px">
       <Left_One />
     </el-aside>
-    <el-container>
-      <div>
-        <el-button @click.native="start()" v-if="!connect">Connect to Server</el-button>
-      </div>
+    <el-container v-if="!connect" class="d_main">
+      <el-button @click.native="start()">Connect to Server</el-button>
+    </el-container>
+    <el-container v-if="connect" class="d_main">
+
+      <el-breadcrumb separator="/">
+        <el-breadcrumb-item @click.native="clickBreadcrumb(item)" v-for="(item, index) in pathList" :key="index">{{item.key}}</el-breadcrumb-item>
+      </el-breadcrumb>
+
+      <ul class="d_ul">
+        <li class="d_li" @click="goToPath(item)" :key="index" v-for="(item, index) in list">
+          <i v-if="item.type==='dir'" class="el-icon-goods"></i>
+          <i v-if="item.type==='file'" class="el-icon-tickets"></i>
+
+          <span>{{item.name}}</span>
+        </li>
+      </ul>
     </el-container>
 
-    <!--<el-dialog title="Add OwnCloud server" custom-class="d_dialog" width="70vw" append-to-body :visible.sync="dialogFormVisible">-->
-      <!--<el-form :model="form" :rules="formRules" ref="form">-->
-        <!--<el-form-item label="Address" prop="address">-->
-          <!--<el-input v-model="form.address" auto-complete="off"></el-input>-->
-        <!--</el-form-item>-->
-        <!--<el-form-item label="Message" prop="msg">-->
-          <!--<el-input v-model="form.msg" auto-complete="off"></el-input>-->
-        <!--</el-form-item>-->
+    <el-dialog :title="file_content.title" custom-class="file_content_dialog" height="80vh" append-to-body :visible.sync="file_dialog">
+      <div v-if="file_dialog" style="height:100%;">
+        <div class="e_m" v-if="file_content.type === 'text'">
+          {{file_content.content}}
+        </div>
+        <div class="e_m" v-if="file_content.type === 'stream'">
+          <video v-if="file_content.ext === 'mp4'" controls :src="file_content.stream"></video>
 
-      <!--</el-form>-->
-      <!--<div slot="footer" class="dialog-footer">-->
-        <!--<el-button @click="dialogFormVisible = false">Cancel</el-button>-->
-        <!--<el-button type="primary" @click="confirmAddFriend()">Confirm</el-button>-->
-      <!--</div>-->
-    <!--</el-dialog>-->
+          <iframe style="width:100%;height:100%;border:none;" v-if="file_content.ext === 'pdf'" :src="file_content.stream"></iframe>
+        </div>
+        <div class="e_m" v-if="file_content.type === 'image'" style="text-align: center;">
+          <img :src="file_content.stream" style="max-width:100%;margin: 0 auto;max-height:100%;" />
+        </div>
+      </div>
+    </el-dialog>
 
     <Loading text="loading..." v-if="loading" />
   </el-container>
@@ -34,14 +47,22 @@
   import _ from 'lodash';
 
   import OwnCloudService from '../service/OwnCouldService';
+
+  let oc;
   export default {
     data(){
       return {
         C : {
-          // address : 'a9dgoBeSANZSwxnX5bEHc28xC9zGF5BTqc31nvUDV83Ymbe8Q8jF',
-          address : '5jejnpwXj49tScjLrp7zJu77qRgWZsPQYnpoHavbDqgaasgmnvs8',
-          //userId : 'G5k6DJg6akoevSGmwe9YwVGBmngKS1bXjNHo6eWDUCuP',
-          userId : '39xaQwJ8fHByWoMyaLUGca8ZT4hc24XrumDCogAH7w2C',
+
+          // local own could
+          address : 'a9dgoBeSANZSwxnX5bEHc28xC9zGF5BTqc31nvUDV83Ymbe8Q8jF',
+          userId : 'G5k6DJg6akoevSGmwe9YwVGBmngKS1bXjNHo6eWDUCuP',
+
+          // tencent own cloud
+          // address : 'RmymGXTYxAtFUL5FWA3R4nL4grZs1mj6TTyEwc9NqidsgfbHe6Ub',
+          // userId : 'CGnVMJUit5t483mkzvAuFL6ETrVj9t1Mx5c953bC2Vpa',
+
+
           secret : '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b',
           service_name : 'owncloud',
           host : 'localhost',
@@ -50,20 +71,12 @@
 
         connect : false,
         loading : false,
-        // dialogFormVisible : false,
-        // form : {
-        //   address : '',
-        //   msg : ''
-        // },
-        // formRules : {
-        //   address : [
-        //     { required: true, message: 'please input friend node address', trigger: 'blur' }
-        //   ],
-        //   msg : [
-        //     { required: true, message: 'please input message', trigger: 'blur' }
-        //   ]
-        // },
-        list: []
+
+        list: [],
+        path : '',
+
+        file_dialog : false,
+        file_content : {}
       }
     },
     components: {
@@ -76,11 +89,40 @@
       },
       me(){
         return this.$store.state.me;
+      },
+
+      pathList(){
+        const pl = this.path.split('/');
+        const len = pl.length;
+        return _.map(pl, (v, i)=>{
+          const tmp = {};
+          if(v === ''){
+            tmp.key = 'ROOT';
+            tmp.path = '';
+          }
+          else{
+            tmp.key = v;
+            tmp.path = pl.slice(0, i+1).join('/');
+          }
+          if(i < len-1){
+            tmp.click = true;
+          }
+
+          return tmp;
+        });
       }
     },
 
-    async mounted(){
+    created(){
+      oc = OwnCloudService.create();
+    },
 
+    async mounted(){
+      // connect to local owncloud to test
+      // oc.connect(`http://localhost:8000/remote.php/dav/files/admin`, 'admin', '111111');
+      // this.connect = true;
+      //
+      // await this.getFileList('/');
     },
     methods: {
       async start(){
@@ -134,19 +176,117 @@
       },
 
       async connectToServer(){
-        const oc = new OwnCloudService();
         oc.connect(`http://${this.C.host}:${this.C.port}/remote.php/dav/files/admin`, 'admin', '111111');
-        const list = await oc.getFileList('/');
+        this.connect = true;
 
-        this.list = _.map(list, (item)=>{
-          item.type = item.isFile() ? 'file' : 'dir';
+        await this.getFileList('/');
+      },
 
-          return item;
-        });
-        console.log(`http://${this.C.host}:${this.C.port}/remote.php/dav/files/admin`, this.list);
 
+      // click event
+      async goToPath(item){
+        if(item.type === 'dir'){
+          if(item.name){
+            this.path += '/'+item.name;
+          }
+          return await this.getFileList('/'+this.path);
+        }
+        else if(item.type === 'file'){
+          const path = this.path + '/' + item.name;
+          this.loading = true;
+          const rs = await oc.getFile(path);
+
+          this.file_content = {
+            title : item.name,
+            ...rs
+          };
+          this.file_dialog = true;
+          this.loading = false;
+        }
+      },
+      async getFileList(path){
+        this.loading = true;
+        try{
+          this.list = await oc.getFileList(path);
+        }catch(e){
+          this.$root.errorMessage(e);
+        }
         this.loading = false;
+      },
+      async clickBreadcrumb(item){
+        if(item.click){
+          this.path = item.path;
+          await this.getFileList(item.path);
+        }
       }
     }
   }
 </script>
+<style lang="scss">
+  .c_own_cloud{
+    .d_main{
+      background: #35393f;
+      padding: 12px 25px;
+      color: #ccc;
+      display: block;
+    }
+
+
+    .d_ul{
+      list-style: none;
+      margin: 0;
+      text-align: left;
+      width: 100%;
+
+      .d_li{
+        padding: 8px 0;
+        border-bottom: 1px solid #8c8c8c;
+        cursor: pointer;
+
+        &:hover{
+          color: #ffffff;
+        }
+      }
+    }
+
+    .el-breadcrumb{
+      padding: 12px 0;
+      font-size: 18px;
+
+      .el-breadcrumb__inner{
+        cursor: pointer;
+        color: #eeeeee;
+
+        &:hover{
+          font-weight: 700;
+          color: #fff;
+          cursor: pointer;
+        }
+
+      }
+      .el-breadcrumb__item:last-child .el-breadcrumb__inner{
+        cursor: default;
+        color: #606266;
+        &:hover{
+          cursor: default;
+          color: #606266;
+          font-weight: normal;
+        }
+      }
+    }
+  }
+  .file_content_dialog{
+    margin-top:10vh !important;
+    width: 80vw;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    .el-dialog__body{
+      flex: 1;
+      overflow-y: auto;
+    }
+    .e_m{
+      height: 100%;
+    }
+  }
+</style>
