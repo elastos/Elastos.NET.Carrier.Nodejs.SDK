@@ -57,18 +57,18 @@
         C : {
 
           // local own could
-          address : 'a9dgoBeSANZSwxnX5bEHc28xC9zGF5BTqc31nvUDV83Ymbe8Q8jF',
-          userId : 'G5k6DJg6akoevSGmwe9YwVGBmngKS1bXjNHo6eWDUCuP',
+          // address : 'a9dgoBeSANZSwxnX5bEHc28xC9zGF5BTqc31nvUDV83Ymbe8Q8jF',
+          // userId : 'G5k6DJg6akoevSGmwe9YwVGBmngKS1bXjNHo6eWDUCuP',
 
           // tencent own cloud
-          // address : 'RmymGXTYxAtFUL5FWA3R4nL4grZs1mj6TTyEwc9NqidsgfbHe6Ub',
-          // userId : 'CGnVMJUit5t483mkzvAuFL6ETrVj9t1Mx5c953bC2Vpa',
+          address : '94rVjwDwpw5yaBkTdBiHqG81d1JCuGKFqn1GhdfXkkjvd9Ax9v6h',
+          userId : '4frsp7arMGdstJaQeTYswyYZrGPGtPPHKWYZxqdNmwjC',
 
 
           secret : '2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b',
           service_name : 'owncloud',
           host : 'localhost',
-          port : _.random(50000, 60000).toString()
+          port : _.random(55000, 60000).toString()
         },
 
         connect : false,
