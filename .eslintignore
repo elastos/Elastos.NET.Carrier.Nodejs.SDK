@@ -1,6 +1,0 @@
-node_modules/**/*
-*.json
-*.md
-
-example/**/*
-demo/**/*
